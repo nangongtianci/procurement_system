@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.personal.mapper.BillMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.personal.entity.Bill">
+        <result column="id" property="id" />
+        <result column="customer_name" property="customerName" />
+        <result column="customer_phone" property="customerPhone" />
+        <result column="customer_id_card" property="customerIdCard" />
+        <result column="city_name" property="cityName" />
+        <result column="market_name" property="marketName" />
+        <result column="bill_sn" property="billSn" />
+        <result column="is_peer_bill" property="isPeerBill" />
+        <result column="customer_unit" property="customerUnit" />
+        <result column="bill_date" property="billDate" />
+        <result column="business_status" property="businessStatus" />
+        <result column="total_price" property="totalPrice" />
+        <result column="bill_status" property="billStatus" />
+        <result column="expect_pay_days" property="expectPayDays" />
+        <result column="remark" property="remark" />
+        <result column="is_source" property="isSource" />
+        <result column="transaction_address" property="transactionAddress" />
+        <result column="create_customer_id" property="createCustomerId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!--级联商品查询映射结果-->
+    <resultMap id="CascadeGoodsResultMap" type="bill" extends="BaseResultMap">
+        <collection property="goods" autoMapping="true" ofType="goods">
+            <result column="goods_id" property="id" />
+            <result column="weight_unit" property="weightUnit" />
+            <result column="security_detection_info" property="securityDetectionInfo" />
+            <result column="bill_id" property="billId" />
+        </collection>
+    </resultMap>
+
+    <!--根据主键查询，级联查询商品-->
+    <select id="selectByIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
+        SELECT
+          b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
+        FROM t_bill b
+        LEFT JOIN t_goods g ON b.id = g.bill_id
+        WHERE b.id=#{id} ORDER BY b.update_time
+    </select>
+
+    <!--根据客户主键查询账单列表（默认今天）-->
+    <select id="selectListByCustomerIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
+        SELECT
+        b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
+        FROM t_bill b
+        LEFT JOIN t_goods g ON b.id = g.bill_id
+        WHERE b.create_customer_id=#{customerId} AND date(b.bill_date) = curdate() ORDER BY b.update_time
+    </select>
+
+    <!--账单多条件查询-->
+    <select id="selectListByMultiConditions" parameterType="billQueryParam" resultMap="CascadeGoodsResultMap">
+        SELECT b.customer_name,b.customer_phone,b.total_price,b.bill_status,b.is_peer_bill,g.name,g.weight_unit,g.number
+        FROM t_bill b
+        LEFT JOIN t_goods g ON b.id = g.bill_id
+        <where>
+            b.create_customer_id=#{createCustomerId}
+            <if test="customerName != null and customerName != ''">
+                AND b.customer_name=#{customerName}
+            </if>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND b.customer_phone=#{customerPhone}
+            </if>
+            <if test="businessStatus != null and businessStatus != ''">
+                AND b.business_status=#{businessStatus}
+            </if>
+            <if test="billStatus != null and billStatus != ''">
+                AND b.bill_status=#{billStatus}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND g.name=#{goodsName}
+            </if>
+            <if test="startDate != null">
+                AND b.create_time BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+    </select>
+</mapper>
