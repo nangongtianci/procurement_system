@@ -1,7 +1,8 @@
 package com.personal.controller;
 
 
-import com.personal.common.annotation.CommonDataAnnotation;
+import com.personal.common.annotation.InsertMethodFlag;
+import com.personal.common.annotation.UpdateMethodFlag;
 import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
@@ -10,7 +11,7 @@ import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.file.ExcelUtils;
 import com.personal.common.utils.result.Result;
 import com.personal.conditions.BillQueryParam;
-import com.personal.config.system.FileConfig;
+import com.personal.config.system.file.FileConfig;
 import com.personal.config.system.mail.ReportConfig;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
@@ -55,8 +56,8 @@ public class BillController {
      * @param bill
      * @return
      */
-    @CommonDataAnnotation
-    @RequestMapping(method = RequestMethod.POST)
+    @InsertMethodFlag
+    @PostMapping
     public Result add(Bill bill){
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
@@ -94,24 +95,26 @@ public class BillController {
             return Result.FAIL(assignFieldIllegalValueRange("业务状态"));
         }
 
-        if(BillStatusEnum.getByValue(bill.getBillStatus()) == null){ // 账单状态
-            return Result.FAIL(assignFieldIllegalValueRange("账单状态"));
-        }else {
-            if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
-                if(!BillStatusEnum.payable.getValue().equalsIgnoreCase(bill.getBillStatus())
-                        && !BillStatusEnum.paid.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
-                    return Result.FAIL("业务状态为买入，则账单状态只能为应付或已付其中一种状态！");
-                }
-            }else if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出
-                if(!BillStatusEnum.receivable.getValue().equalsIgnoreCase(bill.getBillStatus())
-                        && !BillStatusEnum.received.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
-                    return Result.FAIL("业务状态为卖出，则账单状态只能为应收或已收其中一种状态！");
-                }
-            }else{
-                if(StringUtils.isNotBlank(bill.getBillStatus())){
-                    return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
-                }
+        if(!matchesAmount(bill.getFreight(),new BigDecimal(0))){
+            return Result.FAIL(assignFieldNameForMoney("运费",new BigDecimal(0)));
+        }
+
+        if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
+            if(!BillStatusEnum.payable.getValue().equalsIgnoreCase(bill.getBillStatus())
+                    && !BillStatusEnum.paid.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
+                return Result.FAIL("业务状态为买入，则账单状态只能为应付或已付其中一种状态！");
             }
+        }else if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出
+            if(!BillStatusEnum.receivable.getValue().equalsIgnoreCase(bill.getBillStatus())
+                    && !BillStatusEnum.received.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
+                return Result.FAIL("业务状态为卖出，则账单状态只能为应收或已收其中一种状态！");
+            }
+        }else{
+            if(StringUtils.isNotBlank(bill.getBillStatus())){
+                return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
+            }
+
+            bill.setBillStatus(null);
         }
 
         if(IsSourceEnum.getByValue(bill.getIsSource()) == null){ // 溯源信息
@@ -122,12 +125,106 @@ public class BillController {
             return Result.FAIL("账单日期不能为空！");
         }
 
+        // 如果公开溯源信息，则设置为可领取
+        if(IsSourceEnum.yes.getValue().equalsIgnoreCase(bill.getIsSource())
+                && !BusinessStatusEnum.profit.getValue().equalsIgnoreCase(bill.getBusinessStatus())
+                && !BusinessStatusEnum.loss.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+            bill.setIsReceive(IsReceiveEnum.yes.getValue());
+        }
         // 生成账单号
         bill.setBillSn(GenerateOrderUtil.nextSN());
         // 设置对等账单为no
         bill.setIsPeerBill(IsPeerBillEnum.no.getValue());
         if(billService.insertCascadeGoods(bill)){
             return Result.OK(bill.getId());
+        }
+        return Result.FAIL();
+    }
+
+    /**
+     * 更新账单
+     * @param bill
+     * @return
+     */
+    @UpdateMethodFlag
+    @PutMapping
+    public Result update(Bill bill){
+        if(!matchesIds(bill.getId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
+        }
+
+        if(StringUtils.isNotBlank(bill.getBusinessStatus())
+                && BusinessStatusEnum.getByValue(bill.getBusinessStatus()) != null){ // 业务状态
+            return Result.FAIL(assignFieldIllegalValueRange("业务状态"));
+        }
+
+        if(bill.getFreight().compareTo(new BigDecimal(0)) != 0
+                && !matchesAmount(bill.getFreight(),new BigDecimal(0))){
+            return Result.FAIL(assignFieldNameForMoney("运费",new BigDecimal(0)));
+        }
+
+        if(StringUtils.isNotBlank(bill.getBillStatus())){
+            if(BillStatusEnum.getByValue(bill.getBillStatus()) == null){ // 账单状态
+                return Result.FAIL(assignFieldIllegalValueRange("账单状态"));
+            }else {
+                if(BusinessStatusEnum.getByValue(bill.getBusinessStatus()) == null){
+                    return Result.FAIL(assignFieldIllegalValueRange("交易类型"));
+                }else{
+                    if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
+                        if(!BillStatusEnum.payable.getValue().equalsIgnoreCase(bill.getBillStatus())
+                                && !BillStatusEnum.paid.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
+                            return Result.FAIL("业务状态为买入，则账单状态只能为应付或已付其中一种状态！");
+                        }
+                    }else if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出
+                        if(!BillStatusEnum.receivable.getValue().equalsIgnoreCase(bill.getBillStatus())
+                                && !BillStatusEnum.received.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
+                            return Result.FAIL("业务状态为卖出，则账单状态只能为应收或已收其中一种状态！");
+                        }
+                    }else{
+                        if(StringUtils.isNotBlank(bill.getBillStatus())){
+                            return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
+                        }
+                    }
+                }
+            }
+        }
+
+        if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
+            return Result.FAIL("商品至少要添加一条！");
+        }else{
+            int i = 1;
+            String tip = "第"+i+"条商品信息";
+            for(Goods temp : bill.getGoods()){
+                if(StringUtils.isBlank(temp.getName())){
+                    return Result.FAIL(assignFieldNotNull(tip+"品名"));
+                }
+
+                if(!matchesAmount(temp.getPrice(),new BigDecimal(0))){
+                    return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
+                }
+
+                if(!matchesPositiveInteger(temp.getNumber().toString(), 0)){
+                    return Result.FAIL(tip+assignFieldNameForInteger("商品数量",0));
+                }
+
+                if(WeightUnitEnum.getByValue(temp.getWeightUnit()) == null){
+                    return Result.FAIL(assignFieldIllegalValueRange(tip+"重量单位"));
+                }
+
+                if(StringUtils.isBlank(temp.getSecurityDetectionInfo())){
+                    return Result.FAIL(assignFieldNotNull(tip+"安全检测信息"));
+                }
+
+                temp.setBillId(bill.getId());
+                temp.setCreateCustomerId(bill.getCreateCustomerId());
+                i++;
+            }
+        }
+
+        bill.setIsReceive(null);
+        bill.setIsSource(null);
+        if(billService.updateCascadeGoods(bill)){
+            return Result.OK();
         }
         return Result.FAIL();
     }

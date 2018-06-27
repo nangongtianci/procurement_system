@@ -7,16 +7,18 @@
     <result column="id" property="id" />
     <result column="create_time" property="createTime" />
     <result column="update_time" property="updateTime" />
-        <result column="name" property="name" />
-        <result column="phone" property="phone" />
-        <result column="id_card" property="idCard" />
-        <result column="company_name" property="companyName" />
-        <result column="market_name" property="marketName" />
-        <result column="email" property="email" />
-        <result column="id_card_path" property="idCardPath" />
-        <result column="is_agree_protocol" property="isAgreeProtocol" />
-        <result column="login_time" property="loginTime" />
-        <result column="status" property="status" />
+    <result column="name" property="name" />
+    <result column="secret_key" property="secretKey" />
+    <result column="name" property="name" />
+    <result column="phone" property="phone" />
+    <result column="id_card" property="idCard" />
+    <result column="company_name" property="companyName" />
+    <result column="market_name" property="marketName" />
+    <result column="email" property="email" />
+    <result column="id_card_path" property="idCardPath" />
+    <result column="is_agree_protocol" property="isAgreeProtocol" />
+    <result column="login_time" property="loginTime" />
+    <result column="status" property="status" />
     </resultMap>
 
 </mapper>

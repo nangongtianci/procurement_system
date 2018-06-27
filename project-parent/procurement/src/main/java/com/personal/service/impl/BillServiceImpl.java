@@ -3,6 +3,7 @@ package com.personal.service.impl;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.personal.common.enume.IsPeerBillEnum;
+import com.personal.common.utils.collections.ListUtils;
 import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.personal.mapper.BillMapper;
@@ -39,6 +40,17 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         return false;
     }
 
+    @Transactional
+    @Override
+    public boolean updateCascadeGoods(Bill bill) {
+        if(updateById(bill)){
+            if(!ListUtils.isEmpty(bill.getGoods()) && goodsService.updateBatchById(bill.getGoods())){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public Bill selectByIdCascadeGoods(String id) {
         return billMapper.selectByIdCascadeGoods(id);
@@ -59,19 +71,23 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     public boolean deleteByIdAndPeerUpdate(String id) {
         EntityWrapper<Bill> ew = new EntityWrapper<>();
         ew.setSqlSelect("bill_sn,is_peer_bill").where("id={0}",id);
-        Bill bill = selectOne(ew);
-        if(IsPeerBillEnum.yes.getValue().equalsIgnoreCase(bill.getIsPeerBill())){ // 是对等账单
-            if(deleteById(id)){
-                Bill update = new Bill();
-                update.setIsPeerBill(IsPeerBillEnum.no.getValue());
-                if(update(update,new EntityWrapper<Bill>().where("bill_sn={0}",bill.getBillSn()))){
+        Bill bill = selectById(id);
+        if(bill != null){
+            if(IsPeerBillEnum.yes.getValue().equalsIgnoreCase(bill.getIsPeerBill())){ // 是对等账单
+                if(deleteById(id)){
+                    Bill update = new Bill();
+                    update.setIsPeerBill(IsPeerBillEnum.no.getValue());
+                    if(update(update,new EntityWrapper<Bill>().where("bill_sn={0}",bill.getBillSn()))){
+                        return true;
+                    }
+                }
+            }else{ // 非对等账单
+                if(deleteById(id)){
                     return true;
                 }
             }
-        }else{ // 非对等账单
-            if(deleteById(id)){
-                return true;
-            }
+        }else{
+            return false;
         }
         return false;
     }

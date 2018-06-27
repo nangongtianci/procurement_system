@@ -1,18 +1,24 @@
 package com.personal.controller;
 
 
-import com.personal.common.annotation.CommonDataAnnotation;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.personal.common.TokenUtils;
+import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.enume.IsAgreeProtocolEnum;
 import com.personal.common.enume.LoginStatusEnum;
 import com.personal.common.enume.ModuleEnum;
+import com.personal.common.enume.UserTypeEnum;
 import com.personal.common.utils.base.StringUtils;
 import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.ArrayUtils;
+import com.personal.common.utils.constants.AppConstant;
+import com.personal.common.utils.encode.MD5Util;
 import com.personal.common.utils.file.FileUploadUtils;
 import com.personal.common.utils.result.Result;
-import com.personal.config.system.FileConfig;
+import com.personal.config.system.file.FileConfig;
 import com.personal.entity.Customer;
 import com.personal.service.CustomerService;
+import com.personal.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +47,61 @@ public class CustomerController {
     private CustomerService customerService;
     @Autowired
     private FileConfig fileConfig;
+    @Autowired
+    private RedisService redisService;
+
+    /**
+     * 登录
+     * @param customer
+     * @return
+     */
+    @PostMapping("login")
+    public Result login(Customer customer){
+        if(!matchesMobilePhone(customer.getPhone())){
+            return Result.FAIL(assignFieldIllegal("手机号或密码"));
+        }
+
+        if(StringUtils.isBlank(customer.getPassword())){
+            return Result.FAIL(assignFieldIllegal("手机号或密码"));
+        }
+
+        if(StringUtils.isBlank(redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone()))){
+            return Result.FAIL("验证码已过期！");
+        }else if(!customer.getCheckCode().equals(redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone()))){
+            return Result.FAIL("验证码错误!");
+        }
+
+        EntityWrapper<Customer> ew = new EntityWrapper();
+        ew.setSqlSelect("password","secretKey");
+        ew.where("phone={0}",customer.getPhone());
+        Customer rt = customerService.selectOne(ew);
+        if(rt == null || StringUtils.isBlank(rt.getPassword())
+                || StringUtils.isBlank(rt.getSecretKey())){
+            return Result.FAIL("账号不存在！");
+        }
+
+        if(!rt.getPassword().equals(MD5Util.getStringMD5(customer.getPassword()+rt.getSecretKey()))){
+            return Result.FAIL("密码错误！");
+        }
+
+        rt.setStatus(LoginStatusEnum.yes.getValue());
+        rt.setUpdateTime(new Date());
+        if(customerService.updateById(rt)){
+            return Result.OK().setData(TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
+        }
+        return Result.FAIL("登录失败！");
+    }
+
+    /**
+     * 退成成功
+     * @param token
+     * @return
+     */
+    @PostMapping("logout")
+    public Result login(String token){
+        TokenUtils.delToekn(UserTypeEnum.customer,token,redisService);
+        return Result.OK().setData("退出成功！");
+    }
 
     /**
      * 快捷注册
@@ -51,6 +112,8 @@ public class CustomerController {
         Customer customer = new Customer();
         customer.setId(UUIDUtils.getUUID());
         customer.setIsAgreeProtocol(IsAgreeProtocolEnum.yes.getValue());
+        customer.setSecretKey(UUIDUtils.getUUID());
+        customer.setPassword(MD5Util.getStringMD5("123456"+customer.getSecretKey()));
         customer.setStatus(LoginStatusEnum.yes.getValue());
         customer.setName("自动注册信息请及时更改");
         customer.setPhone("13811111111");
@@ -102,12 +165,27 @@ public class CustomerController {
      * @param customer
      * @return
      */
-    @CommonDataAnnotation
+    @InsertMethodFlag
     @PostMapping
     public Result insert(Customer customer){
         if(IsAgreeProtocolEnum.yes.getValue()
                 .equalsIgnoreCase(IsAgreeProtocolEnum.getByValue(customer.getIsAgreeProtocol()).getValue())){
             return Result.FAIL("必须同意用户协议！");
+        }
+
+        if(StringUtils.isBlank(customer.getCheckCodeToken())){
+            return Result.FAIL(assignFieldNotNull("checkCodToken"));
+        }else{
+            String checkCode = redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getCheckCodeToken());
+            if(StringUtils.isBlank(checkCode)){
+                return Result.FAIL("验证码已过期！");
+            }else if(!checkCode.equalsIgnoreCase(customer.getCheckCode())){
+                return Result.FAIL("验证码错误！");
+            }
+        }
+
+        if(StringUtils.isBlank(customer.getPassword())){
+            return Result.FAIL(assignFieldNotNull("密码"));
         }
 
         if(!matchesPositiveIntegerSection(customer.getName(),
@@ -125,7 +203,9 @@ public class CustomerController {
             return Result.FAIL(assignFieldIllegal("身份证"));
         }
 
-        if(customerService.insertOrUpdate(customer)){
+        customer.setSecretKey(UUIDUtils.getUUID());
+        customer.setPassword(MD5Util.getStringMD5(customer.getPassword()+customer.getSecretKey()));
+        if(customerService.insert(customer)){
             return Result.OK();
         }
         return Result.FAIL();
@@ -163,6 +243,8 @@ public class CustomerController {
             return Result.FAIL(assignFieldIllegal("身份证"));
         }
 
+        customer.setPassword(null);
+        customer.setSecretKey(null);
         if(customerService.updateById(customer)){
             return Result.OK();
         }

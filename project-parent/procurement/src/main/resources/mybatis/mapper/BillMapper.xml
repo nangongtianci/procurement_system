@@ -20,6 +20,9 @@
         <result column="expect_pay_days" property="expectPayDays" />
         <result column="remark" property="remark" />
         <result column="is_source" property="isSource" />
+        <result column="is_receive" property="isReceive" />
+        <result column="freight" property="freight" />
+        <result column="actual_total_price" property="actualTotalPrice" />
         <result column="transaction_address" property="transactionAddress" />
         <result column="create_customer_id" property="createCustomerId" />
         <result column="create_time" property="createTime" />

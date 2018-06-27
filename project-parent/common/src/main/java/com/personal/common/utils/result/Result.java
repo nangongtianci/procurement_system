@@ -1,7 +1,7 @@
 package com.personal.common.utils.result;
 
 
-import com.personal.common.enume.BizExceptionEnum;
+import com.personal.common.utils.exceptions.enums.BizExceptionEnum;
 
 public class Result {
     public final static int OK_CODE = 0;

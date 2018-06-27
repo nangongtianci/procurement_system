@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <timestamp key="date" datePattern="yyyyMMdd"/>
+    <property name="LOG_PATH" value="/data/project/logs" />
+    <property name="LOG_NAME" value="quickers" />
     <!-- Output to Console -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -10,10 +12,10 @@
     </appender>
     <!-- Output to File -->
     <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>/home/ylw/workspace/personalTask/project-parent/procurement/logs/nohup.log</File>
+        <File>${LOG_PATH}/${LOG_NAME}.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>
-                /home/ylw/workspace/personalTask/project-parent/procurement/logs/nohup.%d{yyyy-MM-dd}.log
+                ${LOG_PATH}/${LOG_NAME}.%d{yyyy-MM-dd}.log
             </FileNamePattern>
             <!-- keep 1 days worth of history -->
             <MaxHistory>10</MaxHistory>

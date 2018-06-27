@@ -23,6 +23,13 @@ public interface BillService extends IService<Bill> {
     boolean insertCascadeGoods(Bill bill);
 
     /**
+     * 更新账单并更新与之关联的商品
+     * @param bill
+     * @return
+     */
+    boolean updateCascadeGoods(Bill bill);
+
+    /**
      * 根据主键查询，级联查询商品
      * @param id
      * @return

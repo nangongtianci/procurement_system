@@ -1,8 +1,10 @@
-package com.personal.config.system;
+package com.personal.config.system.file;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @ConfigurationProperties(prefix = "kuaige.generate")
+@Configuration
 public class FileConfig {
     // excel保存位置
     private String excelSavePath;

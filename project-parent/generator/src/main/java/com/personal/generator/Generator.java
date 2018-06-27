@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class Generator {
     public static void main(String[] args) {
-            generate("procurement","t_customer");
+            generate("procurement","t_customer_virtual_coin");
     }
 
     private static void generate(String model,String ... tableName){

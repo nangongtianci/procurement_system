@@ -1,10 +1,11 @@
 package com.personal.entity;
 
-import java.util.Date;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.personal.common.base.BaseEntity;
+import org.springframework.data.annotation.Transient;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -23,6 +24,15 @@ public class Customer extends BaseEntity {
      * 用户姓名
      */
     private String name;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 秘钥
+     */
+    @TableField("secret_key")
+    private String secretKey;
     /**
      * 常用手机号
      */
@@ -65,7 +75,30 @@ public class Customer extends BaseEntity {
      * 是否在线(yes:在线,no:不在线)
      */
     private String status;
+    /**
+     * 扩展字段
+     */
+    /**校验码**/
+    @Transient
+    private String checkCode;
+    @Transient
+    private String checkCodeToken;
 
+    public String getCheckCodeToken() {
+        return checkCodeToken;
+    }
+
+    public void setCheckCodeToken(String checkCodeToken) {
+        this.checkCodeToken = checkCodeToken;
+    }
+
+    public String getCheckCode() {
+        return checkCode;
+    }
+
+    public void setCheckCode(String checkCode) {
+        this.checkCode = checkCode;
+    }
 
     public String getName() {
         return name;
@@ -73,6 +106,22 @@ public class Customer extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     public String getPhone() {
@@ -152,6 +201,9 @@ public class Customer extends BaseEntity {
         return "Customer{" +
         "id=" + super.getId() +
         ", name=" + name +
+        ", checkCodeToken=" + checkCodeToken +
+        ", password=" + password +
+        ", secretKey=" + secretKey +
         ", phone=" + phone +
         ", idCard=" + idCard +
         ", companyName=" + companyName +

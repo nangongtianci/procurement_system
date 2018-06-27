@@ -81,6 +81,20 @@ public class Bill extends BaseEntity {
     @TableField("total_price")
     private BigDecimal totalPrice;
     /**
+     * 是否已领取虚拟币
+     */
+    @TableField("is_receive")
+    private String isReceive;
+    /**
+     * 邮费
+     */
+    private BigDecimal freight;
+    /**
+     * 实收总价格
+     */
+    @TableField("actual_total_price")
+    private BigDecimal actualTotalPrice;
+    /**
      * 账单状态（已付，已收，应付，应收）
      */
     @TableField("bill_status")
@@ -260,6 +274,30 @@ public class Bill extends BaseEntity {
         this.isPeerBill = isPeerBill;
     }
 
+    public String getIsReceive() {
+        return isReceive;
+    }
+
+    public void setIsReceive(String isReceive) {
+        this.isReceive = isReceive;
+    }
+
+    public BigDecimal getFreight() {
+        return freight;
+    }
+
+    public void setFreight(BigDecimal freight) {
+        this.freight = freight;
+    }
+
+    public BigDecimal getActualTotalPrice() {
+        return actualTotalPrice;
+    }
+
+    public void setActualTotalPrice(BigDecimal actualTotalPrice) {
+        this.actualTotalPrice = actualTotalPrice;
+    }
+
     @Override
     public String toString() {
         return "Bill{" +
@@ -279,6 +317,9 @@ public class Bill extends BaseEntity {
         ", expectPayDays=" + expectPayDays +
         ", remark=" + remark +
         ", isSource=" + isSource +
+        ", isReceive=" + isReceive +
+        ", freight=" + freight +
+        ", actualTotalPrice=" + actualTotalPrice +
         ", transactionAddress=" + transactionAddress +
         ", createCustomerId=" + createCustomerId +
         ", createTime=" + super.getCreateTime() +

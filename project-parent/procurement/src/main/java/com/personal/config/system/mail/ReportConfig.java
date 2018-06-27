@@ -1,8 +1,10 @@
 package com.personal.config.system.mail;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @ConfigurationProperties(prefix = "kuaige.mail.report")
+@Configuration
 public class ReportConfig {
     // 报表主题
     private String subject;

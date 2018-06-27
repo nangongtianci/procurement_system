@@ -1,7 +1,7 @@
 package com.personal.controller;
 
 
-import com.personal.common.annotation.CommonDataAnnotation;
+import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.enume.ModuleEnum;
 import com.personal.common.enume.MortgageThingEnum;
 import com.personal.common.utils.base.StringUtils;
@@ -36,7 +36,7 @@ public class ApplyLoanRecordController {
      * @param applyLoanRecord
      * @return
      */
-    @CommonDataAnnotation
+    @InsertMethodFlag
     @PostMapping
     public Result insert(ApplyLoanRecord applyLoanRecord){
         if(applyLoanRecord.getNeedMoney() == null ||
