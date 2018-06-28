@@ -15,7 +15,7 @@ spring:
       restart:
         enabled: true
   profiles:
-      active: dev
+      active: @profileActive@
 
 
 
