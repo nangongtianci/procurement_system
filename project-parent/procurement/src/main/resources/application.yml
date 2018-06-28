@@ -1,5 +1,5 @@
 server:
-  port: 8443
+  port: 443
   ssl:
     key-store: classpath:keystore.jks
     key-store-password: 47376543931
