@@ -11,10 +11,7 @@ import com.personal.communicate.HttpUtil;
 import com.personal.config.system.sms.SmsConfig;
 import com.personal.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +26,8 @@ public class CommonController {
     @Autowired
     private RedisService redisService;
 
-    @PostMapping("/send/sms")
-    public Result sendSms(String mobile){
+    @GetMapping("/send/sms/{mobile}")
+    public Result sendSms(@PathVariable String mobile){
         if(StringUtils.isBlank(mobile)){
             return Result.FAIL(assignFieldNotNull("手机号"));
         }

@@ -168,15 +168,15 @@ public class CustomerController {
     @InsertMethodFlag
     @PostMapping
     public Result insert(Customer customer){
-        if(IsAgreeProtocolEnum.yes.getValue()
+        if(StringUtils.isBlank(customer.getIsAgreeProtocol()) || IsAgreeProtocolEnum.no.getValue()
                 .equalsIgnoreCase(IsAgreeProtocolEnum.getByValue(customer.getIsAgreeProtocol()).getValue())){
             return Result.FAIL("必须同意用户协议！");
         }
 
-        if(StringUtils.isBlank(customer.getCheckCodeToken())){
-            return Result.FAIL(assignFieldNotNull("checkCodToken"));
+        if(StringUtils.isBlank(customer.getCheckCode())){
+            return Result.FAIL(assignFieldNotNull("验证码"));
         }else{
-            String checkCode = redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getCheckCodeToken());
+            String checkCode = redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone());
             if(StringUtils.isBlank(checkCode)){
                 return Result.FAIL("验证码已过期！");
             }else if(!checkCode.equalsIgnoreCase(customer.getCheckCode())){
@@ -206,7 +206,7 @@ public class CustomerController {
         customer.setSecretKey(UUIDUtils.getUUID());
         customer.setPassword(MD5Util.getStringMD5(customer.getPassword()+customer.getSecretKey()));
         if(customerService.insert(customer)){
-            return Result.OK();
+            return Result.OK().setData(customer.getId());
         }
         return Result.FAIL();
     }

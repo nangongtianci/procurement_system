@@ -125,6 +125,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
+                    <exclude>config/application*.yml</exclude>
                     <exclude>application*.yml</exclude>
                 </excludes>
             </resource>
@@ -133,6 +134,8 @@
                 <!-- 是否替换@xx@表示的maven properties属性值 -->
                 <filtering>true</filtering>
                 <includes>
+                    <include>config/application.yml</include>
+                    <include>config/application-${profileActive}.yml</include>
                     <include>application.yml</include>
                     <include>application-${profileActive}.yml</include>
                 </includes>

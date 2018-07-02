@@ -79,18 +79,10 @@ public class Customer extends BaseEntity {
      * 扩展字段
      */
     /**校验码**/
-    @Transient
+    @TableField(exist = false)
     private String checkCode;
-    @Transient
-    private String checkCodeToken;
-
-    public String getCheckCodeToken() {
-        return checkCodeToken;
-    }
-
-    public void setCheckCodeToken(String checkCodeToken) {
-        this.checkCodeToken = checkCodeToken;
-    }
+//    @Transient
+//    private String checkCodeToken;
 
     public String getCheckCode() {
         return checkCode;
@@ -201,7 +193,6 @@ public class Customer extends BaseEntity {
         return "Customer{" +
         "id=" + super.getId() +
         ", name=" + name +
-        ", checkCodeToken=" + checkCodeToken +
         ", password=" + password +
         ", secretKey=" + secretKey +
         ", phone=" + phone +

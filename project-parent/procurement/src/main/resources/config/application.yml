@@ -1,11 +1,11 @@
 server:
-  port: 443
+  port: 8443
   ssl:
-    key-store: classpath:keystore.jks
+    key-store: classpath:certificate/keystore.jks
     key-store-password: 47376543931
 
 logging:
-  config: classpath:logback.xml
+  config: classpath:log/logback-spring.xml
 
 spring:
   http:
@@ -16,6 +16,8 @@ spring:
         enabled: true
   profiles:
       active: @profileActive@
+
+
 
 
 

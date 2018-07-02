@@ -3,6 +3,7 @@
     <timestamp key="date" datePattern="yyyyMMdd"/>
     <property name="LOG_PATH" value="/data/project/logs" />
     <property name="LOG_NAME" value="quickers" />
+
     <!-- Output to Console -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -10,6 +11,7 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
+
     <!-- Output to File -->
     <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>${LOG_PATH}/${LOG_NAME}.log</File>
@@ -25,12 +27,24 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
+
     <!-- 打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和  OFF 默认是DEBUG -->
-    <root level="DEBUG">
-        <appender-ref ref="Console"/>
-        <appender-ref ref="File"/>
-    </root>
-    <logger name="org.springframework" level="ERROR"/>
-    <logger name="com.baomidou.mybatisplus" level="TRACE"/>
-    <logger name="com.personal.procurement" level="ERROR"/>
+    <!--开发环境只在控制台打印日志-->
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="Console"/>
+        </root>
+        <logger name="org.springframework" level="debug"/>
+        <logger name="com.baomidou.mybatisplus" level="debug"/>
+        <logger name="com.personal.procurement" level="debug"/>
+    </springProfile>
+
+    <springProfile name="test,prod,prep">
+        <root level="DEBUG">
+            <appender-ref ref="File"/>
+        </root>
+        <logger name="org.springframework" level="info"/>
+        <logger name="com.baomidou.mybatisplus" level="info"/>
+        <logger name="com.personal.procurement" level="info"/>
+    </springProfile>
 </configuration>

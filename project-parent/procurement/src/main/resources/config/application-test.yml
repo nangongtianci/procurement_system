@@ -1,8 +1,23 @@
+server:
+  port: 443
 spring:
-  # redis 集群配置
+#  # redis 集群配置
+#  redis:
+#      cluster:
+#        nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
+  # 单点配置
   redis:
-      cluster:
-        nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: 3000 # 连接超时时间 单位 ms（毫秒）
+    jedis:
+      pool:
+        max-idle: 500
+        min-idle: 50
+        max-active: 2000
+        max-wait: 1000
+
   # 邮箱配置
   mail:
       host: smtp.exmail.qq.com
@@ -20,7 +35,7 @@ spring:
     name: quickers
     url: jdbc:mysql://127.0.0.1:3306/procurement_system?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
     username: root
-    password: root
+    password: Yangxianfeng99?
     # 使用druid数据源
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
@@ -45,6 +60,9 @@ kuaige:
     url: http://118.178.117.163/plain/SmsMt
     acctno: 100710
     passwd: oemMXV4C
+  ssl:
+      port: 8080
+      redirect: 8443
 
 
 
