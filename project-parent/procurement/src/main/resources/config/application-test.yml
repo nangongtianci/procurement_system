@@ -61,8 +61,8 @@ kuaige:
     acctno: 100710
     passwd: oemMXV4C
   ssl:
-      port: 8080
-      redirect: 8443
+      port: 80
+      redirect: 443
 
 
 
