@@ -65,12 +65,6 @@ public class CustomerController {
             return Result.FAIL(assignFieldIllegal("手机号或密码"));
         }
 
-        if(StringUtils.isBlank(redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone()))){
-            return Result.FAIL("验证码已过期！");
-        }else if(!customer.getCheckCode().equals(redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone()))){
-            return Result.FAIL("验证码错误!");
-        }
-
         EntityWrapper<Customer> ew = new EntityWrapper();
         ew.setSqlSelect("password","secretKey");
         ew.where("phone={0}",customer.getPhone());
