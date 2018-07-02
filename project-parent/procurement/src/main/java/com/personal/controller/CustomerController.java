@@ -197,6 +197,11 @@ public class CustomerController {
             return Result.FAIL(assignFieldIllegal("身份证"));
         }
 
+        int exist = customerService.selectCount(new EntityWrapper<Customer>().where("phone={0}",customer.getPhone()));
+        if(exist>0){
+            return Result.FAIL("此手机号已经注册！");
+        }
+
         customer.setSecretKey(UUIDUtils.getUUID());
         customer.setPassword(MD5Util.getStringMD5(customer.getPassword()+customer.getSecretKey()));
         if(customerService.insert(customer)){
