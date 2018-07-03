@@ -66,7 +66,7 @@ public class CustomerController {
         }
 
         EntityWrapper<Customer> ew = new EntityWrapper();
-        ew.setSqlSelect("password","secretKey");
+        ew.setSqlSelect("id","password","secret_key as secretKey");
         ew.where("phone={0}",customer.getPhone());
         Customer rt = customerService.selectOne(ew);
         if(rt == null || StringUtils.isBlank(rt.getPassword())
@@ -81,7 +81,10 @@ public class CustomerController {
         rt.setStatus(LoginStatusEnum.yes.getValue());
         rt.setUpdateTime(new Date());
         if(customerService.updateById(rt)){
-            return Result.OK().setData(TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
+            Map<String,String> map = new HashMap<>();
+            map.put("customerId",rt.getId());
+            map.put("token",TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
+            return Result.OK().setData(map);
         }
         return Result.FAIL("登录失败！");
     }

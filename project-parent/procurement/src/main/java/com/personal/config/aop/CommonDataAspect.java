@@ -34,7 +34,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.InsertMethodFlag)")
-    public Object insertData(ProceedingJoinPoint pjp) throws Exception{
+    public Object insertData(ProceedingJoinPoint pjp) throws Throwable {
         try {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length == 1 && args[0] instanceof BaseEntity) {
@@ -42,7 +42,7 @@ public class CommonDataAspect {
             }
             return pjp.proceed(args);
         } catch (Throwable throwable) {
-            throw new BizException(BizExceptionEnum.COMMON_PARAM_SET_ERROR);
+            throw throwable;
         }
     }
 
@@ -53,7 +53,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.UpdateMethodFlag)")
-    public Object updateData(ProceedingJoinPoint pjp) throws Exception{
+    public Object updateData(ProceedingJoinPoint pjp) throws Throwable{
         try {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length == 1 && args[0] instanceof BaseEntity) {
@@ -61,7 +61,7 @@ public class CommonDataAspect {
             }
             return pjp.proceed(args);
         } catch (Throwable throwable) {
-            throw new BizException(BizExceptionEnum.COMMON_PARAM_SET_ERROR);
+            throw throwable;
         }
     }
 
