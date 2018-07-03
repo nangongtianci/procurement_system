@@ -52,6 +52,7 @@ public class WebAppConfig implements WebMvcConfigurer {
         // token存活时间
         registry.addInterceptor(new CustomerTokenSurvivalTimeInterceptor(redisService))
                 .addPathPatterns("/**")
-                .excludePathPatterns("/static/**","/customer/login","/customer/logout","/common/send/**");
+                .excludePathPatterns("/static/**","/customer/login","/customer/logout","/customer/upload"
+                        ,"/common/send/**");
     }
 }
