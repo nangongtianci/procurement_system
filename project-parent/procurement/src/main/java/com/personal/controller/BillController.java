@@ -1,6 +1,7 @@
 package com.personal.controller;
 
 
+import com.personal.common.TokenUtils;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
 import com.personal.common.enume.*;
@@ -20,9 +21,11 @@ import com.personal.entity.Goods;
 import com.personal.service.BillService;
 import com.personal.service.CustomerService;
 import com.personal.service.MailService;
+import com.personal.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
@@ -51,6 +54,8 @@ public class BillController {
     private FileConfig fileConfig;
     @Autowired
     private ReportConfig reportConfig;
+    @Autowired
+    private RedisService redisService;
 
     /**
      * 新增账单
@@ -59,13 +64,15 @@ public class BillController {
      */
     @InsertMethodFlag
     @PostMapping
-    public Result add(Bill bill){
+    public Result add(HttpServletRequest request,Bill bill){
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
         }else{
+            String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
             int i = 1;
             String tip = "第"+i+"条商品信息";
             for(Goods temp : bill.getGoods()){
+                temp.setCreateCustomerId(customerId);
                 if(StringUtils.isBlank(temp.getName())){
                     return Result.FAIL(assignFieldNotNull(tip+"品名"));
                 }
@@ -149,7 +156,7 @@ public class BillController {
      */
     @UpdateMethodFlag
     @PutMapping
-    public Result update(Bill bill){
+    public Result update(HttpServletRequest request,Bill bill){
         if(!matchesIds(bill.getId())){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
@@ -193,9 +200,11 @@ public class BillController {
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
         }else{
+            String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
             int i = 1;
             String tip = "第"+i+"条商品信息";
             for(Goods temp : bill.getGoods()){
+                temp.setCreateCustomerId(customerId);
                 if(StringUtils.isBlank(temp.getId())){
                     temp.setId(UUIDUtils.getUUID());
                 }
