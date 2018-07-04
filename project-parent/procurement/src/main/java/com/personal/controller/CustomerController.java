@@ -163,7 +163,7 @@ public class CustomerController {
      * @return
      */
     @InsertMethodFlag
-    @PostMapping
+    @PostMapping("/register")
     public Result insert(Customer customer){
         if(StringUtils.isBlank(customer.getIsAgreeProtocol()) || IsAgreeProtocolEnum.no.getValue()
                 .equalsIgnoreCase(IsAgreeProtocolEnum.getByValue(customer.getIsAgreeProtocol()).getValue())){
