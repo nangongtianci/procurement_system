@@ -7,6 +7,7 @@ import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
 import com.personal.common.utils.base.StringUtils;
+import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.file.ExcelUtils;
 import com.personal.common.utils.result.Result;
@@ -154,8 +155,8 @@ public class BillController {
         }
 
         if(StringUtils.isNotBlank(bill.getBusinessStatus())
-                && BusinessStatusEnum.getByValue(bill.getBusinessStatus()) != null){ // 业务状态
-            return Result.FAIL(assignFieldIllegalValueRange("业务状态"));
+                && BusinessStatusEnum.getByValue(bill.getBusinessStatus()) == null){ // 业务状态
+            return Result.FAIL(assignFieldIllegalValueRange("交易状态"));
         }
 
         if(bill.getFreight().compareTo(new BigDecimal(0)) != 0
@@ -195,6 +196,10 @@ public class BillController {
             int i = 1;
             String tip = "第"+i+"条商品信息";
             for(Goods temp : bill.getGoods()){
+                if(StringUtils.isBlank(temp.getId())){
+                    temp.setId(UUIDUtils.getUUID());
+                }
+
                 if(StringUtils.isBlank(temp.getName())){
                     return Result.FAIL(assignFieldNotNull(tip+"品名"));
                 }
