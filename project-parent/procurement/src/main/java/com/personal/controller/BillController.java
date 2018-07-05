@@ -191,6 +191,7 @@ public class BillController {
                         if(StringUtils.isNotBlank(bill.getBillStatus())){
                             return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
                         }
+                        bill.setBillStatus(null);
                     }
                 }
             }
