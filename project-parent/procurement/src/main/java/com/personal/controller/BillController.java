@@ -196,6 +196,8 @@ public class BillController {
                     }
                 }
             }
+        }else{
+            bill.setBillStatus(null);
         }
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         bill.setCreateCustomerId(customerId);
