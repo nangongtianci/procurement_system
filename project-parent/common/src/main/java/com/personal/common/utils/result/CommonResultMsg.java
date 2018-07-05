@@ -20,7 +20,7 @@ public class CommonResultMsg {
     public static final String ILLEGAL_DATE_FORMAT = "日期格式不合法！";
     protected static final String IS_NOT_EXISTS = "%s不存在！";
     protected static final String NOT_ASSGIN_VALUE_SECTION = "%s长度不在指定的%s-%s区间内！";
-    protected static final String ILLEGAL_MONEY = "%d必须为大于%d的数字！";
+    protected static final String ILLEGAL_MONEY = "%s必须为大于%s的数字！";
 
     /**
      * @desc 通用字段数值区间通用错误消息
@@ -117,7 +117,7 @@ public class CommonResultMsg {
      * @return
      */
     public static final String assignFieldNameForMoney(String fieldName, BigDecimal bigDecimal){
-        return fieldName.concat(String.format(ILLEGAL_MONEY,bigDecimal.toString()));
+        return fieldName.concat(String.format(ILLEGAL_MONEY,fieldName,bigDecimal.toString()));
     }
 
     // 异常通用提示

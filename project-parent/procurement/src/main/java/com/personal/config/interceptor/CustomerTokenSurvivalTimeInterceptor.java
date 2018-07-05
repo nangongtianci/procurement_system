@@ -36,19 +36,20 @@ public class CustomerTokenSurvivalTimeInterceptor extends HandlerInterceptorAdap
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response, Object handler) throws Exception
     {
-        if(StringUtils.isBlank(request.getHeader("token"))
-                || !TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
-            response.setContentType("application/json; charset=utf-8");
-            PrintWriter writer = response.getWriter();
-            writer.print(JSONObject.toJSONString(Result.FAIL(BizExceptionEnum.REQUEST_EXP),
-                    SerializerFeature.WriteMapNullValue,SerializerFeature.WriteDateUseDateFormat));
-            writer.close();
-            response.flushBuffer();
-            return false;
-        }
+        return true;
+//        if(StringUtils.isBlank(request.getHeader("token"))
+//                || !TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
+//            response.setContentType("application/json; charset=utf-8");
+//            PrintWriter writer = response.getWriter();
+//            writer.print(JSONObject.toJSONString(Result.FAIL(BizExceptionEnum.REQUEST_EXP),
+//                    SerializerFeature.WriteMapNullValue,SerializerFeature.WriteDateUseDateFormat));
+//            writer.close();
+//            response.flushBuffer();
+//            return false;
+//        }
 
         // 重置过期时间
-        redisService.expire(request.getHeader("token"), AppConstant.TOKEN_EXP_TIME);
-        return true;
+        //redisService.expire(request.getHeader("token"), AppConstant.TOKEN_EXP_TIME);
+       // return true;
     }
 }
