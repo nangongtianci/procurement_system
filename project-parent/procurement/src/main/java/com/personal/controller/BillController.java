@@ -121,7 +121,6 @@ public class BillController {
             if(StringUtils.isNotBlank(bill.getBillStatus())){
                 return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
             }
-
             bill.setBillStatus(null);
         }
 
@@ -196,15 +195,14 @@ public class BillController {
                 }
             }
         }
-
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        bill.setCreateCustomerId(customerId);
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
         }else{
-            String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
             int i = 1;
             String tip = "第"+i+"条商品信息";
             for(Goods temp : bill.getGoods()){
-                temp.setCreateCustomerId(customerId);
                 if(StringUtils.isBlank(temp.getId())){
                     temp.setId(UUIDUtils.getUUID());
                 }

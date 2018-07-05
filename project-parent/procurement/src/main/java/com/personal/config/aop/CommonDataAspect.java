@@ -35,8 +35,12 @@ public class CommonDataAspect {
     public Object insertData(ProceedingJoinPoint pjp) throws Throwable {
         try {
             Object[] args = pjp.getArgs();
-            if(!ArrayUtils.isEmpty(args) && args.length == 1 && args[0] instanceof BaseEntity) {
-                setInsertData(args[0]);
+            if(!ArrayUtils.isEmpty(args) && args.length>0){
+                for(int i=0;i<args.length;i++){
+                    if(args[i] instanceof BaseEntity){
+                        setInsertData(args[i]);
+                    }
+                }
             }
             return pjp.proceed(args);
         } catch (Throwable throwable) {
@@ -54,8 +58,12 @@ public class CommonDataAspect {
     public Object updateData(ProceedingJoinPoint pjp) throws Throwable{
         try {
             Object[] args = pjp.getArgs();
-            if(!ArrayUtils.isEmpty(args) && args.length == 1 && args[0] instanceof BaseEntity) {
-                setUpdateData(args[0]);
+            if(!ArrayUtils.isEmpty(args) && args.length>0){
+                for(int i=0;i<args.length;i++){
+                    if(args[i] instanceof BaseEntity){
+                        setUpdateData(args[i]);
+                    }
+                }
             }
             return pjp.proceed(args);
         } catch (Throwable throwable) {

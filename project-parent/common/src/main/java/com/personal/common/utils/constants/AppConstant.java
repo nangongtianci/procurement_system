@@ -15,7 +15,7 @@ public class AppConstant {
     /**
      * 短信校验码默认180秒
      */
-    public final static int CHECK_CODE_EXP_TIME = 180;
+    public final static int CHECK_CODE_EXP_TIME = 90;
 
     public final static String TOEKN_SALT = "token-salt-618";
     public final static String TOEKN_RPEPIX = "token_appu_";

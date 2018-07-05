@@ -100,8 +100,12 @@ public class CustomerVirtualCoinController {
         if(!matchesIds(customerId)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
         }
-        return Result.OK().setData(customerVirtualCoinService
-                .selectOne(new EntityWrapper<CustomerVirtualCoin>().where("customer_id={0}",customerId)).getVirtualCoinCount());
+        CustomerVirtualCoin cvc = customerVirtualCoinService
+                .selectOne(new EntityWrapper<CustomerVirtualCoin>().where("customer_id={0}",customerId));
+        if(cvc != null && cvc.getVirtualCoinCount() >0){
+            return Result.OK().setData(cvc.getVirtualCoinCount());
+        }
+        return Result.OK().setData(0);
     }
 }
 

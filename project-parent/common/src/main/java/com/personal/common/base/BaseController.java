@@ -8,12 +8,11 @@ package com.personal.common.base;
  * @return
  */
 public class BaseController {
-
     /**
      * 获取当前用户id
      * @return
      */
-    protected String getCurrentCustomerId(){
+    protected String getCurrentCid(){
         return null;
     }
 }
