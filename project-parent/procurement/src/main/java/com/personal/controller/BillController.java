@@ -65,8 +65,7 @@ public class BillController {
     @InsertMethodFlag
     @PostMapping
     public Result add(HttpServletRequest request,Bill bill){
-        //String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        String customerId = "e92f5b2f284c41b6a955d0ee63007130";
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         bill.setCreateCustomerId(customerId);
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
@@ -198,8 +197,7 @@ public class BillController {
                 }
             }
         }
-        //String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        String customerId = "e92f5b2f284c41b6a955d0ee63007130";
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         bill.setCreateCustomerId(customerId);
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
