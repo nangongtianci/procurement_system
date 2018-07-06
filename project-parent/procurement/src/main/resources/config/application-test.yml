@@ -23,6 +23,7 @@ spring:
       host: smtp.exmail.qq.com
       username: yinliwen@bjscfl.com
       password: 1234qweR
+      port: 465
       properties:
         mail:
           smtp:
