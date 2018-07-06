@@ -17,20 +17,6 @@ spring:
         min-idle: 50
         max-active: 2000
         max-wait: 1000
-
-  # 邮箱配置
-  mail:
-      host: smtp.exmail.qq.com
-      username: yinliwen@bjscfl.com
-      password: 1234qweR
-      port: 465
-      properties:
-        mail:
-          smtp:
-            auth: true
-            starttls:
-              enable: true
-              required: true
   # 数据源配置
   datasource:
     name: quickers

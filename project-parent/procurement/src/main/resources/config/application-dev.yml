@@ -3,18 +3,6 @@ spring:
   redis:
       cluster:
         nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
-  # 邮箱配置
-  mail:
-      host: smtp.exmail.qq.com
-      username: yinliwen@bjscfl.com
-      password: 1234qweR
-      properties:
-        mail:
-          smtp:
-            auth: true
-            starttls:
-              enable: true
-              required: true
   # 数据源配置
   datasource:
     name: quickers

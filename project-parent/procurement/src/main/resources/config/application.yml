@@ -14,6 +14,21 @@ spring:
   devtools:
       restart:
         enabled: true
+  # 邮箱配置
+  mail:
+      host: smtp.exmail.qq.com
+      username: yinliwen@bjscfl.com
+      password: 1234qweR
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+              required: true
+            socketFactory:
+              class: javax.net.ssl.SSLSocketFactory
+              port: 465
   profiles:
       active: @profileActive@
 
