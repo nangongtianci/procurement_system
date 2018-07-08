@@ -104,10 +104,6 @@ public class BillController {
             return Result.FAIL(assignFieldIllegalValueRange("业务状态"));
         }
 
-        if(!matchesAmount(bill.getFreight(),new BigDecimal(0))){
-            return Result.FAIL(assignFieldNameForMoney("运费",new BigDecimal(0)));
-        }
-
         if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
             if(!BillStatusEnum.payable.getValue().equalsIgnoreCase(bill.getBillStatus())
                     && !BillStatusEnum.paid.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
@@ -164,11 +160,6 @@ public class BillController {
         if(StringUtils.isNotBlank(bill.getBusinessStatus())
                 && BusinessStatusEnum.getByValue(bill.getBusinessStatus()) == null){ // 业务状态
             return Result.FAIL(assignFieldIllegalValueRange("交易状态"));
-        }
-
-        if(bill.getFreight().compareTo(new BigDecimal(0)) != 0
-                && !matchesAmount(bill.getFreight(),new BigDecimal(0))){
-            return Result.FAIL(assignFieldNameForMoney("运费",new BigDecimal(0)));
         }
 
         if(StringUtils.isNotBlank(bill.getBillStatus())){
