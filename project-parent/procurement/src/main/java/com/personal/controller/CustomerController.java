@@ -196,7 +196,7 @@ public class CustomerController {
             return Result.FAIL(assignFieldIllegal("手机号"));
         }
 
-        if(!matchesIdCard(customer.getIdCard())){
+        if(StringUtils.isNotBlank(customer.getIdCard()) && !matchesIdCard(customer.getIdCard())){
             return Result.FAIL(assignFieldIllegal("身份证"));
         }
 

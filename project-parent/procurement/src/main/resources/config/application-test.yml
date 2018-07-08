@@ -1,10 +1,6 @@
 server:
   port: 443
 spring:
-#  # redis 集群配置
-#  redis:
-#      cluster:
-#        nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
   # 单点配置
   redis:
     database: 0
@@ -27,10 +23,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
 
-  resources:
-    static-locations: file:${kuaige.generate.imgPath}
-  mvc:
-    static-path-pattern: ${kuaige.generate.staticBrowsePath}**
+
 
 # 快鸽自定义配置信息
 kuaige:
