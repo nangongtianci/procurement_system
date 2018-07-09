@@ -101,6 +101,46 @@ public class CustomerController {
     }
 
     /**
+     * 找回密码
+     * @param customer
+     * @return
+     */
+    @PostMapping("retrieve/password")
+    public Result retrievePassword(Customer customer){
+        if(StringUtils.isBlank(customer.getCheckCode())){
+            return Result.FAIL(assignFieldNotNull("验证码"));
+        }else{
+            String checkCode = redisService.get(AppConstant.CHECK_CODE_RPEPIX+customer.getPhone());
+            if(StringUtils.isBlank(checkCode)){
+                return Result.FAIL("验证码已过期！");
+            }else if(!checkCode.equalsIgnoreCase(customer.getCheckCode())){
+                return Result.FAIL("验证码错误！");
+            }
+        }
+
+        if(!matchesMobilePhone(customer.getPhone())){
+            return Result.FAIL(assignFieldIllegal("手机号"));
+        }
+
+        EntityWrapper<Customer> ew = new EntityWrapper();
+        ew.where("phone={0}",customer.getPhone());
+        Customer exists = customerService.selectOne(ew);
+        if(exists == null){
+            return Result.FAIL("账号不存在！");
+        }
+
+        if(StringUtils.isBlank(customer.getPassword())){
+            return Result.FAIL(assignFieldNotNull("密码"));
+        }
+
+        exists.setPassword(MD5Util.getStringMD5(customer.getPassword()+exists.getSecretKey()));
+        if(!customerService.updateById(exists)){
+            return Result.FAIL("找回密码失败！");
+        }
+        return Result.OK();
+    }
+
+    /**
      * 快捷注册
      * @return
      */
