@@ -29,7 +29,7 @@ public class ProcurementApplicationTests {
 		try {
 			// true表示需要创建一个multipart message
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
-			helper.setFrom("yinliwen@bjscfl.com");
+			helper.setFrom("3393024626@qq.com");
 			helper.setTo("675886926@qq.com");
 			helper.setSubject("liwentest");
 			helper.setText("hello nihao , i am ylw!", true);

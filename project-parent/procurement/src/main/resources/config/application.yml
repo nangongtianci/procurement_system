@@ -16,9 +16,9 @@ spring:
         enabled: true
   # 邮箱配置
   mail:
-      host: smtp.exmail.qq.com
-      username: yinliwen@bjscfl.com
-      password: 1234qweR
+      host: smtp.qq.com
+      username: 3393024626@qq.com
+      password: gfyboxieuibgcifh
       properties:
         mail:
           smtp:
