@@ -1,6 +1,10 @@
 server:
   port: 443
 spring:
+  resources:
+    static-locations: file:${kuaige.generate.imgPath},file:/data/template/wx-verify
+  mvc:
+    static-path-pattern: ${kuaige.generate.staticBrowsePath}**
   # 单点配置
   redis:
     database: 0
@@ -12,7 +16,7 @@ spring:
         max-idle: 500
         min-idle: 50
         max-active: 2000
-        max-wait: 1000
+        max-wait: 100
   # 数据源配置
   datasource:
     name: quickers
@@ -22,7 +26,6 @@ spring:
     # 使用druid数据源
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-
 
 
 # 快鸽自定义配置信息

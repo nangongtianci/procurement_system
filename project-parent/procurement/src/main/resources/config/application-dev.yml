@@ -14,7 +14,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
 
   resources:
-    static-locations: file:${kuaige.generate.imgPath}
+    static-locations: file:${kuaige.generate.imgPath},file:/data/template/wx-verify
   mvc:
     static-path-pattern: ${kuaige.generate.staticBrowsePath}**
 

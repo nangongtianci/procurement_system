@@ -36,6 +36,7 @@ public class CustomerTokenSurvivalTimeInterceptor extends HandlerInterceptorAdap
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response, Object handler) throws Exception
     {
+        System.out.println(request.getRequestURI());
         if(StringUtils.isBlank(request.getHeader("token"))
                 || !TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
             response.setContentType("application/json; charset=utf-8");
