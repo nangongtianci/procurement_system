@@ -59,7 +59,7 @@
 
     <!--账单多条件查询-->
     <select id="selectListByMultiConditions" parameterType="billQueryParam" resultMap="CascadeGoodsResultMap">
-        SELECT b.customer_name,b.customer_phone,b.total_price,b.bill_status,b.is_peer_bill,g.name,g.weight_unit,g.number
+        SELECT b.id,b.customer_name,b.customer_phone,b.total_price,b.bill_status,b.is_peer_bill,g.name,g.weight_unit,g.number
         FROM t_bill b
         LEFT JOIN t_goods g ON b.id = g.bill_id
         <where>
