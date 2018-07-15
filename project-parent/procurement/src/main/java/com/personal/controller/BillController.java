@@ -1,8 +1,10 @@
 package com.personal.controller;
 
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.personal.common.TokenUtils;
 import com.personal.common.annotation.InsertMethodFlag;
+import com.personal.common.annotation.PageQueryMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
 import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
@@ -11,13 +13,14 @@ import com.personal.common.utils.base.StringUtils;
 import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.file.ExcelUtils;
+import com.personal.common.utils.result.PaginationUtils;
 import com.personal.common.utils.result.Result;
-import com.personal.conditions.BillQueryParam;
 import com.personal.config.system.file.FileConfig;
 import com.personal.config.system.mail.ReportConfig;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
 import com.personal.entity.Goods;
+import com.personal.conditions.BillQueryParam;
 import com.personal.service.BillService;
 import com.personal.service.CustomerService;
 import com.personal.service.MailService;
@@ -137,12 +140,80 @@ public class BillController {
         }
         // 生成账单号
         bill.setBillSn(GenerateOrderUtil.nextSN());
+        // 账单号类型(手动)
+        bill.setBillSnType(BillSnTypeEnum.manual.getValue());
         // 设置对等账单为no
         bill.setIsPeerBill(IsPeerBillEnum.no.getValue());
         if(billService.insertCascadeGoods(bill)){
             return Result.OK(bill.getId());
         }
         return Result.FAIL();
+    }
+
+    /**
+     * 生成对等账单
+     * @param request
+     * @param sn
+     * @return
+     */
+    @PostMapping("scan")
+    public Result scanGeneratorBill(HttpServletRequest request,String sn){
+        if(StringUtils.isBlank(sn)){
+            return Result.FAIL(assignFieldNotNull("账单号"));
+        }
+
+        EntityWrapper<Bill> ew = new EntityWrapper();
+        ew.where("bill_sn={0}",sn);
+        Bill exist = billService.selectOne(ew);
+        if(exist == null){
+            return Result.FAIL("原始账单不存在，无法生成对等账单！");
+        }
+        String originalId = exist.getId();
+
+        // 组件对等账单
+        if(BusinessStatusEnum.out.getValue().equals(exist.getBusinessStatus())){ // 卖家
+            exist.setBusinessStatus(BusinessStatusEnum.in.getValue());
+            if(BillStatusEnum.receivable.getValue().equals(exist.getBillStatus())){
+                exist.setBillStatus(BillStatusEnum.payable.getValue());
+            }else if(BillStatusEnum.received.getValue().equals(exist.getBillStatus())){
+                exist.setBillStatus(BillStatusEnum.paid.getValue());
+            }
+        }else if(BusinessStatusEnum.in.getValue().equals(exist.getBusinessStatus())){ // 卖家
+            exist.setBusinessStatus(BusinessStatusEnum.out.getValue());
+            if(BillStatusEnum.payable.getValue().equals(exist.getBillStatus())){
+                exist.setBillStatus(BillStatusEnum.receivable.getValue());
+            }else if(BillStatusEnum.paid.getValue().equals(exist.getBillStatus())){
+                exist.setBillStatus(BillStatusEnum.received.getValue());
+            }
+        }else{
+            return Result.FAIL("盘盈，盘损，无法生成对等账单！");
+        }
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        Customer customer = customerService.selectById(exist.getCreateCustomerId());
+        exist.setCustomerName(customer.getName());
+        exist.setCustomerPhone(customer.getPhone());
+        exist.setCustomerIdCard(customer.getIdCard());
+        exist.setCustomerUnit(customer.getCompanyName());
+        exist.setMarketName(customer.getMarketName());
+        exist.setId(UUIDUtils.getUUID());
+        exist.setCreateCustomerId(customerId);
+        exist.setCreateTime(new Date());
+        exist.setUpdateTime(new Date());
+        exist.setBillDate(new Date());
+        exist.setBillSn(GenerateOrderUtil.nextSN());
+        exist.setBillSnType(BillSnTypeEnum.scan.getValue());
+        exist.setIsPeerBill(IsPeerBillEnum.yes.getValue());
+        exist.setRemark("");
+        if(billService.insert(exist)){
+            // 更新原始账单为对等账单
+            Bill original = new Bill();
+            original.setId(originalId);
+            original.setIsPeerBill(IsPeerBillEnum.yes.getValue());
+            if(billService.updateById(original)){
+                return Result.OK();
+            }
+        }
+        return Result.FAIL().setMessage("生成对等账单失败！");
     }
 
     /**
@@ -255,33 +326,73 @@ public class BillController {
     }
 
     /**
-     * 根据客户主键查询列表信息
-     * @param customerId
+     * 账单分页查询（多条件）-（级联商品分页）
+     * @param param
      * @return
      */
-    @RequestMapping("list/{customerId}")
-    public Result selectListByCustomerId(@PathVariable String customerId){
-        if(!matchesIds(customerId)){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.goods));
+    @PageQueryMethodFlag
+    @PostMapping("goods/page")
+    public Result selectPageByCondition(BillQueryParam param){
+        if(param == null || !matchesIds(param.getCreateCustomerId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
         }
-        return Result.OK(billService.selectListByCustomerIdCascadeGoods(customerId));
+
+        int count = billService.selectCountByCondition(param);
+        if (count == 0) {
+            return Result.EMPTY();
+        }
+        List<Bill> content = billService.selectPageByParam(param);
+        return PaginationUtils.getResultObj(content,count,param.getPageNow(),param.getPageSize());
     }
 
     /**
-     * 根据客户主键查询列表信息（级联商品）
-     * @param customerId
+     * 账单分页查询（多条件）-（不级联商品分页）
+     * @param param
      * @return
      */
-    @RequestMapping("list/cascade/goods/{customerId}")
-    public Result selectListByCustomerIdCascadeGoods(@PathVariable String customerId){
-        if(!matchesIds(customerId)){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.goods));
+    @PageQueryMethodFlag
+    @PostMapping("page")
+    public Result selectPageByParamNoCascadeGoods(BillQueryParam param){
+        if(param == null || !matchesIds(param.getCreateCustomerId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
         }
-        return Result.OK(billService.selectListByCustomerIdCascadeGoods(customerId));
+
+        int count = billService.selectCountByCondition(param);
+        if (count == 0) {
+            return Result.EMPTY();
+        }
+        List<Bill> content = billService.selectPageByParamNoCascadeGoods(param);
+        return PaginationUtils.getResultObj(content,count,param.getPageNow(),param.getPageSize());
     }
 
     /**
-     * 根据主键查询
+     * 账单查询（多条件,不包含分页信息）-（级联商品分页）
+     * @param param
+     * @return
+     */
+    @PostMapping("goods/list")
+    public Result selectListByCondition(BillQueryParam param){
+        if(param == null || !matchesIds(param.getCreateCustomerId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
+        }
+        return Result.OK(billService.selectByParam(param));
+    }
+
+    /**
+     * 账单查询（多条件,不包含分页信息）-（不级联商品分页）
+     * @param param
+     * @return
+     */
+    @PostMapping("list")
+    public Result selectByParamNoCascadeGoods(BillQueryParam param){
+        if(param == null || !matchesIds(param.getCreateCustomerId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
+        }
+        return Result.OK(billService.selectByParamNoCascadeGoods(param));
+    }
+
+    /**
+     * 根据主键查询（不级联查询商品）
      * @param id
      * @return
      */
@@ -298,7 +409,7 @@ public class BillController {
      * @param id
      * @return
      */
-    @RequestMapping("/cascade/goods/{id}")
+    @GetMapping("goods/{id}")
     public Result selectByIdCascadeGoods(@PathVariable String id){
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
@@ -307,33 +418,19 @@ public class BillController {
     }
 
     /**
-     * 多条件查询
-     * @param billQueryParam
-     * @return
-     */
-    @PostMapping("/multi/conditions")
-    public Result selectListByMultiConditions(BillQueryParam billQueryParam){
-        Result result = multiQueryValidate(billQueryParam);
-        if(result != null){
-            return result;
-        }
-        return Result.OK(billService.selectListByMultiConditions(billQueryParam));
-    }
-
-    /**
      * 发送报表邮件 (TODO 此方法日后会作性能优化)
-     * @param billQueryParam
+     * @param param
      * @return
      */
     @PostMapping("/send/mail")
-    public Result sendMail(BillQueryParam billQueryParam) throws Exception {
-        Result result = multiQueryValidate(billQueryParam);
+    public Result sendMail(BillQueryParam param) throws Exception {
+        Result result = multiQueryValidate(param);
         if(result != null){
             return result;
         }
 
         // 生成excel文件
-        List<Bill> list = billService.selectListByMultiConditions(billQueryParam);
+        List<Bill> list = billService.selectByParam(param);
         if(ListUtils.isEmpty(list)){
             return Result.FAIL("数据为空，无需发送邮件！");
         }
@@ -356,7 +453,7 @@ public class BillController {
         ExcelUtils.createExcel(filePathName,headList,fieldList,mapList);
 
         // 发送邮件
-        Customer customer = customerService.selectById(billQueryParam.getCreateCustomerId());
+        Customer customer = customerService.selectById(param.getCreateCustomerId());
         if(mailService.sendAttachmentsMail(customer.getEmail(),reportConfig.getSubject(),reportConfig.getContent(),filePathName)){
             return Result.OK();
         }

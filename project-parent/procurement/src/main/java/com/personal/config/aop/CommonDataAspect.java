@@ -1,6 +1,9 @@
 package com.personal.config.aop;
 
 import com.personal.common.base.BaseEntity;
+import com.personal.common.base.page.AbstractPageQueryParam;
+import com.personal.common.constant.SysConstant;
+import com.personal.common.utils.base.ReflectionUtils;
 import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +66,33 @@ public class CommonDataAspect {
                 for(int i=0;i<args.length;i++){
                     if(args[i] instanceof BaseEntity){
                         setUpdateData(args[i]);
+                    }
+                }
+            }
+            return pjp.proceed(args);
+        } catch (Throwable throwable) {
+            throw throwable;
+        }
+    }
+
+
+    /**
+     * 分页查询方法
+     * @param pjp
+     * @return
+     * @throws Exception
+     */
+    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.PageQueryMethodFlag)")
+    public Object pageQueryData(ProceedingJoinPoint pjp) throws Throwable{
+        try {
+            Object[] args = pjp.getArgs();
+            if(!ArrayUtils.isEmpty(args) && args.length>0){
+                for(int i=0;i<args.length;i++){
+                    if(args[i] instanceof AbstractPageQueryParam){
+                        int pageSize = (int)ReflectionUtils.invokeGetter(args[i],"pageSize");
+                        if(pageSize == SysConstant.PAGE_SIZE_DEFAULT){
+                            ReflectionUtils.invokeSetter(args[i],"pageSize",SysConstant.PAGE_SIZE_DEFAULT);
+                        }
                     }
                 }
             }

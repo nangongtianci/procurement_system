@@ -1,5 +1,7 @@
 package com.personal.controller;
 
+import com.personal.common.TokenUtils;
+import com.personal.common.enume.UserTypeEnum;
 import com.personal.common.json.JsonUtils;
 import com.personal.common.random.RandomNum;
 import com.personal.common.utils.base.StringUtils;
@@ -13,6 +15,7 @@ import com.personal.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +51,20 @@ public class CommonController {
             return Result.OK();
         }
         return Result.FAIL("发送失败！");
+    }
+
+    /**
+     * 检查token是否过期
+     * @param request
+     * @return
+     */
+    @GetMapping("checkToken")
+    public String checkToken(HttpServletRequest request){
+        if(TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
+            return "false";
+        }else{
+            return "true";
+        }
     }
 
     @GetMapping("test")

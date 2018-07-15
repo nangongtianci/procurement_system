@@ -60,6 +60,11 @@ public class Bill extends BaseEntity {
     @TableField("bill_sn")
     private String billSn;
     /**
+     * 账单号类型
+     */
+    @TableField("bill_sn_type")
+    private String billSnType;
+    /**
      * 是否为对等账单（否，是）
      */
     @TableField("is_peer_bill")
@@ -264,6 +269,18 @@ public class Bill extends BaseEntity {
 
     public void setBillSn(String billSn) {
         this.billSn = billSn;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getBillSnType() {
+        return billSnType;
+    }
+
+    public void setBillSnType(String billSnType) {
+        this.billSnType = billSnType;
     }
 
     public String getIsPeerBill() {

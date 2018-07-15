@@ -1,18 +1,21 @@
 package com.personal.conditions;
 
-
 import com.personal.common.base.BaseQueryParam;
+import com.personal.common.base.marking.POJOSerializable;
+import com.personal.common.base.page.AbstractPageQueryParam;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+
 /**
- * 账单多条件查询实体类
+ * 账单分页查询接口
  * @author ylw
- * @date 18-5-18 下午3:13
+ * @date 18-7-15 上午10:29
  * @param
  * @return
  */
-public class BillQueryParam  extends BaseQueryParam{
+public class BillQueryParam extends BaseQueryParam implements POJOSerializable{
+    private static final long serialVersionUID = -2368778921048607015L;
     // 创建人主键
     private String createCustomerId;
     // 开始日期

@@ -27,6 +27,6 @@ public class GenerateOrderUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(nextSN().length());
+        System.out.println(nextSN());
     }
 }

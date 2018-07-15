@@ -1,8 +1,8 @@
 package com.personal.mapper;
 
-import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.personal.conditions.BillQueryParam;
 
 import java.util.List;
 
@@ -23,16 +23,37 @@ public interface BillMapper extends BaseMapper<Bill> {
     Bill selectByIdCascadeGoods(String id);
 
     /**
-     * 根据客户主键查询账单列表（默认今天）
-     * @param customerId
+     * 分页查询个数
+     * @param param
      * @return
      */
-    List<Bill> selectListByCustomerIdCascadeGoods(String customerId);
+    int selectCountByCondition(BillQueryParam param);
 
     /**
-     * 账单多条件查询
-     * @param billQueryParam
+     * 账单多条件查询（默认级联商品）
+     * @param param
      * @return
      */
-    List<Bill> selectListByMultiConditions(BillQueryParam billQueryParam);
+    List<Bill> selectPageByParam(BillQueryParam param);
+
+    /**
+     * 账单多条件查询（不级联商品）
+     * @param pageParam
+     * @return
+     */
+    List<Bill> selectPageByParamNoCascadeGoods(BillQueryParam pageParam);
+
+    /**
+     * 账单多条件查询(无分页信息)-（默认级联商品）
+     * @param param
+     * @return
+     */
+    List<Bill> selectByParam(BillQueryParam param);
+
+    /**
+     * 账单多条件查询(无分页信息)-（不级联查询商品）
+     * @param param
+     * @return
+     */
+    List<Bill> selectByParamNoCascadeGoods(BillQueryParam param);
 }

@@ -1,6 +1,7 @@
 package com.personal.common.base;
 
-import java.io.Serializable;
+import com.personal.common.base.marking.POJOSerializable;
+import com.personal.common.base.page.AbstractPageQueryParam;
 
 /**
  * 多条件查询基类
@@ -9,7 +10,7 @@ import java.io.Serializable;
  * @param
  * @return
  */
-public class BaseQueryParam implements Serializable {
+public class BaseQueryParam extends AbstractPageQueryParam implements POJOSerializable{
     private static final long serialVersionUID = 1L;
     private String id;
 
