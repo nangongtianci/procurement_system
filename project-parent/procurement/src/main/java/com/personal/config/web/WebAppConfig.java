@@ -50,9 +50,9 @@ public class WebAppConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry)
     {
         // token存活时间
-//        registry.addInterceptor(new CustomerTokenSurvivalTimeInterceptor(redisService))
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/static/**","/customer/register","/customer/login","/customer/logout","/customer/upload"
-//                        ,"/common/send/**","/customer/retrieve/password");
+        registry.addInterceptor(new CustomerTokenSurvivalTimeInterceptor(redisService))
+                .addPathPatterns("/**")
+                .excludePathPatterns("/static/**","/customer/register","/customer/login","/customer/logout","/customer/upload"
+                        ,"/common/send/**","/customer/retrieve/password","/bill/scan");
     }
 }
