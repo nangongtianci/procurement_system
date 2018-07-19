@@ -93,10 +93,6 @@ public class BillController {
                     return Result.FAIL(assignFieldIllegalValueRange(tip+"重量单位"));
                 }
 
-                if(StringUtils.isBlank(temp.getSecurityDetectionInfo())){
-                    return Result.FAIL(assignFieldNotNull(tip+"安全检测信息"));
-                }
-
                 temp.setBillId(bill.getId());
                 temp.setCreateCustomerId(bill.getCreateCustomerId());
                 i++;
@@ -112,7 +108,7 @@ public class BillController {
                     && !BillStatusEnum.paid.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
                 return Result.FAIL("业务状态为买入，则账单状态只能为应付或已付其中一种状态！");
             }
-        }else if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出
+        }else if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出jintian
             if(!BillStatusEnum.receivable.getValue().equalsIgnoreCase(bill.getBillStatus())
                     && !BillStatusEnum.received.getValue().equalsIgnoreCase(bill.getBillStatus()) ){
                 return Result.FAIL("业务状态为卖出，则账单状态只能为应收或已收其中一种状态！");
@@ -287,10 +283,6 @@ public class BillController {
 
                 if(WeightUnitEnum.getByValue(temp.getWeightUnit()) == null){
                     return Result.FAIL(assignFieldIllegalValueRange(tip+"重量单位"));
-                }
-
-                if(StringUtils.isBlank(temp.getSecurityDetectionInfo())){
-                    return Result.FAIL(assignFieldNotNull(tip+"安全检测信息"));
                 }
 
                 temp.setBillId(bill.getId());

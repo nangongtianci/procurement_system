@@ -49,7 +49,7 @@ public class GeneratorQRCode {
         File logoFile = new File(path+"shop.png");
         File QrCodeFile = new File(path+"logo_code.png");
         File QrCodeFile2 = new File(path+"code.png");
-        String url = "https://www.bequickers.com/static/img/";
+        String url = "https://www.bequickers.com/static/img?a=abc";
         drawLogoQRCode(logoFile, QrCodeFile, url, null, "png");
         drawLogoQRCode(null, QrCodeFile2, url, null, "png");
     }
