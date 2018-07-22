@@ -13,7 +13,7 @@ public class AppConstant {
      */
     public final static int TOKEN_EXP_TIME = 2592000;
     /**
-     * 短信校验码默认180秒
+     * 短信校验码默认90秒
      */
     public final static int CHECK_CODE_EXP_TIME = 90;
 

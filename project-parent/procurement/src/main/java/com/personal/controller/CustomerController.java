@@ -95,7 +95,7 @@ public class CustomerController {
      * @return
      */
     @PostMapping("logout")
-    public Result login(String token){
+    public Result logout(String token){
         TokenUtils.delToekn(UserTypeEnum.customer,token,redisService);
         return Result.OK().setData("退出成功！");
     }

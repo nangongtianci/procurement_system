@@ -21,10 +21,7 @@ import com.personal.entity.Bill;
 import com.personal.entity.Customer;
 import com.personal.entity.Goods;
 import com.personal.conditions.BillQueryParam;
-import com.personal.service.BillService;
-import com.personal.service.CustomerService;
-import com.personal.service.MailService;
-import com.personal.service.RedisService;
+import com.personal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +56,8 @@ public class BillController {
     private ReportConfig reportConfig;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private GoodsService goodsService;
 
     /**
      * 新增账单
@@ -185,13 +184,33 @@ public class BillController {
             return Result.FAIL("盘盈，盘损，无法生成对等账单！");
         }
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        if(StringUtils.isBlank(customerId)){
+            return Result.FAIL("请先登录！");
+        }
+
         Customer customer = customerService.selectById(exist.getCreateCustomerId());
-        exist.setCustomerName(customer.getName());
-        exist.setCustomerPhone(customer.getPhone());
-        exist.setCustomerIdCard(customer.getIdCard());
-        exist.setCustomerUnit(customer.getCompanyName());
-        exist.setMarketName(customer.getMarketName());
+        if(customer != null){
+            exist.setCustomerName(customer.getName());
+            exist.setCustomerPhone(customer.getPhone());
+            exist.setCustomerIdCard(customer.getIdCard());
+            exist.setCustomerUnit(customer.getCompanyName());
+            exist.setMarketName(customer.getMarketName());
+        }
+
+        List<Goods> goods = goodsService.selectList(new EntityWrapper<Goods>().where("bill_id={0}",exist.getId()));
         exist.setId(UUIDUtils.getUUID());
+        if(ListUtils.isEmpty(goods)){
+            return Result.FAIL("账单中不包含商品，生成失败！");
+        }else{
+            goods.forEach((item)->{
+                item.setId(UUIDUtils.getUUID());
+                item.setBillId(exist.getId());
+                item.setCreateTime(new Date());
+                item.setUpdateTime(new Date());
+            });
+            exist.setGoods(goods);
+        }
+
         exist.setCreateCustomerId(customerId);
         exist.setCreateTime(new Date());
         exist.setUpdateTime(new Date());
@@ -200,7 +219,7 @@ public class BillController {
         exist.setBillSnType(BillSnTypeEnum.scan.getValue());
         exist.setIsPeerBill(IsPeerBillEnum.yes.getValue());
         exist.setRemark("");
-        if(billService.insert(exist)){
+        if(billService.insertCascadeGoods(exist)){
             // 更新原始账单为对等账单
             Bill original = new Bill();
             original.setId(originalId);
