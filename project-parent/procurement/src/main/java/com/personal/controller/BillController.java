@@ -2,10 +2,10 @@ package com.personal.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.TokenUtils;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.annotation.PageQueryMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
+import com.personal.common.base.BaseController;
 import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
@@ -15,13 +15,18 @@ import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.file.ExcelUtils;
 import com.personal.common.utils.result.PaginationUtils;
 import com.personal.common.utils.result.Result;
+import com.personal.conditions.BillQueryParam;
+import com.personal.config.redis.RedisService;
 import com.personal.config.system.file.FileConfig;
 import com.personal.config.system.mail.ReportConfig;
+import com.personal.config.token.TokenUtils;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
 import com.personal.entity.Goods;
-import com.personal.conditions.BillQueryParam;
-import com.personal.service.*;
+import com.personal.service.BillService;
+import com.personal.service.CustomerService;
+import com.personal.service.GoodsService;
+import com.personal.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +48,7 @@ import static com.personal.common.utils.result.RegUtils.*;
  */
 @RestController
 @RequestMapping("/bill")
-public class BillController {
+public class BillController{
     @Autowired
     private BillService billService;
     @Autowired
@@ -510,6 +515,23 @@ public class BillController {
             return Result.FAIL(assignFieldIllegalValueRange("付款状态"));
         }
         return null;
+    }
+
+    /**
+     * 账单统计信息
+     * @param isReceivable
+     * @return
+     */
+    @PostMapping("statistics")
+    public Result selectStatisticsForBill(HttpServletRequest request,String isReceivable){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        //String customerId = "b6c27ed95024484a8c6aaa64b5620521";
+        Map<String,String> param = new HashMap<>();
+        param.put("createCustomerId",customerId);
+        if("true".equalsIgnoreCase(isReceivable)){ // 应收界面
+            param.put("isReceivable","true");
+        }
+        return Result.OK(billService.selectStatisticsForBill(param));
     }
 }
 

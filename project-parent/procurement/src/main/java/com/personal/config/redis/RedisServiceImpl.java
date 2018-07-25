@@ -1,6 +1,5 @@
-package com.personal.service.impl;
+package com.personal.config.redis;
 
-import com.personal.service.RedisService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

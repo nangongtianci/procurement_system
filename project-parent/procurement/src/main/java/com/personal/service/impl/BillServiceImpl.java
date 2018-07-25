@@ -7,6 +7,7 @@ import com.personal.common.utils.collections.Collections3;
 import com.personal.common.utils.collections.ListUtils;
 import com.personal.entity.Bill;
 import com.personal.entity.Goods;
+import com.personal.entity.vo.BillStatisticsVO;
 import com.personal.mapper.BillMapper;
 import com.personal.conditions.BillQueryParam;
 import com.personal.service.BillService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -117,5 +119,10 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             return false;
         }
         return false;
+    }
+
+    @Override
+    public List<BillStatisticsVO> selectStatisticsForBill(Map<String, String> param) {
+        return billMapper.selectStatisticsForBill(param);
     }
 }

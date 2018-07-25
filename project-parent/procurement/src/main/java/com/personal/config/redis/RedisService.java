@@ -1,4 +1,4 @@
-package com.personal.service;
+package com.personal.config.redis;
 
 import org.springframework.data.redis.core.ZSetOperations;
 

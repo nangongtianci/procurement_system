@@ -3,8 +3,10 @@ package com.personal.mapper;
 import com.personal.entity.Bill;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.personal.conditions.BillQueryParam;
+import com.personal.entity.vo.BillStatisticsVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -56,4 +58,11 @@ public interface BillMapper extends BaseMapper<Bill> {
      * @return
      */
     List<Bill> selectByParamNoCascadeGoods(BillQueryParam param);
+
+    /**
+     * 账单统计查询
+     * @param param
+     * @return
+     */
+    List<BillStatisticsVO> selectStatisticsForBill(Map<String,String> param);
 }

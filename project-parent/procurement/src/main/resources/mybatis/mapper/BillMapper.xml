@@ -40,6 +40,25 @@
         </collection>
     </resultMap>
 
+    <!--账单统计查询-->
+    <select id="selectStatisticsForBill" resultType="billStatisticsVO">
+        SELECT
+          DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,sum(actual_total_price) as atp
+        FROM t_bill
+        <where>
+            create_customer_id = #{createCustomerId}
+            <choose>
+                <when test="isReceivable != 'true'">
+                    AND (bill_status = 'receivable' or bill_status = 'payable')
+                </when>
+                <otherwise>
+                    AND bill_status = 'receivable'
+                </otherwise>
+            </choose>
+        </where>
+        GROUP BY time
+    </select>
+
     <!--根据主键查询，级联查询商品-->
     <select id="selectByIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
         SELECT

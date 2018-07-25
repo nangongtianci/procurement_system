@@ -3,8 +3,10 @@ package com.personal.service;
 import com.personal.entity.Bill;
 import com.baomidou.mybatisplus.service.IService;
 import com.personal.conditions.BillQueryParam;
+import com.personal.entity.vo.BillStatisticsVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -77,4 +79,11 @@ public interface BillService extends IService<Bill> {
      * @return
      */
     boolean deleteByIdAndPeerUpdate(String id);
+
+    /**
+     * 账单统计查询
+     * @param param
+     * @return
+     */
+    List<BillStatisticsVO> selectStatisticsForBill(Map<String,String> param);
 }

@@ -2,7 +2,6 @@ package com.personal.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.TokenUtils;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.enume.IsAgreeProtocolEnum;
 import com.personal.common.enume.LoginStatusEnum;
@@ -15,10 +14,11 @@ import com.personal.common.utils.constants.AppConstant;
 import com.personal.common.utils.encode.MD5Util;
 import com.personal.common.utils.file.FileUploadUtils;
 import com.personal.common.utils.result.Result;
+import com.personal.config.redis.RedisService;
 import com.personal.config.system.file.FileConfig;
+import com.personal.config.token.TokenUtils;
 import com.personal.entity.Customer;
 import com.personal.service.CustomerService;
-import com.personal.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,7 +83,7 @@ public class CustomerController {
         if(customerService.updateById(rt)){
             Map<String,String> map = new HashMap<>();
             map.put("customerId",rt.getId());
-            map.put("token",TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
+            map.put("token", TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
             return Result.OK().setData(map);
         }
         return Result.FAIL("登录失败！");

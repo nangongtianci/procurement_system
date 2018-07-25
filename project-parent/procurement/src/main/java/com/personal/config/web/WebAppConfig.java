@@ -1,7 +1,7 @@
 package com.personal.config.web;
 
 import com.personal.config.interceptor.CustomerTokenSurvivalTimeInterceptor;
-import com.personal.service.RedisService;
+import com.personal.config.redis.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
