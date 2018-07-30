@@ -45,6 +45,25 @@ public class TokenUtils {
     }
 
     /**
+     * 重置token过期时间
+     * @param userTypeEnum
+     * @param token
+     * @param redisService
+     * @return
+     */
+    public static boolean resetTokenExpire(UserTypeEnum userTypeEnum,String token,RedisService redisService){
+        String userId = getUid(userTypeEnum,token,redisService);
+        if(StringUtils.isBlank(userId)){
+            return false;
+        }
+        redisService.set(getPre(userTypeEnum).concat(token),userId,AppConstant.TOKEN_EXP_TIME);
+        // 配置此与用户唯一有效token
+        redisService.set(AppConstant.TOEKN_RPEPIX
+                + MD5Util.getStringMD5(userId+AppConstant.TOEKN_SALT),token,AppConstant.TOKEN_EXP_TIME);
+        return true;
+    }
+
+    /**
      * 获取前缀
      * @param userTypeEnum
      * @return

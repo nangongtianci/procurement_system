@@ -37,7 +37,8 @@ public class CustomerTokenSurvivalTimeInterceptor extends HandlerInterceptorAdap
                              HttpServletResponse response, Object handler) throws Exception
     {
         if(StringUtils.isBlank(request.getHeader("token"))
-                || !TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
+                || !TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)
+                || !TokenUtils.resetTokenExpire(UserTypeEnum.customer,request.getHeader("token"),redisService)){
             response.setContentType("application/json; charset=utf-8");
             PrintWriter writer = response.getWriter();
             writer.print(JSONObject.toJSONString(Result.FAIL(BizExceptionEnum.REQUEST_EXP),
@@ -46,9 +47,6 @@ public class CustomerTokenSurvivalTimeInterceptor extends HandlerInterceptorAdap
             response.flushBuffer();
             return false;
         }
-
-        // 重置过期时间
-        redisService.expire(request.getHeader("token"), AppConstant.TOKEN_EXP_TIME);
         return true;
     }
 }

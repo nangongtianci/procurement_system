@@ -167,6 +167,10 @@ public class BillController{
         if(exist == null){
             return Result.FAIL("原始账单不存在，无法生成对等账单！");
         }
+
+        if(IsPeerBillEnum.yes.getValue().equalsIgnoreCase(exist.getIsPeerBill())){
+            return Result.FAIL("无法重复扫描生成对等账单！");
+        }
         String originalId = exist.getId();
 
         // 组件对等账单
