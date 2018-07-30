@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.annotation.PageQueryMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
-import com.personal.common.base.BaseController;
 import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;

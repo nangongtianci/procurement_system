@@ -16,6 +16,8 @@ public class BillStatisticsVO{
     private String tp;
     // 实收总价格（以time为间隔单位）
     private String atp;
+    // 账单状态
+    private String businessStatus;
 
     public String getTime() {
         return time;
@@ -47,5 +49,13 @@ public class BillStatisticsVO{
 
     public void setAtp(String atp) {
         this.atp = atp;
+    }
+
+    public String getBusinessStatus() {
+        return businessStatus;
+    }
+
+    public void setBusinessStatus(String businessStatus) {
+        this.businessStatus = businessStatus;
     }
 }
