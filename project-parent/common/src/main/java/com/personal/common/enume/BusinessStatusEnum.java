@@ -13,6 +13,7 @@ public enum BusinessStatusEnum {
     out("out", "卖出"),
     profit("profit", "盘盈"),
     loss("loss", "盘损"),
+    other("other", "其他"),
     ;
 
     /**

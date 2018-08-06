@@ -118,7 +118,7 @@ public class BillController{
             }
         }else{
             if(StringUtils.isNotBlank(bill.getBillStatus())){
-                return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
+                return Result.FAIL("交易类型为盘盈，盘损，其他费用时，账单状态不必传值！");
             }
             bill.setBillStatus(null);
         }
@@ -189,11 +189,18 @@ public class BillController{
                 exist.setBillStatus(BillStatusEnum.received.getValue());
             }
         }else{
-            return Result.FAIL("盘盈，盘损，无法生成对等账单！");
+            return Result.FAIL("盘盈，盘损，其他费用无法生成对等账单！");
         }
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         if(StringUtils.isBlank(customerId)){
             return Result.FAIL("请先登录！");
+        }
+
+        EntityWrapper<Bill> oneselfew = new EntityWrapper();
+        oneselfew.where("create_customer_id={0} and sn={1}",customerId,sn);
+        Bill oneself = billService.selectOne(oneselfew);
+        if(oneself == null){
+            return Result.FAIL("无法扫描生成自己的账单！");
         }
 
         Customer customer = customerService.selectById(exist.getCreateCustomerId());
@@ -275,7 +282,7 @@ public class BillController{
                         }
                     }else{
                         if(StringUtils.isNotBlank(bill.getBillStatus())){
-                            return Result.FAIL("交易类型为盘盈或盘损时，账单状态不必传值！");
+                            return Result.FAIL("交易类型为盘盈,盘损,其他费用时，账单状态不必传值！");
                         }
                         bill.setBillStatus(null);
                     }
