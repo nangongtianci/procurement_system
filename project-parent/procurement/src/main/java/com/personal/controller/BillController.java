@@ -197,7 +197,7 @@ public class BillController{
         }
 
         EntityWrapper<Bill> oneselfew = new EntityWrapper();
-        oneselfew.where("create_customer_id={0} and sn={1}",customerId,sn);
+        oneselfew.where("create_customer_id={0} and bill_sn={1}",customerId,sn);
         Bill oneself = billService.selectOne(oneselfew);
         if(oneself == null){
             return Result.FAIL("无法扫描生成自己的账单！");
