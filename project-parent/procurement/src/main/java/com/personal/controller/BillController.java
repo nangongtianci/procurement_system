@@ -397,10 +397,9 @@ public class BillController{
      * @return
      */
     @PostMapping("goods/list")
-    public Result selectListByCondition(BillQueryParam param){
-        if(param == null || !matchesIds(param.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
+    public Result selectListByCondition(HttpServletRequest request,BillQueryParam param){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        param.setCreateCustomerId(customerId);
         return Result.OK(billService.selectByParam(param));
     }
 
