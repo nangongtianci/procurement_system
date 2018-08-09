@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -295,15 +296,12 @@ public class CustomerController {
 
     /**
      * 根据主键查询
-     * @param id
      * @return
      */
-    @GetMapping("/{id}")
-    public Result selectById(@PathVariable String id){
-        if(!matchesIds(id)){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-        return Result.OK(customerService.selectById(id));
+    @GetMapping
+    public Result selectById(HttpServletRequest request){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        return Result.OK(customerService.selectById(customerId));
     }
 }
 
