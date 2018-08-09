@@ -448,7 +448,9 @@ public class BillController{
      * @return
      */
     @PostMapping("/send/mail")
-    public Result sendMail(BillQueryParam param) throws Exception {
+    public Result sendMail(HttpServletRequest request,BillQueryParam param) throws Exception {
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        param.setCreateCustomerId(customerId);
         Result result = multiQueryValidate(param);
         if(result != null){
             return result;
@@ -505,10 +507,6 @@ public class BillController{
      * @return
      */
     private Result multiQueryValidate(BillQueryParam billQueryParam){
-        if(!matchesIds(billQueryParam.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-
         if(!((billQueryParam.getStartDate() != null && billQueryParam.getEndDate() != null)
                 || (billQueryParam.getStartDate() == null && billQueryParam.getEndDate() == null))){
             return Result.FAIL("如果日期作为筛选条件，开始日期和结束日期都不能为空！");
