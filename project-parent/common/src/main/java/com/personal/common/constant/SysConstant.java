@@ -10,7 +10,7 @@ public class SysConstant {
     /**
      * 默认每页显示条数
      */
-    public final static Integer PAGE_SIZE_DEFAULT = 5;
+    public final static Integer PAGE_SIZE_DEFAULT = 10;
     /**
      * 分页，默认当前页码
      */
