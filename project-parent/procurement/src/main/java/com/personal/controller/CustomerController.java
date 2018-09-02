@@ -67,7 +67,7 @@ public class CustomerController {
         }
 
         EntityWrapper<Customer> ew = new EntityWrapper();
-        ew.setSqlSelect("id","password","secret_key as secretKey");
+        ew.setSqlSelect("id","password","name","secret_key as secretKey");
         ew.where("phone={0}",customer.getPhone());
         Customer rt = customerService.selectOne(ew);
         if(rt == null || StringUtils.isBlank(rt.getPassword())
