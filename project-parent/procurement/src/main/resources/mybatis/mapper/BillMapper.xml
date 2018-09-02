@@ -182,7 +182,7 @@
                 AND g.name=#{goodsName}
             </if>
         </where>
-        ORDER BY lmb.create_time DESC,lmb.update_time DESC
+        ORDER BY lmb.create_time DESC
     </select>
 
 
