@@ -85,6 +85,7 @@ public class CustomerController {
             Map<String,String> map = new HashMap<>();
             map.put("customerId",rt.getId());
             map.put("token", TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
+            map.put("customerName",rt.getName());
             return Result.OK().setData(map);
         }
         return Result.FAIL("登录失败！");

@@ -235,10 +235,16 @@ public class BillController{
         exist.setIsPeerBill(IsPeerBillEnum.yes.getValue());
         exist.setRemark("");
         if(billService.insertCascadeGoods(exist)){
+            Customer curCustomer = customerService.selectById(customerId);
             // 更新原始账单为对等账单
             Bill original = new Bill();
             original.setId(originalId);
             original.setIsPeerBill(IsPeerBillEnum.yes.getValue());
+            original.setCustomerName(curCustomer.getName());
+            original.setCustomerPhone(curCustomer.getPhone());
+            original.setCustomerIdCard(curCustomer.getIdCard());
+            original.setCustomerUnit(curCustomer.getCompanyName());
+            original.setMarketName(curCustomer.getMarketName());
             if(billService.updateById(original)){
                 return Result.OK();
             }
