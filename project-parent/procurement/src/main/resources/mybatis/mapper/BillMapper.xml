@@ -176,13 +176,13 @@
                 AND b.create_time BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
-        ORDER BY b.create_time DESC
         LIMIT #{pageSize} offset #{offSet}) lmb left join t_goods g ON lmb.id = g.bill_id
         <where>
             <if test="goodsName != null and goodsName != ''">
                 AND g.name=#{goodsName}
             </if>
         </where>
+        ORDER BY lmb.create_time DESC,lmb.id DESC
     </select>
 
 
