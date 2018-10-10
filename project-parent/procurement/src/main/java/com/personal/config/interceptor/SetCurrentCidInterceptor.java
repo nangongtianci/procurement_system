@@ -1,6 +1,8 @@
 package com.personal.config.interceptor;
 
+import com.personal.common.enume.UserTypeEnum;
 import com.personal.config.redis.RedisService;
+import com.personal.config.token.TokenUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ public class SetCurrentCidInterceptor extends HandlerInterceptorAdapter
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response, Object handler) throws Exception
     {
-        //TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         return true;
     }
 }

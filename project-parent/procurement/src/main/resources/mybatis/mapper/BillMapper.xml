@@ -84,11 +84,6 @@
         </choose>
     </select>
 
-    <!--
-
-
-    -->
-
     <!--根据主键查询，级联查询商品-->
     <select id="selectByIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
         SELECT

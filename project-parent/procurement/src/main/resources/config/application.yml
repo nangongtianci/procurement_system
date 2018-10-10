@@ -2,7 +2,7 @@ server:
   port: 8443
   ssl:
     key-store: classpath:certificate/keystore.jks
-    key-store-password: 47376543931
+    key-store-password: 50167515853
 
 logging:
   config: classpath:log/logback-spring.xml
