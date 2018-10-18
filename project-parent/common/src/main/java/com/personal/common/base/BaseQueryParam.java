@@ -1,7 +1,7 @@
 package com.personal.common.base;
 
 import com.personal.common.base.marking.POJOSerializable;
-import com.personal.common.base.page.AbstractPageQueryParam;
+import com.personal.common.base.page.BasePageQueryParam;
 
 /**
  * 多条件查询基类
@@ -10,7 +10,7 @@ import com.personal.common.base.page.AbstractPageQueryParam;
  * @param
  * @return
  */
-public class BaseQueryParam extends AbstractPageQueryParam implements POJOSerializable{
+public class BaseQueryParam extends BasePageQueryParam implements POJOSerializable{
     private static final long serialVersionUID = 1L;
     private String id;
 

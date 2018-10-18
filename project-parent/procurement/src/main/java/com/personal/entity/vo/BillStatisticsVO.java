@@ -1,5 +1,7 @@
 package com.personal.entity.vo;
 
+import com.personal.common.base.BaseVO;
+
 /**
  * 账单统计试图对象
  * @author ylw
@@ -7,7 +9,7 @@ package com.personal.entity.vo;
  * @param
  * @return
  */
-public class BillStatisticsVO{
+public class BillStatisticsVO extends BaseVO{
     // 间隔时间
     private String time;
     // 总条数（以time为间隔单位）

@@ -2,14 +2,16 @@ package com.personal.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.personal.common.base.page.PageQueryParam;
 import com.personal.common.enume.IsPeerBillEnum;
 import com.personal.common.utils.collections.Collections3;
 import com.personal.common.utils.collections.ListUtils;
+import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.personal.entity.Goods;
+import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.entity.vo.BillStatisticsVO;
 import com.personal.mapper.BillMapper;
-import com.personal.conditions.BillQueryParam;
 import com.personal.service.BillService;
 import com.personal.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +80,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Override
     public List<Bill> selectPageByParam(BillQueryParam param) {
         return billMapper.selectPageByParam(param);
+    }
+
+    @Override
+    public List<BillGoodsForIndexPageVO> selectByParamForIndexPage(PageQueryParam param) {
+        return billMapper.selectByParamForIndexPage(param);
     }
 
     @Override

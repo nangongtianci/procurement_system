@@ -67,7 +67,7 @@ public class CustomerController {
         }
 
         EntityWrapper<Customer> ew = new EntityWrapper();
-        ew.setSqlSelect("id","password","name","secret_key as secretKey");
+        ew.setSqlSelect("id","password","name","secret_key as secretKey","phone");
         ew.where("phone={0}",customer.getPhone());
         Customer rt = customerService.selectOne(ew);
         if(rt == null || StringUtils.isBlank(rt.getPassword())
@@ -86,6 +86,7 @@ public class CustomerController {
             map.put("customerId",rt.getId());
             map.put("token", TokenUtils.setToken(UserTypeEnum.customer,rt.getId(),redisService));
             map.put("customerName",rt.getName());
+            map.put("customerPhone",rt.getPhone());
             return Result.OK().setData(map);
         }
         return Result.FAIL("登录失败！");

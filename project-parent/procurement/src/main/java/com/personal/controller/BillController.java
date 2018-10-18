@@ -22,6 +22,7 @@ import com.personal.config.token.TokenUtils;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
 import com.personal.entity.Goods;
+import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.service.BillService;
 import com.personal.service.CustomerService;
 import com.personal.service.GoodsService;
@@ -378,6 +379,26 @@ public class BillController{
     }
 
     /**
+     * 账单分页查询（首页）-（级联商品名称分页）
+     * @param param
+     * @return
+     */
+    @PageQueryMethodFlag
+    @PostMapping("goods/page/index")
+    public Result selectPageForIndex(BillQueryParam param){
+        if(param == null || !matchesIds(param.getCreateCustomerId())){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
+        }
+
+        int count = billService.selectCountByCondition(param);
+        if (count == 0) {
+            return Result.EMPTY();
+        }
+        List<BillGoodsForIndexPageVO> content = billService.selectByParamForIndexPage(param);
+        return PaginationUtils.getResultObj(content,count,param.getPageNow(),param.getPageSize());
+    }
+
+    /**
      * 账单分页查询（多条件）-（不级联商品分页）
      * @param param
      * @return
@@ -406,7 +427,18 @@ public class BillController{
     public Result selectListByCondition(HttpServletRequest request,BillQueryParam param){
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         param.setCreateCustomerId(customerId);
-        return Result.OK(billService.selectByParam(param));
+        List<Bill> billList = billService.selectByParam(param);
+        BigDecimal statisticsAtp = new BigDecimal(0);
+        if(!ListUtils.isEmpty(billList)){
+            for(Bill bill : billList){
+                statisticsAtp = statisticsAtp.add(bill.getActualTotalPrice());
+            }
+        }
+
+        HashMap<String,Object> rt = new HashMap<>();
+        rt.put("statisticsAtp",statisticsAtp.toString());
+        rt.put("data",billList);
+        return Result.OK(rt);
     }
 
     /**

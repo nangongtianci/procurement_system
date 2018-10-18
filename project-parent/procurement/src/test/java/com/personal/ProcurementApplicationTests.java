@@ -24,25 +24,25 @@ public class ProcurementApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		MimeMessage message = sender.createMimeMessage();
+	//	MimeMessage message = sender.createMimeMessage();
 
-		try {
+	//	try {
 			// true表示需要创建一个multipart message
-			MimeMessageHelper helper = new MimeMessageHelper(message, true);
-			helper.setFrom("3393024626@qq.com");
-			helper.setTo("675886926@qq.com");
-			helper.setSubject("liwentest");
-			helper.setText("hello nihao , i am ylw!", true);
+			//MimeMessageHelper helper = new MimeMessageHelper(message, true);
+			//helper.setFrom("3393024626@qq.com");
+			//helper.setTo("675886926@qq.com");
+			//helper.setSubject("liwentest");
+			//helper.setText("hello nihao , i am ylw!", true);
 
 //			FileSystemResource file = new FileSystemResource(new File(filePath));
 //			String fileName = filePath.substring(filePath.lastIndexOf(File.separator));
 //			helper.addAttachment(fileName, file);
 
-			sender.send(message);
-			logger.info("带附件的邮件已经发送。");
-		} catch (MessagingException e) {
-			logger.error("发送带附件的邮件时发生异常！", e);
-		}
+			//sender.send(message);
+			//logger.info("带附件的邮件已经发送。");
+		//} catch (MessagingException e) {
+	//		logger.error("发送带附件的邮件时发生异常！", e);
+	//	}
 	}
 
 }

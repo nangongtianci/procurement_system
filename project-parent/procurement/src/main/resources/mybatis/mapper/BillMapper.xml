@@ -181,6 +181,20 @@
     </select>
 
 
+    <!--账单首页分页查询（级联商品名称，创建时间降序排序）-->
+    <select id="selectByParamForIndexPage" resultType="billGoodsForIndexPageVO">
+        SELECT
+          b.id,b.bill_date AS billDate,b.customer_name AS customerName,
+          b.customer_phone AS customerPhone,total_price AS totalPrice,
+          b.actual_total_price AS actualTotalPrice,b.business_status AS businessStatus,
+          bill_status AS billStatus,b.create_time AS createTime,b.update_time AS updateTime,
+          (SELECT GROUP_CONCAT(g.name) FROM t_goods g WHERE g.bill_id = b.id) goodsNames
+        FROM t_bill b
+        ORDER BY b.create_time DESC
+        LIMIT #{pageSize} offset #{offSet}
+    </select>
+
+
     <!--账单多条件查询-->
     <select id="selectPageByParamNoCascadeGoods" resultMap="BaseResultMap">
         SELECT b.*

@@ -1,8 +1,10 @@
 package com.personal.service;
 
-import com.personal.entity.Bill;
 import com.baomidou.mybatisplus.service.IService;
+import com.personal.common.base.page.PageQueryParam;
 import com.personal.conditions.BillQueryParam;
+import com.personal.entity.Bill;
+import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.entity.vo.BillStatisticsVO;
 
 import java.util.List;
@@ -86,4 +88,13 @@ public interface BillService extends IService<Bill> {
      * @return
      */
     List<BillStatisticsVO> selectStatisticsForBill(Map<String,String> param);
+
+
+    /**------------------改造过的，单一页面使用接口-----------------------**/
+    /**
+     * 账单首页分页查询（级联商品名称，创建时间降序排序）
+     * @param param
+     * @return
+     */
+    List<BillGoodsForIndexPageVO> selectByParamForIndexPage(PageQueryParam param);
 }

@@ -10,7 +10,7 @@ import com.personal.common.constant.SysConstant;
   * @date: 2017/3/20
   * @Version: V1.0
   */
-public class AbstractPageQueryParam implements PageQueryParam {
+public abstract class AbstractPageQueryParam implements PageQueryParam {
     /**
      * @desc 每页多少条
      */
