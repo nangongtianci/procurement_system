@@ -190,6 +190,7 @@
           bill_status AS billStatus,b.create_time AS createTime,b.update_time AS updateTime,
           (SELECT GROUP_CONCAT(g.name) FROM t_goods g WHERE g.bill_id = b.id) goodsNames
         FROM t_bill b
+        WHERE b.create_customer_id=#{createCustomerId}
         ORDER BY b.create_time DESC
         LIMIT #{pageSize} offset #{offSet}
     </select>
