@@ -477,12 +477,12 @@ public class BillController{
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
-        //String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        //Customer customer = customerService.selectById(customerId);
-        //Map<String,Object> rt = new HashMap<>();
-        //rt.put("companyName",customer.getCompanyName());
-        //rt.put("data",billService.selectByIdCascadeGoods(id));
-        return Result.OK(billService.selectByIdCascadeGoods(id));
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        Customer customer = customerService.selectById(customerId);
+        Map<String,Object> rt = new HashMap<>();
+        rt.put("companyName",customer.getCompanyName());
+        rt.put("data",billService.selectByIdCascadeGoods(id));
+        return Result.OK(rt);
     }
 
     /**
