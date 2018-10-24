@@ -66,7 +66,7 @@ public interface BillMapper extends BaseMapper<Bill> {
      * @param param
      * @return
      */
-    List<BillStatisticsVO> selectStatisticsForBill(Map<String,String> param);
+    List<BillStatisticsVO> selectStatisticsForBill(Map<String,Object> param);
 
 
 

@@ -87,7 +87,7 @@ public interface BillService extends IService<Bill> {
      * @param param
      * @return
      */
-    List<BillStatisticsVO> selectStatisticsForBill(Map<String,String> param);
+    List<BillStatisticsVO> selectStatisticsForBill(Map<String,Object> param);
 
 
     /**------------------改造过的，单一页面使用接口-----------------------**/

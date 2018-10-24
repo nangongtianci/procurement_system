@@ -66,20 +66,38 @@
                 DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
                 sum(actual_total_price) as atp,business_status as businessStatus
                 FROM t_bill
-                WHERE create_customer_id = #{createCustomerId} AND business_status = 'in' GROUP BY time
+                <where>
+                    create_customer_id = #{createCustomerId} AND business_status = 'in'
+                    <if test="startDate != null and endDate != null">
+                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                    </if>
+                </where>
+                GROUP BY time
                 UNION
                 SELECT
                 DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
                 sum(actual_total_price) as atp,business_status as businessStatus
                 FROM t_bill
-                WHERE create_customer_id = #{createCustomerId} AND business_status = 'out' GROUP BY time
+                <where>
+                    create_customer_id = #{createCustomerId} AND business_status = 'out'
+                    <if test="startDate != null and endDate != null">
+                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                    </if>
+                </where>
+                GROUP BY time
             </when>
             <otherwise>
                 SELECT
                 DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
                 sum(actual_total_price) as atp
                 FROM t_bill
-                WHERE create_customer_id = #{createCustomerId} AND bill_status = 'receivable' GROUP BY time
+                <where>
+                    create_customer_id = #{createCustomerId} AND bill_status = 'receivable'
+                    <if test="startDate != null and endDate != null">
+                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                    </if>
+                </where>
+                GROUP BY time
             </otherwise>
         </choose>
     </select>

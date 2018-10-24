@@ -129,7 +129,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
-    public List<BillStatisticsVO> selectStatisticsForBill(Map<String, String> param) {
+    public List<BillStatisticsVO> selectStatisticsForBill(Map<String, Object> param) {
         return billMapper.selectStatisticsForBill(param);
     }
 }

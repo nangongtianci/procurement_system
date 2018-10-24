@@ -573,14 +573,19 @@ public class BillController{
      * @return
      */
     @PostMapping("statistics")
-    public Result selectStatisticsForBill(HttpServletRequest request,String isReceivable){
+    public Result selectStatisticsForBill(HttpServletRequest request,
+                                          String isReceivable,
+                                          Date startDate,
+                                          Date endDate){
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         //String customerId = "b6c27ed95024484a8c6aaa64b5620521";
-        Map<String,String> param = new HashMap<>();
+        Map<String,Object> param = new HashMap<>();
         param.put("createCustomerId",customerId);
         if("true".equalsIgnoreCase(isReceivable)){ // 应收界面
             param.put("isReceivable","true");
         }
+        param.put("startDate",startDate);
+        param.put("endDate",endDate);
         return Result.OK(billService.selectStatisticsForBill(param));
     }
 }
