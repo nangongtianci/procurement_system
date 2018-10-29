@@ -128,5 +128,17 @@ public class CodeManageController extends BaseController{
         ew.orderAsc(order);
         return Result.OK(codeManageService.selectList(ew));
     }
+
+    @GetMapping("key/map")
+    public Result keyMap(HttpServletRequest request){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        EntityWrapper<CodeManage> ew = new EntityWrapper<>();
+        ew.setSqlSelect("code","name");
+        ew.where("create_customer_id={0}",customerId);
+        List<String> order = new ArrayList();
+        order.add("create_time");
+        ew.orderAsc(order);
+        return Result.OK(codeManageService.selectList(ew));
+    }
 }
 
