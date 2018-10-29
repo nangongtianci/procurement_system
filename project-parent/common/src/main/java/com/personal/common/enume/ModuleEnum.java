@@ -12,6 +12,7 @@ public enum ModuleEnum {
     goods("goods","商品"),
     customer("customer","用户主键"),
     applyLoanRecord("applyLoanRecord","贷款记录"),
+    codeManage("codeManage","产品管理"),
     ;
 
 
