@@ -122,7 +122,7 @@ public class CodeManageController extends BaseController{
     public Result selectPageForIndex(HttpServletRequest request){
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         EntityWrapper<CodeManage> ew = new EntityWrapper<>();
-        ew.where("create_customer_id",customerId);
+        ew.where("create_customer_id={0}",customerId);
         List<String> order = new ArrayList();
         order.add("create_time");
         ew.orderAsc(order);
