@@ -75,6 +75,7 @@ public class CodeManageController extends BaseController{
 
         EntityWrapper<CodeManage> ew = new EntityWrapper<>();
         ew.setSqlSelect("max(code) as maxCode");
+        ew.where("create_customer_id={0}",customerId);
         int code = 1;
         Object obj = codeManageService.selectObj(ew);
         if(obj != null && obj instanceof Integer){

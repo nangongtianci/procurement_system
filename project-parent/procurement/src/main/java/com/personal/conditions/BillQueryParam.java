@@ -2,7 +2,6 @@ package com.personal.conditions;
 
 import com.personal.common.base.BaseQueryParam;
 import com.personal.common.base.marking.POJOSerializable;
-import com.personal.common.base.page.AbstractPageQueryParam;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
