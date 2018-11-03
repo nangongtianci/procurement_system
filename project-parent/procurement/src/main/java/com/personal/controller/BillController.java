@@ -89,7 +89,7 @@ public class BillController{
                     return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
                 }
 
-                if(!matchesPositiveInteger(temp.getNumber().toString(), 0)){
+                if(temp.getNumber() <= 0){
                     return Result.FAIL(tip+assignFieldNameForInteger("商品数量",0));
                 }
 
@@ -318,7 +318,7 @@ public class BillController{
                     return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
                 }
 
-                if(!matchesPositiveInteger(temp.getNumber().toString(), 0)){
+                if(temp.getNumber() <= 0){
                     return Result.FAIL(tip+assignFieldNameForInteger("商品数量",0));
                 }
 

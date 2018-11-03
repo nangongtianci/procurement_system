@@ -32,7 +32,7 @@ public class Goods extends BaseEntity {
     /**
      * 商品数量
      */
-    private Integer number;
+    private float number;
     /**
      * 商品单位（吨，公斤，箱）
      */
@@ -54,6 +54,14 @@ public class Goods extends BaseEntity {
     @TableField("create_customer_id")
     private String createCustomerId;
 
+
+    public float getNumber() {
+        return number;
+    }
+
+    public void setNumber(float number) {
+        this.number = number;
+    }
 
     public String getName() {
         return name;
@@ -101,14 +109,6 @@ public class Goods extends BaseEntity {
 
     public void setCreateCustomerId(String createCustomerId) {
         this.createCustomerId = createCustomerId;
-    }
-
-    public Integer getNumber() {
-        return number;
-    }
-
-    public void setNumber(Integer number) {
-        this.number = number;
     }
 
     @Override
