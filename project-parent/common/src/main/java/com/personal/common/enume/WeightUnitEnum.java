@@ -11,7 +11,9 @@ public enum WeightUnitEnum {
 
     ton("ton", "吨"),
     kilo("kilo", "公斤"),
-    box("box", "箱")
+    box("box", "箱"),
+    sheet("sheet", "单"),
+    catty("catty", "斤"),
     ;
 
     /**
