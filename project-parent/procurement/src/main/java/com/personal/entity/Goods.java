@@ -1,11 +1,11 @@
 package com.personal.entity;
 
-import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.personal.common.base.BaseEntity;
+
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -34,6 +34,11 @@ public class Goods extends BaseEntity {
      */
     private float number;
     /**
+     * 单个商品总价
+     */
+    @TableField("total_price")
+    private BigDecimal totalPrice;
+    /**
      * 商品单位（吨，公斤，箱）
      */
     @TableField("weight_unit")
@@ -53,6 +58,15 @@ public class Goods extends BaseEntity {
      */
     @TableField("create_customer_id")
     private String createCustomerId;
+    /**
+     * 商品管理图片
+     */
+    @TableField("code_img_path")
+    private String codeImgPath;
+    /**
+     * 代码管理主键
+     */
+    private String cmid;
 
 
     public float getNumber() {
@@ -111,6 +125,30 @@ public class Goods extends BaseEntity {
         this.createCustomerId = createCustomerId;
     }
 
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public String getCodeImgPath() {
+        return codeImgPath;
+    }
+
+    public void setCodeImgPath(String codeImgPath) {
+        this.codeImgPath = codeImgPath;
+    }
+
+    public String getCmid() {
+        return cmid;
+    }
+
+    public void setCmid(String cmid) {
+        this.cmid = cmid;
+    }
+
     @Override
     public String toString() {
         return "Goods{" +
@@ -118,10 +156,13 @@ public class Goods extends BaseEntity {
         ", name=" + name +
         ", price=" + price +
         ", number=" + number +
+        ", totalPrice" + totalPrice +
         ", weightUnit=" + weightUnit +
         ", securityDetectionInfo=" + securityDetectionInfo +
         ", billId=" + billId +
         ", createCustomerId=" + createCustomerId +
+        ", codeImgPath=" + codeImgPath+
+        ", cmid=" + cmid +
         ", createTime=" + super.getCreateTime() +
         ", updateTime=" + super.getUpdateTime() +
         "}";

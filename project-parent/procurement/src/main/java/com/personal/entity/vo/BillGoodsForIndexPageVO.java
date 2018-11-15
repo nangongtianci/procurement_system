@@ -105,6 +105,39 @@ public class BillGoodsForIndexPageVO extends BaseVO{
      * 商品名称（逗号相链接）
      */
     private String goodsNames;
+    /**
+     * 商品数量（逗号相链接）
+     */
+    private String goodsNumbers;
+    /**
+     * 单位（逗号相链接）
+     */
+    private String goodsWeightUnits;
+    /**
+     * 商品图片路径
+     */
+    private String codeImgPath;
+
+    /**
+     * 主体，共享
+     */
+    private String masterShare;
+
+    public String getGoodsNumbers() {
+        return goodsNumbers;
+    }
+
+    public void setGoodsNumbers(String goodsNumbers) {
+        this.goodsNumbers = goodsNumbers;
+    }
+
+    public String getGoodsWeightUnits() {
+        return goodsWeightUnits;
+    }
+
+    public void setGoodsWeightUnits(String goodsWeightUnits) {
+        this.goodsWeightUnits = goodsWeightUnits;
+    }
 
     public String getCustomerName() {
         return customerName;
@@ -280,5 +313,21 @@ public class BillGoodsForIndexPageVO extends BaseVO{
 
     public void setGoodsNames(String goodsNames) {
         this.goodsNames = goodsNames;
+    }
+
+    public String getMasterShare() {
+        return masterShare;
+    }
+
+    public void setMasterShare(String masterShare) {
+        this.masterShare = masterShare;
+    }
+
+    public String getCodeImgPath() {
+        return codeImgPath;
+    }
+
+    public void setCodeImgPath(String codeImgPath) {
+        this.codeImgPath = codeImgPath;
     }
 }

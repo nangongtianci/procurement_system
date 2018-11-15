@@ -16,5 +16,4 @@
     <result column="create_customer_id" property="createCustomerId" />
     <result column="status" property="status" />
     </resultMap>
-
 </mapper>

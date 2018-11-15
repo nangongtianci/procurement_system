@@ -116,7 +116,7 @@ public class CodeManageController extends BaseController{
             return Result.FAIL(assignFieldSection(codeManage.getProductPlace(),
                     ConditionEnum.countDefaultValue,12));
         }
-        return Result.OK(codeManageService.updateById(codeManage));
+        return Result.OK(codeManageService.updateCasCadeGoods(codeManage));
     }
 
     @GetMapping("list")

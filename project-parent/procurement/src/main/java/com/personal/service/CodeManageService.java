@@ -1,5 +1,6 @@
 package com.personal.service;
 
+import com.personal.common.utils.result.Result;
 import com.personal.entity.CodeManage;
 import com.baomidou.mybatisplus.service.IService;
 
@@ -13,4 +14,10 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface CodeManageService extends IService<CodeManage> {
 
+    /**
+     * 更新代码管理级联更新商品
+     * @param codeManage
+     * @return
+     */
+    Result updateCasCadeGoods(CodeManage codeManage);
 }

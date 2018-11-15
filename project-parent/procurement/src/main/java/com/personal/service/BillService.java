@@ -41,25 +41,20 @@ public interface BillService extends IService<Bill> {
     Bill selectByIdCascadeGoods(String id);
 
     /**
+     * 查询子账单列表，级联商品
+     * @author ylw
+     * @date 18-11-11 上午11:33
+     * @param pid
+     * @return java.util.List<com.personal.entity.Bill>
+     */
+    List<Bill> selectSubBillByPidCascadeGoods(String pid);
+
+    /**
      * 分页查询个数
      * @param param
      * @return
      */
     int selectCountByCondition(BillQueryParam param);
-
-    /**
-     * 账单多条件查询
-     * @param param
-     * @return
-     */
-    List<Bill> selectPageByParam(BillQueryParam param);
-
-    /**
-     * 账单多条件查询（不级联商品）
-     * @param param
-     * @return
-     */
-    List<Bill> selectPageByParamNoCascadeGoods(BillQueryParam param);
 
     /**
      * 账单多条件查询(无分页信息)
@@ -69,18 +64,11 @@ public interface BillService extends IService<Bill> {
     List<Bill> selectByParam(BillQueryParam param);
 
     /**
-     * 账单多条件查询(无分页信息)-（不级联查询商品）
-     * @param param
-     * @return
-     */
-    List<Bill> selectByParamNoCascadeGoods(BillQueryParam param);
-
-    /**
      * 删除账单，并更新对等账单
      * @param id
      * @return
      */
-    boolean deleteByIdAndPeerUpdate(String id);
+    boolean deleteByIdAndPeerUpdate(String cid,String id);
 
     /**
      * 账单统计查询
@@ -97,4 +85,12 @@ public interface BillService extends IService<Bill> {
      * @return
      */
     List<BillGoodsForIndexPageVO> selectByParamForIndexPage(PageQueryParam param);
+
+    /**
+     * 分享账单
+     * @param customerId
+     * @param bill
+     * @return
+     */
+    boolean shareBill(String customerId, Bill bill);
 }

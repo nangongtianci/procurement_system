@@ -27,6 +27,15 @@ public interface BillMapper extends BaseMapper<Bill> {
     Bill selectByIdCascadeGoods(String id);
 
     /**
+     * 查询子账单列表，级联商品
+     * @author ylw
+     * @date 18-11-11 上午11:33
+     * @param pid
+     * @return java.util.List<com.personal.entity.Bill>
+     */
+    List<Bill> selectSubBillByPidCascadeGoods(String pid);
+
+    /**
      * 分页查询个数
      * @param param
      * @return
@@ -34,32 +43,11 @@ public interface BillMapper extends BaseMapper<Bill> {
     int selectCountByCondition(BillQueryParam param);
 
     /**
-     * 账单多条件查询（默认级联商品）
-     * @param param
-     * @return
-     */
-    List<Bill> selectPageByParam(BillQueryParam param);
-
-    /**
-     * 账单多条件查询（不级联商品）
-     * @param pageParam
-     * @return
-     */
-    List<Bill> selectPageByParamNoCascadeGoods(BillQueryParam pageParam);
-
-    /**
      * 账单多条件查询(无分页信息)-（默认级联商品）
      * @param param
      * @return
      */
     List<Bill> selectByParam(BillQueryParam param);
-
-    /**
-     * 账单多条件查询(无分页信息)-（不级联查询商品）
-     * @param param
-     * @return
-     */
-    List<Bill> selectByParamNoCascadeGoods(BillQueryParam param);
 
     /**
      * 账单统计查询

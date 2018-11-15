@@ -10,6 +10,9 @@
         <result column="name" property="name" />
         <result column="price" property="price" />
         <result column="number" property="number" />
+        <result column="code_img_path" property="codeImgPath" />
+        <result column="cmid" property="cmid" />
+        <result column="totalPrice" property="totalPrice"/>
         <result column="weight_unit" property="weightUnit" />
         <result column="security_detection_info" property="securityDetectionInfo" />
         <result column="bill_id" property="billId" />

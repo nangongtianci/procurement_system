@@ -21,12 +21,10 @@ import com.personal.config.system.mail.ReportConfig;
 import com.personal.config.token.TokenUtils;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
+import com.personal.entity.CustomerBill;
 import com.personal.entity.Goods;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;
-import com.personal.service.BillService;
-import com.personal.service.CustomerService;
-import com.personal.service.GoodsService;
-import com.personal.service.MailService;
+import com.personal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +34,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.personal.common.utils.result.CommonResultMsg.*;
-import static com.personal.common.utils.result.RegUtils.*;
+import static com.personal.common.utils.result.RegUtils.matchesIds;
 
 /**
  * <p>
@@ -63,6 +61,8 @@ public class BillController{
     private RedisService redisService;
     @Autowired
     private GoodsService goodsService;
+    @Autowired
+    private CustomerBillService customerBillService;
 
     /**
      * 新增账单
@@ -77,6 +77,29 @@ public class BillController{
         if(ListUtils.isEmpty(bill.getGoods())){ // 商品列表
             return Result.FAIL("商品至少要添加一条！");
         }else{
+            // 代卖逻辑-----------------------start
+            if(StringUtils.isNotBlank(bill.getPid())){
+                if(bill.getGoods().size() > 1){
+                    return Result.FAIL("代卖母账单，只能存在一个商品！");
+                }
+
+//                Bill exist = billService.selectByIdCascadeGoods(bill.getId());
+//                BigDecimal goodsTotalPrice = exist.getGoods().get(0).getTotalPrice();
+//
+//                // 统计已经卖出去的商品总价格
+//                List<Bill> saleBills = billService.selectSubBillByPidCascadeGoods(bill.getId());
+//                BigDecimal saleTotalPrice = bill.getGoods().get(0).getTotalPrice();
+//                if(saleBills.size() > 0){
+//                    for(Bill tmp : saleBills){
+//                        saleTotalPrice = saleTotalPrice.add(tmp.getTotalPrice());
+//                    }
+//                }
+//
+//                if(goodsTotalPrice.compareTo(saleTotalPrice) <=0){
+//                    return Result.FAIL("当前子账单累计售出金额已超过母账单总金额！");
+//                }
+            }
+            // 代卖逻辑-----------------------end
             int i = 1;
             String tip = "第"+i+"条商品信息";
             for(Goods temp : bill.getGoods()){
@@ -85,7 +108,7 @@ public class BillController{
                     return Result.FAIL(assignFieldNotNull(tip+"品名"));
                 }
 
-                if(!matchesAmount(temp.getPrice(),new BigDecimal(0))){
+                if(temp.getPrice().compareTo(new BigDecimal(0))<0){
                     return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
                 }
 
@@ -95,6 +118,11 @@ public class BillController{
 
                 if(WeightUnitEnum.getByValue(temp.getWeightUnit()) == null){
                     return Result.FAIL(assignFieldIllegalValueRange(tip+"重量单位"));
+                }
+
+                if(StringUtils.isNotBlank(temp.getCodeImgPath())
+                        && StringUtils.isBlank(temp.getCmid())){
+                    return Result.OK("代码管理主键不能为空！");
                 }
 
                 temp.setBillId(bill.getId());
@@ -151,6 +179,41 @@ public class BillController{
     }
 
     /**
+     * 分享账单
+     * @param phone
+     * @return
+     */
+    @PostMapping("share")
+    public Result shareBill(String phone,String billId){
+        if(StringUtils.isBlank(phone)){
+            return Result.FAIL("手机号不能为空!");
+        }
+
+        EntityWrapper<Customer> ew = new EntityWrapper<>();
+        ew.where("phone={0}",phone);
+        Customer customer = customerService.selectOne(ew);
+        if(customer == null){
+            return Result.FAIL("请先注册！");
+        }
+
+        if(!matchesIds(billId)){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
+        }
+
+        Bill bill = billService.selectById(billId);
+        if(bill == null){
+           return Result.FAIL("您要分享的账单不存在！");
+        }
+
+        if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+            return Result.FAIL("对不起，卖出状态下的账单无法分享！");
+        }
+
+        billService.shareBill(customer.getId(),bill);
+        return Result.OK();
+    }
+
+    /**
      * 生成对等账单
      * @param request
      * @param sn
@@ -198,10 +261,14 @@ public class BillController{
         }
 
         EntityWrapper<Bill> oneselfew = new EntityWrapper();
-        oneselfew.where("create_customer_id={0} and bill_sn={1}",customerId,sn);
+        oneselfew.where("bill_sn={1}",customerId,sn);
         Bill oneself = billService.selectOne(oneselfew);
         if(oneself != null){
-            return Result.FAIL("无法扫描生成自己的账单！");
+            CustomerBill cb = customerBillService.selectOne(new EntityWrapper<CustomerBill>().
+                    where("cid={0} and bid={1}",oneself.getId(),customerId));
+            if(cb != null){
+                return Result.FAIL("无法扫描生成自己的账单！");
+            }
         }
 
         Customer customer = customerService.selectById(exist.getCreateCustomerId());
@@ -247,7 +314,15 @@ public class BillController{
             original.setCustomerUnit(curCustomer.getCompanyName());
             original.setMarketName(curCustomer.getMarketName());
             if(billService.updateById(original)){
-                return Result.OK();
+                CustomerBill cb = new CustomerBill();
+                cb.setId(UUIDUtils.getUUID());
+                cb.setCid(customerId);
+                cb.setBid(exist.getId());
+                cb.setCreateTime(exist.getCreateTime());
+                cb.setUpdateTime(exist.getUpdateTime());
+                if(customerBillService.insert(cb)) {
+                    return Result.OK();
+                }
             }
         }
         return Result.FAIL().setMessage("生成对等账单失败！");
@@ -314,7 +389,7 @@ public class BillController{
                     return Result.FAIL(assignFieldNotNull(tip+"品名"));
                 }
 
-                if(!matchesAmount(temp.getPrice(),new BigDecimal(0))){
+                if(temp.getPrice().compareTo(new BigDecimal(0))<0){
                     return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
                 }
 
@@ -324,6 +399,11 @@ public class BillController{
 
                 if(WeightUnitEnum.getByValue(temp.getWeightUnit()) == null){
                     return Result.FAIL(assignFieldIllegalValueRange(tip+"重量单位"));
+                }
+
+                if(StringUtils.isNotBlank(temp.getCodeImgPath())
+                        && StringUtils.isBlank(temp.getCmid())){
+                    return Result.OK("代码管理主键不能为空！");
                 }
 
                 temp.setBillId(bill.getId());
@@ -347,35 +427,16 @@ public class BillController{
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteById(@PathVariable String id){
+    public Result deleteById(HttpServletRequest request,@PathVariable String id){
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
 
-        if(billService.deleteByIdAndPeerUpdate(id)){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        if(billService.deleteByIdAndPeerUpdate(customerId,id)){
             return Result.OK();
         }
         return Result.FAIL();
-    }
-
-    /**
-     * 账单分页查询（多条件）-（级联商品分页）
-     * @param param
-     * @return
-     */
-    @PageQueryMethodFlag
-    @PostMapping("goods/page")
-    public Result selectPageByCondition(BillQueryParam param){
-        if(param == null || !matchesIds(param.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-
-        int count = billService.selectCountByCondition(param);
-        if (count == 0) {
-            return Result.EMPTY();
-        }
-        List<Bill> content = billService.selectPageByParam(param);
-        return PaginationUtils.getResultObj(content,count,param.getPageNow(),param.getPageSize());
     }
 
     /**
@@ -384,12 +445,10 @@ public class BillController{
      * @return
      */
     @PageQueryMethodFlag
-    @PostMapping("goods/page/index")
-    public Result selectPageForIndex(BillQueryParam param){
-        if(param == null || !matchesIds(param.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-
+    @PostMapping("goods/page")
+    public Result selectPageForIndex(HttpServletRequest request,BillQueryParam param){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        param.setCreateCustomerId(customerId);
         int count = billService.selectCountByCondition(param);
         if (count == 0) {
             return Result.EMPTY();
@@ -399,35 +458,16 @@ public class BillController{
     }
 
     /**
-     * 账单分页查询（多条件）-（不级联商品分页）
-     * @param param
-     * @return
-     */
-    @PageQueryMethodFlag
-    @PostMapping("page")
-    public Result selectPageByParamNoCascadeGoods(BillQueryParam param){
-        if(param == null || !matchesIds(param.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-
-        int count = billService.selectCountByCondition(param);
-        if (count == 0) {
-            return Result.EMPTY();
-        }
-        List<Bill> content = billService.selectPageByParamNoCascadeGoods(param);
-        return PaginationUtils.getResultObj(content,count,param.getPageNow(),param.getPageSize());
-    }
-
-    /**
      * 账单查询（多条件,不包含分页信息）-（级联商品分页）
      * @param param
      * @return
      */
-    @PostMapping("goods/list")
+    @PostMapping("goods/much/condition")
     public Result selectListByCondition(HttpServletRequest request,BillQueryParam param){
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         param.setCreateCustomerId(customerId);
         List<Bill> billList = billService.selectByParam(param);
+
         BigDecimal statisticsAtp = new BigDecimal(0);
         if(!ListUtils.isEmpty(billList)){
             for(Bill bill : billList){
@@ -442,29 +482,40 @@ public class BillController{
     }
 
     /**
-     * 账单查询（多条件,不包含分页信息）-（不级联商品分页）
-     * @param param
-     * @return
-     */
-    @PostMapping("list")
-    public Result selectByParamNoCascadeGoods(BillQueryParam param){
-        if(param == null || !matchesIds(param.getCreateCustomerId())){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.customer));
-        }
-        return Result.OK(billService.selectByParamNoCascadeGoods(param));
-    }
-
-    /**
      * 根据主键查询（不级联查询商品）
      * @param id
      * @return
      */
     @RequestMapping("/{id}")
-    public Result selectById(@PathVariable String id){
+    public Result selectById(HttpServletRequest request,@PathVariable String id){
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
-        return Result.OK(billService.selectById(id));
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        Customer customer = customerService.selectById(customerId);
+        Bill bill = billService.selectById(id);
+        if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+            bill.setSubList(billService.selectList(new EntityWrapper().where("pid={0}",bill.getId())));
+        }
+
+        Map<String,Object> rt = new HashMap<>();
+        if(bill.getSubList() != null && bill.getSubList().size()>1){
+            BigDecimal incomeTP = new BigDecimal(0);
+            for(Bill tmp : bill.getSubList()){
+                incomeTP = incomeTP.add(tmp.getTotalPrice());
+            }
+            rt.put("incomeTP",incomeTP);
+
+            if(incomeTP.compareTo(bill.getActualTotalPrice()) <= 0){
+                rt.put("profitTP","0.00");
+            }else{
+                rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
+            }
+        }
+
+        rt.put("companyName",customer.getCompanyName());
+        rt.put("data",bill);
+        return Result.OK(rt);
     }
 
     /**
@@ -479,9 +530,28 @@ public class BillController{
         }
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
         Customer customer = customerService.selectById(customerId);
+        Bill bill = billService.selectByIdCascadeGoods(id);
+        if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+            bill.setSubList(billService.selectSubBillByPidCascadeGoods(bill.getId()));
+        }
+
         Map<String,Object> rt = new HashMap<>();
+        if(bill.getSubList() != null && bill.getSubList().size()>0){
+            BigDecimal incomeTP = new BigDecimal(0);
+            for(Bill tmp : bill.getSubList()){
+                incomeTP = incomeTP.add(tmp.getTotalPrice());
+            }
+            rt.put("incomeTP",incomeTP);
+
+            if(incomeTP.compareTo(bill.getActualTotalPrice()) <= 0){
+                rt.put("profitTP","0.00");
+            }else{
+                rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
+            }
+        }
+
         rt.put("companyName",customer.getCompanyName());
-        rt.put("data",billService.selectByIdCascadeGoods(id));
+        rt.put("data",bill);
         return Result.OK(rt);
     }
 

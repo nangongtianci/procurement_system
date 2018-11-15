@@ -26,6 +26,7 @@
         <result column="actual_total_price" property="actualTotalPrice" />
         <result column="transaction_address" property="transactionAddress" />
         <result column="create_customer_id" property="createCustomerId" />
+        <result column="pid" property="pid" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
@@ -37,6 +38,9 @@
             <result column="weight_unit" property="weightUnit" />
             <result column="security_detection_info" property="securityDetectionInfo" />
             <result column="bill_id" property="billId" />
+            <result column="total_price" property="totalPrice" />
+            <result column="cmid" property="cmid" />
+            <result column="code_img_path" property="codeImgPath" />
         </collection>
     </resultMap>
 
@@ -105,10 +109,19 @@
     <!--根据主键查询，级联查询商品-->
     <select id="selectByIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
         SELECT
-          b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
+          b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.total_price,g.cmid,g.code_img_path
         FROM t_bill b
         LEFT JOIN t_goods g ON b.id = g.bill_id
         WHERE b.id=#{id} ORDER BY b.update_time
+    </select>
+
+    <!--查询子账单列表，级联商品-->
+    <select id="selectSubBillByPidCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
+        SELECT
+        b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.total_price,g.cmid,g.code_img_path
+        FROM t_bill b
+        LEFT JOIN t_goods g ON b.id = g.bill_id
+        WHERE b.pid=#{pid} ORDER BY b.id,b.update_time
     </select>
 
     <!--账单多条件查询（默认级联商品）-->
@@ -140,86 +153,23 @@
         ORDER BY b.create_time desc,b.update_time desc
     </select>
 
-
-    <!--账单多条件查询-->
-    <select id="selectByParamNoCascadeGoods" resultMap="BaseResultMap">
-        SELECT b.* FROM t_bill b
-        <where>
-            b.create_customer_id=#{createCustomerId}
-            <if test="customerName != null and customerName != ''">
-                AND b.customer_name=#{customerName}
-            </if>
-            <if test="customerPhone != null and customerPhone != ''">
-                AND b.customer_phone=#{customerPhone}
-            </if>
-            <if test="businessStatus != null and businessStatus != ''">
-                AND b.business_status=#{businessStatus}
-            </if>
-            <if test="billStatus != null and billStatus != ''">
-                AND b.bill_status=#{billStatus}
-            </if>
-            <if test="startDate != null">
-                AND b.create_time BETWEEN #{startDate} AND #{endDate}
-            </if>
-        </where>
-        ORDER BY b.create_time desc,b.update_time desc
-    </select>
-
-    <!--账单多条件查询 （默认级联商品）-->
-    <select id="selectPageByParam" resultMap="CascadeGoodsResultMap">
-        SELECT
-         lmb.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
-        FROM
-        (SELECT b.* FROM t_bill b
-        <where>
-            b.create_customer_id=#{createCustomerId}
-            <if test="customerName != null and customerName != ''">
-                AND b.customer_name=#{customerName}
-            </if>
-            <if test="customerPhone != null and customerPhone != ''">
-                AND b.customer_phone=#{customerPhone}
-            </if>
-            <if test="businessStatus != null and businessStatus != ''">
-                AND b.business_status=#{businessStatus}
-            </if>
-            <if test="billStatus != null and billStatus != ''">
-                AND b.bill_status=#{billStatus}
-            </if>
-            <if test="startDate != null">
-                AND b.create_time BETWEEN #{startDate} AND #{endDate}
-            </if>
-        </where>
-        LIMIT #{pageSize} offset #{offSet}) lmb left join t_goods g ON lmb.id = g.bill_id
-        <where>
-            <if test="goodsName != null and goodsName != ''">
-                AND g.name=#{goodsName}
-            </if>
-        </where>
-        ORDER BY lmb.create_time DESC,lmb.id DESC
-    </select>
-
-
     <!--账单首页分页查询（级联商品名称，创建时间降序排序）-->
     <select id="selectByParamForIndexPage" resultType="billGoodsForIndexPageVO">
         SELECT
-          b.id,b.bill_date AS billDate,b.customer_name AS customerName,
+          tmp.master_share AS masterShare,b.id,b.bill_date AS billDate,b.customer_name AS customerName,
           b.customer_phone AS customerPhone,total_price AS totalPrice,
           b.actual_total_price AS actualTotalPrice,b.business_status AS businessStatus,
           bill_status AS billStatus,b.create_time AS createTime,b.update_time AS updateTime,
-          (SELECT GROUP_CONCAT(g.name) FROM t_goods g WHERE g.bill_id = b.id) goodsNames
-        FROM t_bill b
-        WHERE b.create_customer_id=#{createCustomerId}
-        ORDER BY b.create_time DESC
-        LIMIT #{pageSize} offset #{offSet}
-    </select>
-
-
-    <!--账单多条件查询-->
-    <select id="selectPageByParamNoCascadeGoods" resultMap="BaseResultMap">
-        SELECT b.*
-        FROM t_bill b
+          (SELECT GROUP_CONCAT(g.name) FROM t_goods g WHERE g.bill_id = b.id) goodsNames,
+          (SELECT GROUP_CONCAT(g.number) FROM t_goods g WHERE g.bill_id = b.id) goodsNumbers,
+          (SELECT GROUP_CONCAT(g.weight_unit) FROM t_goods g WHERE g.bill_id = b.id) goodsWeightUnits,
+          (SELECT GROUP_CONCAT(g.code_img_path) FROM t_goods g WHERE g.bill_id = b.id) codeImgPath
+        FROM
+            (SELECT tbl.bid,tbl.master_share
+            FROM t_customer_bill_link tbl
+            WHERE tbl.cid = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b on tmp.bid = b.id
         <where>
-            b.create_customer_id=#{createCustomerId}
             <if test="customerName != null and customerName != ''">
                 AND b.customer_name=#{customerName}
             </if>
@@ -236,17 +186,20 @@
                 AND b.create_time BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
-        ORDER BY b.create_time desc,b.update_time desc
+        ORDER BY b.create_time DESC
         LIMIT #{pageSize} offset #{offSet}
     </select>
 
     <!--分页个数查询-->
     <select id="selectCountByCondition" resultType="int">
-        SELECT count(b.id)
-        FROM t_bill b
-        LEFT JOIN t_goods g ON b.id = g.bill_id
+        SELECT
+          count(b.id)
+        FROM
+            (SELECT tbl.bid
+            FROM t_customer_bill_link tbl
+            WHERE tbl.cid = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b on tmp.bid = b.id
         <where>
-            b.create_customer_id=#{createCustomerId}
             <if test="customerName != null and customerName != ''">
                 AND b.customer_name=#{customerName}
             </if>

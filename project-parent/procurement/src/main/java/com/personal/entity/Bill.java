@@ -3,7 +3,6 @@ package com.personal.entity;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.personal.common.base.BaseEntity;
 
 import java.math.BigDecimal;
@@ -18,7 +17,6 @@ import java.util.List;
  * @author ylw
  * @since 2018-05-13
  */
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 @TableName("t_bill")
 public class Bill extends BaseEntity {
 
@@ -130,10 +128,20 @@ public class Bill extends BaseEntity {
     private String createCustomerId;
 
     /**
+     * 父主键
+     */
+    private String pid;
+
+    /**
      * 商品
      */
     @TableField(exist = false)
     private List<Goods> goods;
+    /**
+     * 子账单
+     */
+    @TableField(exist = false)
+    private List<Bill> subList;
 
     public List<Goods> getGoods() {
         return goods;
@@ -315,6 +323,22 @@ public class Bill extends BaseEntity {
         this.actualTotalPrice = actualTotalPrice;
     }
 
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public List<Bill> getSubList() {
+        return subList;
+    }
+
+    public void setSubList(List<Bill> subList) {
+        this.subList = subList;
+    }
+
     @Override
     public String toString() {
         return "Bill{" +
@@ -339,6 +363,7 @@ public class Bill extends BaseEntity {
         ", actualTotalPrice=" + actualTotalPrice +
         ", transactionAddress=" + transactionAddress +
         ", createCustomerId=" + createCustomerId +
+        ", pid=" + pid +
         ", createTime=" + super.getCreateTime() +
         ", updateTime=" + super.getUpdateTime() +
         "}";
