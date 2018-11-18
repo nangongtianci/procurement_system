@@ -505,12 +505,7 @@ public class BillController{
                 incomeTP = incomeTP.add(tmp.getTotalPrice());
             }
             rt.put("incomeTP",incomeTP);
-
-            if(incomeTP.compareTo(bill.getActualTotalPrice()) <= 0){
-                rt.put("profitTP","0.00");
-            }else{
-                rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
-            }
+            rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
         }
 
         rt.put("companyName",customer.getCompanyName());
@@ -542,12 +537,7 @@ public class BillController{
                 incomeTP = incomeTP.add(tmp.getTotalPrice());
             }
             rt.put("incomeTP",incomeTP);
-
-            if(incomeTP.compareTo(bill.getActualTotalPrice()) <= 0){
-                rt.put("profitTP","0.00");
-            }else{
-                rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
-            }
+            rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
         }
 
         rt.put("companyName",customer.getCompanyName());
