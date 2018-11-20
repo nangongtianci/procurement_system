@@ -11,6 +11,7 @@ import com.personal.communicate.HttpUtil;
 import com.personal.config.redis.RedisService;
 import com.personal.config.system.sms.SmsConfig;
 import com.personal.config.token.TokenUtils;
+import com.personal.entity.Voice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,9 +67,36 @@ public class CommonController {
         }
     }
 
+    /**
+     * 语义解析
+     * @param voice
+     * @return
+     */
+    @PostMapping("/voice")
+    public String sendSms(Voice voice){
+        Map<String, String> map = new HashMap<>();
+        map.put("text",voice.getText());
+        map.put("userId",voice.getUserId());
+        map.put("operationId",voice.getOperationId());
+        return HttpUtil.doPost("http://112.125.89.15/bill/parse",map);
+    }
+
     @GetMapping("test")
     public String test(){
         return "wo shi test!";
     }
+
+//    public static void main(String[] args) {
+//        Voice voice = new Voice();
+//        voice.setText("");
+//        voice.setUserId("anonymous");
+//        voice.setOperationId("web-5717548096468088");
+//        Map<String, String> map = new HashMap<>();
+//        map.put("text","苹果20公斤合格证书");
+//        map.put("userId","anonymous");
+//        map.put("operationId","web-5717548096468088");
+//        System.out.print(HttpUtil.
+//                doPost("http://112.125.89.15/bill/parse",map));
+//    }
 
 }

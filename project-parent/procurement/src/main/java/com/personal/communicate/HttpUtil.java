@@ -1,8 +1,10 @@
 package com.personal.communicate;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +15,7 @@ import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -182,6 +185,41 @@ public class HttpUtil {
 		}
 		return null;
 	}
+
+
+//	public static String httpPost(String url, String json, Map<String, String> headerMap) {
+//		CloseableHttpClient httpClient = HttpClients.createDefault();
+//		HttpPost httpPost = new HttpPost(url);
+//		try {
+//			StringEntity entity = new StringEntity(json, "utf-8");
+//			httpPost.setEntity(entity);
+//			if (headerMap != null) {
+//				for (Map.Entry entry : headerMap.entrySet()) {
+//					httpPost.setHeader(entry.getKey() + "", entry.getValue() + "");
+//				}
+//			}
+//
+//			HttpResponse httpResponse;
+//			httpResponse = httpClient.execute(httpPost);
+//
+//			HttpEntity httpEntity = httpResponse.getEntity();
+//			if (httpEntity != null) {
+//				String response = EntityUtils.toString(httpEntity, "UTF-8");
+//				return response;
+//			} else {
+//				return null;
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				httpClient.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return null;
+//	}
 
 	/**
 	 * 带参数的doPost
