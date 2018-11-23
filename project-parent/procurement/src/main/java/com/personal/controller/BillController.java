@@ -65,6 +65,31 @@ public class BillController{
     private CustomerBillService customerBillService;
 
     /**
+     * 账单置顶
+     * @param id
+     * @param top
+     * @return
+     */
+    @GetMapping("top/{id}/{top}")
+    public Result billTop(@PathVariable String id,@PathVariable int top){
+        if(!matchesIds(id)){
+            return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
+        }
+        Bill bill = new Bill();
+        bill.setId(id);
+        if(top > 0){
+            bill.setIsTop(1);
+        }else{
+            bill.setIsTop(0);
+        }
+        if(billService.updateById(bill)){
+            return Result.OK();
+        }else{
+            return Result.FAIL();
+        }
+    }
+
+    /**
      * 新增账单
      * @param bill
      * @return
@@ -499,13 +524,36 @@ public class BillController{
         }
 
         Map<String,Object> rt = new HashMap<>();
-        if(bill.getSubList() != null && bill.getSubList().size()>1){
-            BigDecimal incomeTP = new BigDecimal(0);
+        if(bill.getSubList() != null && bill.getSubList().size()>0){
+            BigDecimal in = bill.getActualTotalPrice(); // 买入总额
+            BigDecimal out = new BigDecimal(0); // 卖出总额(收入总额)
+            BigDecimal profit = new BigDecimal(0); // 盘盈总额
+            BigDecimal loss = new BigDecimal(0); // 盘损总额
+            BigDecimal other = new BigDecimal(0); // 其他费用总额
+
             for(Bill tmp : bill.getSubList()){
-                incomeTP = incomeTP.add(tmp.getTotalPrice());
+                switch (BusinessStatusEnum.getByValue(tmp.getBusinessStatus())){
+                    case out:
+                        out = out.add(tmp.getTotalPrice());
+                        break;
+                    case profit:
+                        profit = profit.add(tmp.getTotalPrice());
+                        break;
+                    case loss:
+                        loss = loss.add(tmp.getTotalPrice());
+                        break;
+                    case other:
+                        other = other.add(tmp.getTotalPrice());
+                        break;
+                    default:
+                        break;
+                }
             }
-            rt.put("incomeTP",incomeTP);
-            rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
+
+            // 收入总额
+            rt.put("incomeTP",out.add(profit));
+            // 利润=卖出额+盘盈额-买入额-费用额-盘损额
+            rt.put("profitTP",out.add(profit).subtract(in).subtract(loss).subtract(other));
         }
 
         rt.put("companyName",customer.getCompanyName());
@@ -532,12 +580,35 @@ public class BillController{
 
         Map<String,Object> rt = new HashMap<>();
         if(bill.getSubList() != null && bill.getSubList().size()>0){
-            BigDecimal incomeTP = new BigDecimal(0);
+            BigDecimal in = bill.getActualTotalPrice(); // 买入总额
+            BigDecimal out = new BigDecimal(0); // 卖出总额(收入总额)
+            BigDecimal profit = new BigDecimal(0); // 盘盈总额
+            BigDecimal loss = new BigDecimal(0); // 盘损总额
+            BigDecimal other = new BigDecimal(0); // 其他费用总额
+
             for(Bill tmp : bill.getSubList()){
-                incomeTP = incomeTP.add(tmp.getTotalPrice());
+                switch (BusinessStatusEnum.getByValue(tmp.getBusinessStatus())){
+                    case out:
+                        out = out.add(tmp.getTotalPrice());
+                        break;
+                    case profit:
+                        profit = profit.add(tmp.getTotalPrice());
+                        break;
+                    case loss:
+                        loss = loss.add(tmp.getTotalPrice());
+                        break;
+                    case other:
+                        other = other.add(tmp.getTotalPrice());
+                        break;
+                    default:
+                        break;
+                }
             }
-            rt.put("incomeTP",incomeTP);
-            rt.put("profitTP",incomeTP.subtract(bill.getActualTotalPrice()));
+
+            // 收入总额
+            rt.put("incomeTP",out.add(profit));
+            // 利润=卖出额+盘盈额-买入额-费用额-盘损额
+            rt.put("profitTP",out.add(profit).subtract(in).subtract(loss).subtract(other));
         }
 
         rt.put("companyName",customer.getCompanyName());
@@ -638,7 +709,6 @@ public class BillController{
                                           Date startDate,
                                           Date endDate){
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        //String customerId = "b6c27ed95024484a8c6aaa64b5620521";
         Map<String,Object> param = new HashMap<>();
         param.put("createCustomerId",customerId);
         if("true".equalsIgnoreCase(isReceivable)){ // 应收界面

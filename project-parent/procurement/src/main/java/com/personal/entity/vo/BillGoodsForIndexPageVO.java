@@ -122,6 +122,10 @@ public class BillGoodsForIndexPageVO extends BaseVO{
      * 主体，共享
      */
     private String masterShare;
+    /**
+     * 是否置顶
+     */
+    private int isTop;
 
     public String getGoodsNumbers() {
         return goodsNumbers;
@@ -329,5 +333,13 @@ public class BillGoodsForIndexPageVO extends BaseVO{
 
     public void setCodeImgPath(String codeImgPath) {
         this.codeImgPath = codeImgPath;
+    }
+
+    public int getIsTop() {
+        return isTop;
+    }
+
+    public void setIsTop(int isTop) {
+        this.isTop = isTop;
     }
 }

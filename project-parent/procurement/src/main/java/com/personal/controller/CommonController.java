@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,7 +89,7 @@ public class CommonController {
         return "wo shi test!";
     }
 
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
 //        Voice voice = new Voice();
 //        voice.setText("");
 //        voice.setUserId("anonymous");
@@ -97,6 +100,16 @@ public class CommonController {
 //        map.put("operationId","web-5717548096468088");
 //        System.out.print(HttpUtil.
 //                doPost("http://112.125.89.15/bill/parse",map));
-//    }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(1467302400000l);
+        System.out.println(sdf.format(date));
+
+        Calendar ca = Calendar.getInstance();
+        // int year, int month, int date, int hourOfDay, int minute
+        ca.set(2015,6,0,24,0,0);
+//        ca.set(2016,4,0,24,0,0);
+        System.out.println(sdf.format(ca.getTime()));
+        System.out.println(ca.getTime().getTime());
+    }
 
 }

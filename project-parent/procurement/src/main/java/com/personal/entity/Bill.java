@@ -133,6 +133,12 @@ public class Bill extends BaseEntity {
     private String pid;
 
     /**
+     * 是否置顶 (默认不置顶)
+     */
+    @TableField("is_top")
+    private int isTop = 0;
+
+    /**
      * 商品
      */
     @TableField(exist = false)
@@ -339,6 +345,14 @@ public class Bill extends BaseEntity {
         this.subList = subList;
     }
 
+    public int getIsTop() {
+        return isTop;
+    }
+
+    public void setIsTop(int isTop) {
+        this.isTop = isTop;
+    }
+
     @Override
     public String toString() {
         return "Bill{" +
@@ -364,6 +378,7 @@ public class Bill extends BaseEntity {
         ", transactionAddress=" + transactionAddress +
         ", createCustomerId=" + createCustomerId +
         ", pid=" + pid +
+        ", isTop=" + isTop +
         ", createTime=" + super.getCreateTime() +
         ", updateTime=" + super.getUpdateTime() +
         "}";
