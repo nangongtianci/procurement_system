@@ -140,7 +140,7 @@
     <select id="selectByParamForIndexPage" resultType="billGoodsForIndexPageVO">
         SELECT
           tmp.master_share AS masterShare,b.id,b.bill_date AS billDate,b.customer_name AS customerName,
-          b.customer_phone AS customerPhone,total_price AS totalPrice,b.is_top as isTop,
+          b.customer_phone AS customerPhone,total_price AS totalPrice,b.is_top as isTop, 
           b.actual_total_price AS actualTotalPrice,b.business_status AS businessStatus,
           bill_status AS billStatus,b.create_time AS createTime,b.update_time AS updateTime,
           (SELECT GROUP_CONCAT(g.name) FROM t_goods g WHERE g.bill_id = b.id) goodsNames,
