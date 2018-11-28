@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.annotation.PageQueryMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
+import com.personal.common.base.BaseController;
+import com.personal.common.cache.RedisUtils;
 import com.personal.common.enume.*;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
@@ -26,6 +28,7 @@ import com.personal.entity.Goods;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +49,7 @@ import static com.personal.common.utils.result.RegUtils.matchesIds;
  */
 @RestController
 @RequestMapping("/bill")
-public class BillController{
+public class BillController extends BaseController{
     @Autowired
     private BillService billService;
     @Autowired
@@ -63,6 +66,31 @@ public class BillController{
     private GoodsService goodsService;
     @Autowired
     private CustomerBillService customerBillService;
+
+    /**
+     * 个人销售榜单排名
+     * @param request
+     * @return
+     */
+    @GetMapping("/person/ranking")
+    public Result getPersonRankingByDay(HttpServletRequest request){
+        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+        Customer customer = customerService.selectById(customerId);
+        String key = RedisUtils.zsetKey();
+        long ranking = redisService.zrevrank(key,customer.getId()+":"+customer.getPhone()+":"+customer.getName())+1;
+        return Result.OK(ranking);
+    }
+
+    /**
+     * 销售榜单前10排名
+     * @return
+     */
+    @GetMapping("/ranking")
+    public Result rankingByDay(){
+        String key = RedisUtils.zsetKey();
+        Set<ZSetOperations.TypedTuple<String>> rankings = redisService.zreverseRangeWithScores(key,0,10);
+        return Result.OK(rankings);
+    }
 
     /**
      * 账单置顶
@@ -203,6 +231,9 @@ public class BillController{
         return Result.FAIL();
     }
 
+
+
+
     /**
      * 分享账单
      * @param phone
@@ -327,28 +358,8 @@ public class BillController{
         exist.setBillSnType(BillSnTypeEnum.scan.getValue());
         exist.setIsPeerBill(IsPeerBillEnum.yes.getValue());
         exist.setRemark("");
-        if(billService.insertCascadeGoods(exist)){
-            Customer curCustomer = customerService.selectById(customerId);
-            // 更新原始账单为对等账单
-            Bill original = new Bill();
-            original.setId(originalId);
-            original.setIsPeerBill(IsPeerBillEnum.yes.getValue());
-            original.setCustomerName(curCustomer.getName());
-            original.setCustomerPhone(curCustomer.getPhone());
-            original.setCustomerIdCard(curCustomer.getIdCard());
-            original.setCustomerUnit(curCustomer.getCompanyName());
-            original.setMarketName(curCustomer.getMarketName());
-            if(billService.updateById(original)){
-                CustomerBill cb = new CustomerBill();
-                cb.setId(UUIDUtils.getUUID());
-                cb.setCid(customerId);
-                cb.setBid(exist.getId());
-                cb.setCreateTime(exist.getCreateTime());
-                cb.setUpdateTime(exist.getUpdateTime());
-                if(customerBillService.insert(cb)) {
-                    return Result.OK();
-                }
-            }
+        if(billService.insertScan(exist,originalId)){
+            return Result.OK();
         }
         return Result.FAIL().setMessage("生成对等账单失败！");
     }
@@ -365,8 +376,7 @@ public class BillController{
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
 
-        if(StringUtils.isNotBlank(bill.getBusinessStatus())
-                && BusinessStatusEnum.getByValue(bill.getBusinessStatus()) == null){ // 业务状态
+        if(BusinessStatusEnum.getByValue(bill.getBusinessStatus()) == null){ // 业务状态
             return Result.FAIL(assignFieldIllegalValueRange("交易状态"));
         }
 

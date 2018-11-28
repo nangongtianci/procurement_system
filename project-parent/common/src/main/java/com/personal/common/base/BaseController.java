@@ -1,5 +1,6 @@
 package com.personal.common.base;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -15,14 +16,13 @@ import java.io.Serializable;
  */
 public class BaseController implements Serializable{
     private static final long serialVersionUID = 1L;
-    /**
-     * 获取当前用户id
-     * @return
-     */
-    protected String getCid()
-    {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        //return TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        return null;
-    }
+
+//    protected String getCid()
+//    {
+//        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+//        //return TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+//        return null;
+//    }
+
+
 }

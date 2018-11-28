@@ -106,7 +106,7 @@ public class CommonController {
 
         Calendar ca = Calendar.getInstance();
         // int year, int month, int date, int hourOfDay, int minute
-        ca.set(2015,6,0,24,0,0);
+        ca.set(2017,9,0,24,0,0);
 //        ca.set(2016,4,0,24,0,0);
         System.out.println(sdf.format(ca.getTime()));
         System.out.println(ca.getTime().getTime());

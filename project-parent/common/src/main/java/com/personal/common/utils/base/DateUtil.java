@@ -67,7 +67,7 @@ public final class DateUtil {
         return getFormatDate("yyyyMMddHHmmss");
     }
 
-    protected static String getFormatDate(String formatString) {
+    public static String getFormatDate(String formatString) {
         String currentDate = "";
         SimpleDateFormat format1 = new SimpleDateFormat(formatString);
         currentDate = format1.format(new Date());

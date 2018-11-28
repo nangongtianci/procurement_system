@@ -159,6 +159,8 @@ public class RedisServiceImpl implements RedisService {
         return redisTemplate.keys(pattern);
     }
 
+
+    /**------------------zset集合操作--------------------**/
     /**
      * 范围获取zset集合
      * @param key
@@ -167,7 +169,62 @@ public class RedisServiceImpl implements RedisService {
      * @return
      */
     @Override
-    public Set<ZSetOperations.TypedTuple<String>> zrange(String key, int start, int end) {
+    public Set<ZSetOperations.TypedTuple<String>> zrangeWithScores(String key,long start,long end) {
         return redisTemplate.boundZSetOps(key).rangeWithScores(start,end);
+    }
+
+    @Override
+    public Set<ZSetOperations.TypedTuple<String>> zreverseRangeWithScores(String key, long start, long end) {
+        return redisTemplate.boundZSetOps(key).reverseRangeWithScores(start,end);
+    }
+
+    /**
+     * zset: 返回指定key对应的有序集合中，索引在min~max之间的元素信息，如果带上 withscores 属性的话，可以将分值也带出来
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    @Override
+    public Set<String> zrange(String key, long start, long end) {
+        return redisTemplate.boundZSetOps(key).range(start,end);
+    }
+
+    /**
+     * zset: 添加元素
+     * @param key
+     * @param value
+     */
+    @Override
+    public void zsadd(String key,String value,double score) {
+        redisTemplate.boundZSetOps(key).add(value,score);
+    }
+
+    /**
+     * zset:返回指定key中的集合中指定member元素对应的分值
+     * @param key
+     * @param member
+     */
+    @Override
+    public double zscore(String key, Object member) {
+        return redisTemplate.boundZSetOps(key).score(member);
+    }
+
+    /**
+     * zset:返回指定key对应的集合中，指定member在其中的排名，注意排名从0开始且按照分值从大到小降序
+     * @param key
+     * @param member
+     */
+    @Override
+    public long zrevrank(String key, Object member) {
+        return redisTemplate.boundZSetOps(key).reverseRank(member)==null?-2:redisTemplate.boundZSetOps(key).reverseRank(member);
+    }
+
+    /**
+     * zset:返回指定key对应的有序集合的元素数量
+     */
+    @Override
+    public long zcard(String key) {
+        return redisTemplate.boundZSetOps(key).zCard();
     }
 }

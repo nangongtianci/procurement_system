@@ -142,6 +142,42 @@ public interface RedisService {
      * @param end
      * @return
      */
-    Set<ZSetOperations.TypedTuple<String>> zrange(String key, int start, int end);
+    Set<ZSetOperations.TypedTuple<String>> zrangeWithScores(String key, long start, long end);
 
+    Set<ZSetOperations.TypedTuple<String>> zreverseRangeWithScores(String key, long start, long end);
+
+    /**
+     * zset: 返回指定key对应的有序集合中，索引在min~max之间的元素信息，如果带上 withscores 属性的话，可以将分值也带出来
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    Set<String> zrange(String key, long start, long end);
+
+    /**
+     * 添加zset
+     * @param key
+     * @param value
+     */
+    void zsadd(String key,String value,double score);
+
+    /**
+     * zset:返回指定key中的集合中指定member元素对应的分值
+     * @param key
+     * @param member
+     */
+    double zscore(String key,Object member);
+
+    /**
+     * zset:返回指定key对应的集合中，指定member在其中的排名，注意排名从0开始且按照分值从大到小降序
+     * @param key
+     * @param member
+     */
+    long zrevrank(String key,Object member);
+
+    /**
+     * zset:返回指定key对应的有序集合的元素数量
+     */
+    long zcard(String key);
 }

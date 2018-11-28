@@ -7,6 +7,11 @@ package com.personal.common.constant;
  * @return
  */
 public class SysConstant {
+
+    /**
+     * page config -------------------------------------start
+     */
+
     /**
      * 默认每页显示条数
      */
@@ -19,4 +24,18 @@ public class SysConstant {
      * 分页，每页最大显示条数
      */
     public final static Integer PAGE_SIZE_MAX = 50;
+
+    /**
+     * page config -------------------------------------end
+     */
+
+    /**
+     * redis 常量配置 -----------------------------------start
+     */
+
+
+    /**
+     * redis 常量配置 -----------------------------------end
+     */
+
 }

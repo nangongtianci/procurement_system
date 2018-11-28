@@ -27,6 +27,13 @@ public interface BillService extends IService<Bill> {
     boolean insertCascadeGoods(Bill bill);
 
     /**
+     * 扫描生成账单
+     * @param bill
+     * @return
+     */
+    boolean insertScan(Bill bill,String originId);
+
+    /**
      * 更新账单并更新与之关联的商品
      * @param bill
      * @return
