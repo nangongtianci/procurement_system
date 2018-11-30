@@ -13,6 +13,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -187,39 +188,42 @@ public class HttpUtil {
 	}
 
 
-//	public static String httpPost(String url, String json, Map<String, String> headerMap) {
-//		CloseableHttpClient httpClient = HttpClients.createDefault();
-//		HttpPost httpPost = new HttpPost(url);
-//		try {
-//			StringEntity entity = new StringEntity(json, "utf-8");
-//			httpPost.setEntity(entity);
-//			if (headerMap != null) {
-//				for (Map.Entry entry : headerMap.entrySet()) {
-//					httpPost.setHeader(entry.getKey() + "", entry.getValue() + "");
-//				}
-//			}
-//
-//			HttpResponse httpResponse;
-//			httpResponse = httpClient.execute(httpPost);
-//
-//			HttpEntity httpEntity = httpResponse.getEntity();
-//			if (httpEntity != null) {
-//				String response = EntityUtils.toString(httpEntity, "UTF-8");
-//				return response;
-//			} else {
-//				return null;
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			try {
-//				httpClient.close();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return null;
-//	}
+	public static String httpPost(String url, String json, Map<String, String> headerMap) {
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost(url);
+		try {
+			StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+			httpPost.setEntity(entity);
+			if (headerMap != null) {
+				for (Map.Entry entry : headerMap.entrySet()) {
+					httpPost.setHeader(entry.getKey() + "", entry.getValue() + "");
+				}
+			}
+
+			HttpResponse httpResponse;
+			httpResponse = httpClient.execute(httpPost);
+			System.out.println("status:-------------------------"+httpResponse.getStatusLine().getStatusCode());
+			if (httpResponse.getStatusLine().getStatusCode() == 200) {
+				HttpEntity httpEntity = httpResponse.getEntity();
+				if (httpEntity != null) {
+					String response = EntityUtils.toString(httpEntity, "UTF-8");
+					System.out.println("test-----------------------"+response);
+					return response;
+				} else {
+					return null;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				httpClient.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 带参数的doPost

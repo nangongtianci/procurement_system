@@ -8,6 +8,7 @@ import com.personal.common.annotation.UpdateMethodFlag;
 import com.personal.common.base.BaseController;
 import com.personal.common.cache.RedisUtils;
 import com.personal.common.enume.*;
+import com.personal.common.json.JsonUtils;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
 import com.personal.common.utils.base.StringUtils;
@@ -16,15 +17,13 @@ import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.file.ExcelUtils;
 import com.personal.common.utils.result.PaginationUtils;
 import com.personal.common.utils.result.Result;
+import com.personal.communicate.HttpUtil;
 import com.personal.conditions.BillQueryParam;
 import com.personal.config.redis.RedisService;
 import com.personal.config.system.file.FileConfig;
 import com.personal.config.system.mail.ReportConfig;
 import com.personal.config.token.TokenUtils;
-import com.personal.entity.Bill;
-import com.personal.entity.Customer;
-import com.personal.entity.CustomerBill;
-import com.personal.entity.Goods;
+import com.personal.entity.*;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,22 +134,6 @@ public class BillController extends BaseController{
                 if(bill.getGoods().size() > 1){
                     return Result.FAIL("代卖母账单，只能存在一个商品！");
                 }
-
-//                Bill exist = billService.selectByIdCascadeGoods(bill.getId());
-//                BigDecimal goodsTotalPrice = exist.getGoods().get(0).getTotalPrice();
-//
-//                // 统计已经卖出去的商品总价格
-//                List<Bill> saleBills = billService.selectSubBillByPidCascadeGoods(bill.getId());
-//                BigDecimal saleTotalPrice = bill.getGoods().get(0).getTotalPrice();
-//                if(saleBills.size() > 0){
-//                    for(Bill tmp : saleBills){
-//                        saleTotalPrice = saleTotalPrice.add(tmp.getTotalPrice());
-//                    }
-//                }
-//
-//                if(goodsTotalPrice.compareTo(saleTotalPrice) <=0){
-//                    return Result.FAIL("当前子账单累计售出金额已超过母账单总金额！");
-//                }
             }
             // 代卖逻辑-----------------------end
             int i = 1;
@@ -226,13 +209,36 @@ public class BillController extends BaseController{
         // 设置对等账单为no
         bill.setIsPeerBill(IsPeerBillEnum.no.getValue());
         if(billService.insertCascadeGoods(bill)){
+            feedBacks(customerId,bill.getFeedBacks());
             return Result.OK(bill.getId());
         }
         return Result.FAIL();
     }
 
+    private static void feedBacks(String userId,String feedBacks){
+        if(StringUtils.isBlank(feedBacks)){
+            return;
+        }
 
+        String[] splitComma = feedBacks.split(",");
 
+        List<Map<String,Object>> data = new ArrayList<>();
+        String[] item;
+        FeedBack feedBack = new FeedBack();
+        Map<String,Object> param;
+        for(int i = 0;i<splitComma.length;i++){
+            item = splitComma[i].split(":");
+            param = new HashMap<>();
+            param.put("userId",userId);
+            param.put("operationId",item[0]);
+            feedBack.setProductName(item[1]);
+            param.put("result",feedBack);
+            data.add(param);
+        }
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("contentType","application/json");
+        HttpUtil.httpPost("http://112.125.89.15/bill/feedbacks",JsonUtils.toJson(data),headerMap);
+    }
 
     /**
      * 分享账单

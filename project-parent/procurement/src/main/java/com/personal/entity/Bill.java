@@ -149,6 +149,21 @@ public class Bill extends BaseEntity {
     @TableField(exist = false)
     private List<Bill> subList;
 
+    /**
+     * 反馈信息
+     * 格式：operationId：productName，......
+     */
+    @TableField(exist = false)
+    private String feedBacks;
+
+    public String getFeedBacks() {
+        return feedBacks;
+    }
+
+    public void setFeedBacks(String feedBacks) {
+        this.feedBacks = feedBacks;
+    }
+
     public List<Goods> getGoods() {
         return goods;
     }
