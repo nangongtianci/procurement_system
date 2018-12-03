@@ -39,7 +39,7 @@
             <result column="weight_unit" property="weightUnit" />
             <result column="security_detection_info" property="securityDetectionInfo" />
             <result column="bill_id" property="billId" />
-            <result column="total_price" property="totalPrice" />
+            <result column="amount" property="amount" />
             <result column="cmid" property="cmid" />
             <result column="code_img_path" property="codeImgPath" />
         </collection>
@@ -92,7 +92,7 @@
     <!--根据主键查询，级联查询商品-->
     <select id="selectByIdCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
         SELECT
-          b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.total_price,g.cmid,g.code_img_path
+          b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.amount,g.cmid,g.code_img_path
         FROM t_bill b
         LEFT JOIN t_goods g ON b.id = g.bill_id
         WHERE b.id=#{id} ORDER BY b.update_time
@@ -101,7 +101,7 @@
     <!--查询子账单列表，级联商品-->
     <select id="selectSubBillByPidCascadeGoods" parameterType="string" resultMap="CascadeGoodsResultMap">
         SELECT
-        b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.total_price,g.cmid,g.code_img_path
+        b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id,g.amount,g.cmid,g.code_img_path
         FROM t_bill b
         LEFT JOIN t_goods g ON b.id = g.bill_id
         WHERE b.pid=#{pid} ORDER BY b.id,b.update_time

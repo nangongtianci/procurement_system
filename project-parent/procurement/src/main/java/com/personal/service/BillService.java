@@ -2,6 +2,7 @@ package com.personal.service;
 
 import com.baomidou.mybatisplus.service.IService;
 import com.personal.common.base.page.PageQueryParam;
+import com.personal.common.utils.result.Result;
 import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;
@@ -75,7 +76,7 @@ public interface BillService extends IService<Bill> {
      * @param id
      * @return
      */
-    boolean deleteByIdAndPeerUpdate(String cid,String id);
+    Result deleteByIdAndPeerUpdate(String cid, String id);
 
     /**
      * 账单统计查询

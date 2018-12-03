@@ -199,7 +199,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
     @Transactional
     @Override
-    public boolean deleteByIdAndPeerUpdate(String cid,String id) {
+    public Result deleteByIdAndPeerUpdate(String cid,String id) {
         EntityWrapper<Bill> ew = new EntityWrapper<>();
         ew.setSqlSelect("bill_sn,is_peer_bill,business_status as businessStatus").where("id={0}",id);
         Bill bill = selectById(id);
@@ -209,7 +209,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             isParent.where("pid={0}",id);
             int rt = billMapper.selectCount(isParent);
             if(rt>0){
-                return false;
+                return Result.FAIL("当前账单含有自账单，无法删除！");
             }
 
             // 主账单和共享账单区别（删除关联关系）
@@ -217,7 +217,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             cb.where("bid={0}",id);
             int ct = customerBillMapper.selectCount(cb);
             if(ct > 1){
-                return false;
+                return Result.FAIL("此账单存已分享，无法删除！");
             }
             EntityWrapper<CustomerBill> delcb = new EntityWrapper<>();
             delcb.where("cid={0} and bid={1}",cid,id);
@@ -237,9 +237,9 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
                 // 只有销售账单参与销售排行榜
                 setRanking(bill.getCreateCustomerId());
             }
-            return true;
+            return Result.OK();
         }else{
-            return false;
+            return Result.FAIL("账单不存在，删除失败！");
         }
     }
 

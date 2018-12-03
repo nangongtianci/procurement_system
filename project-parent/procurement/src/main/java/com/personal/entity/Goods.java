@@ -36,8 +36,7 @@ public class Goods extends BaseEntity {
     /**
      * 单个商品总价
      */
-    @TableField("total_price")
-    private BigDecimal totalPrice;
+    private BigDecimal amount;
     /**
      * 商品单位（吨，公斤，箱）
      */
@@ -125,12 +124,12 @@ public class Goods extends BaseEntity {
         this.createCustomerId = createCustomerId;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public String getCodeImgPath() {
@@ -156,7 +155,7 @@ public class Goods extends BaseEntity {
         ", name=" + name +
         ", price=" + price +
         ", number=" + number +
-        ", totalPrice" + totalPrice +
+        ", amount" + amount +
         ", weightUnit=" + weightUnit +
         ", securityDetectionInfo=" + securityDetectionInfo +
         ", billId=" + billId +

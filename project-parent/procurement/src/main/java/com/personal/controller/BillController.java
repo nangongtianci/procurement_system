@@ -9,6 +9,7 @@ import com.personal.common.base.BaseController;
 import com.personal.common.cache.RedisUtils;
 import com.personal.common.enume.*;
 import com.personal.common.json.JsonUtils;
+import com.personal.common.random.RandomNum;
 import com.personal.common.utils.base.DateUtil;
 import com.personal.common.utils.base.GenerateOrderUtil;
 import com.personal.common.utils.base.StringUtils;
@@ -148,7 +149,7 @@ public class BillController extends BaseController{
                     return Result.FAIL(tip+assignFieldNameForMoney("商品单价",new BigDecimal(0)));
                 }
 
-                if(temp.getNumber() <= 0){
+                if(temp.getNumber() < 0){
                     return Result.FAIL(tip+assignFieldNameForInteger("商品数量",0));
                 }
 
@@ -238,6 +239,10 @@ public class BillController extends BaseController{
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("contentType","application/json");
         HttpUtil.httpPost("http://112.125.89.15/bill/feedbacks",JsonUtils.toJson(data),headerMap);
+        //System.out.println("request:http://112.125.89.15/bill/feedBacks:method->post");
+        //System.out.println("feedBacks:reponse:"+rt);
+        //String my = HttpUtil.doGet("http://112.125.89.15/product/list?userId="+userId+"&number="+ RandomNum.createSmsAuthCode(6),null);
+        //System.out.println("request:http://112.125.89.15/product/list?userId=+"+userId+"--------------->reponse:"+my);
     }
 
     /**
@@ -474,10 +479,7 @@ public class BillController extends BaseController{
         }
 
         String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        if(billService.deleteByIdAndPeerUpdate(customerId,id)){
-            return Result.OK();
-        }
-        return Result.FAIL();
+        return billService.deleteByIdAndPeerUpdate(customerId,id);
     }
 
     /**
@@ -522,60 +524,60 @@ public class BillController extends BaseController{
         return Result.OK(rt);
     }
 
-    /**
-     * 根据主键查询（不级联查询商品）
-     * @param id
-     * @return
-     */
-    @RequestMapping("/{id}")
-    public Result selectById(HttpServletRequest request,@PathVariable String id){
-        if(!matchesIds(id)){
-            return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
-        }
-        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
-        Customer customer = customerService.selectById(customerId);
-        Bill bill = billService.selectById(id);
-        if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
-            bill.setSubList(billService.selectList(new EntityWrapper().where("pid={0}",bill.getId())));
-        }
-
-        Map<String,Object> rt = new HashMap<>();
-        if(bill.getSubList() != null && bill.getSubList().size()>0){
-            BigDecimal in = bill.getActualTotalPrice(); // 买入总额
-            BigDecimal out = new BigDecimal(0); // 卖出总额(收入总额)
-            BigDecimal profit = new BigDecimal(0); // 盘盈总额
-            BigDecimal loss = new BigDecimal(0); // 盘损总额
-            BigDecimal other = new BigDecimal(0); // 其他费用总额
-
-            for(Bill tmp : bill.getSubList()){
-                switch (BusinessStatusEnum.getByValue(tmp.getBusinessStatus())){
-                    case out:
-                        out = out.add(tmp.getTotalPrice());
-                        break;
-                    case profit:
-                        profit = profit.add(tmp.getTotalPrice());
-                        break;
-                    case loss:
-                        loss = loss.add(tmp.getTotalPrice());
-                        break;
-                    case other:
-                        other = other.add(tmp.getTotalPrice());
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            // 收入总额
-            rt.put("incomeTP",out.add(profit));
-            // 利润=卖出额+盘盈额-买入额-费用额-盘损额
-            rt.put("profitTP",out.add(profit).subtract(in).subtract(loss).subtract(other));
-        }
-
-        rt.put("companyName",customer.getCompanyName());
-        rt.put("data",bill);
-        return Result.OK(rt);
-    }
+//    /**
+//     * 根据主键查询（不级联查询商品）
+//     * @param id
+//     * @return
+//     */
+//    @RequestMapping("/{id}")
+//    public Result selectById(HttpServletRequest request,@PathVariable String id){
+//        if(!matchesIds(id)){
+//            return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
+//        }
+//        String customerId = TokenUtils.getUid(UserTypeEnum.customer,request.getHeader("token"),redisService);
+//        Customer customer = customerService.selectById(customerId);
+//        Bill bill = billService.selectById(id);
+//        if(BusinessStatusEnum.in.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+//            bill.setSubList(billService.selectList(new EntityWrapper().where("pid={0}",bill.getId())));
+//        }
+//
+//        Map<String,Object> rt = new HashMap<>();
+//        if(bill.getSubList() != null && bill.getSubList().size()>0){
+//            BigDecimal in = bill.getActualTotalPrice(); // 买入总额
+//            BigDecimal out = new BigDecimal(0); // 卖出总额(收入总额)
+//            BigDecimal profit = new BigDecimal(0); // 盘盈总额
+//            BigDecimal loss = new BigDecimal(0); // 盘损总额
+//            BigDecimal other = new BigDecimal(0); // 其他费用总额
+//
+//            for(Bill tmp : bill.getSubList()){
+//                switch (BusinessStatusEnum.getByValue(tmp.getBusinessStatus())){
+//                    case out:
+//                        out = out.add(tmp.getTotalPrice());
+//                        break;
+//                    case profit:
+//                        profit = profit.add(tmp.getTotalPrice());
+//                        break;
+//                    case loss:
+//                        loss = loss.add(tmp.getTotalPrice());
+//                        break;
+//                    case other:
+//                        other = other.add(tmp.getTotalPrice());
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
+//
+//            // 收入总额
+//            rt.put("incomeTP",out.add(profit));
+//            // 利润=卖出额+盘盈额-买入额-费用额-盘损额
+//            rt.put("profitTP",out.add(profit).subtract(in).subtract(loss).subtract(other));
+//        }
+//
+//        rt.put("companyName",customer.getCompanyName());
+//        rt.put("data",bill);
+//        return Result.OK(rt);
+//    }
 
     /**
      * 根据主键查询（级联商品）
