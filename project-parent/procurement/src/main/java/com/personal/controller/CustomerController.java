@@ -250,10 +250,8 @@ public class CustomerController {
 
         customer.setSecretKey(UUIDUtils.getUUID());
         customer.setPassword(MD5Util.getStringMD5(customer.getPassword()+customer.getSecretKey()));
-        if(customerService.insert(customer)){
-            return Result.OK().setData(customer.getId());
-        }
-        return Result.FAIL();
+        customerService.insertCustomerAndInitDefaultBill(customer);
+        return Result.OK().setData(customer.getId());
     }
 
 

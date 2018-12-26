@@ -1,7 +1,7 @@
 package com.personal.service;
 
-import com.personal.entity.Customer;
 import com.baomidou.mybatisplus.service.IService;
+import com.personal.entity.Customer;
 
 /**
  * <p>
@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface CustomerService extends IService<Customer> {
 
+    /**
+     * 注册用户并初始化默认账单(注册时候调用)
+     * @param customer
+     * @return
+     */
+    void insertCustomerAndInitDefaultBill(Customer customer);
 }

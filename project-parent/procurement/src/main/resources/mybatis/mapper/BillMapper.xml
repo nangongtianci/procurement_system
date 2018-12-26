@@ -50,41 +50,53 @@
         <choose>
             <when test="isReceivable != 'true'">
                 SELECT
-                DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
-                sum(actual_total_price) as atp,business_status as businessStatus
-                FROM t_bill
+                DATE_FORMAT(b.create_time,'%Y-%m-%d') as time,count(b.id) as ct,sum(b.total_price) as tp,
+                sum(b.actual_total_price) as atp,b.business_status as b.businessStatus
+                FROM
+                (SELECT tbl.bid
+                FROM t_customer_bill_link tbl
+                WHERE tbl.cid = #{createCustomerId}) tmp
+                LEFT JOIN t_bill b ON tmp.bid = b.id
                 <where>
-                    create_customer_id = #{createCustomerId} AND business_status = 'in'
+                    b.business_status = 'in'
                     <if test="startDate != null and endDate != null">
-                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                        AND b.create_time BETWEEN #{startDate} AND #{endDate}
                     </if>
                 </where>
-                GROUP BY time
+                GROUP BY b.time
                 UNION
                 SELECT
-                DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
-                sum(actual_total_price) as atp,business_status as businessStatus
-                FROM t_bill
+                DATE_FORMAT(b.create_time,'%Y-%m-%d') as time,count(b.id) as ct,sum(b.total_price) as tp,
+                sum(b.actual_total_price) as atp,b.business_status as businessStatus
+                FROM
+                (SELECT tbl.bid
+                FROM t_customer_bill_link tbl
+                WHERE tbl.cid = #{createCustomerId}) tmp
+                LEFT JOIN t_bill b ON tmp.bid = b.id
                 <where>
-                    create_customer_id = #{createCustomerId} AND business_status = 'out'
+                    b.business_status = 'out'
                     <if test="startDate != null and endDate != null">
-                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                        AND b.create_time BETWEEN #{startDate} AND #{endDate}
                     </if>
                 </where>
-                GROUP BY time
+                GROUP BY b.time
             </when>
             <otherwise>
                 SELECT
-                DATE_FORMAT(create_time,'%Y-%m-%d') as time,count(id) as ct,sum(total_price) as tp,
-                sum(actual_total_price) as atp
-                FROM t_bill
+                DATE_FORMAT(b.create_time,'%Y-%m-%d') as time,count(b.id) as ct,sum(b.total_price) as tp,
+                sum(b.actual_total_price) as atp
+                FROM
+                (SELECT tbl.bid
+                FROM t_customer_bill_link tbl
+                WHERE tbl.cid = #{createCustomerId}) tmp
+                LEFT JOIN t_bill b ON tmp.bid = b.id
                 <where>
-                    create_customer_id = #{createCustomerId} AND bill_status = 'receivable'
+                    b.bill_status = 'receivable'
                     <if test="startDate != null and endDate != null">
-                        AND create_time BETWEEN #{startDate} AND #{endDate}
+                        AND b.create_time BETWEEN #{startDate} AND #{endDate}
                     </if>
                 </where>
-                GROUP BY time
+                GROUP BY b.time
             </otherwise>
         </choose>
     </select>
@@ -109,11 +121,12 @@
 
     <!--账单多条件查询（默认级联商品）-->
     <select id="selectByParam" resultMap="CascadeGoodsResultMap">
-        SELECT b.*,g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
-        FROM t_bill b
+        SELECT b.*,
+        g.id AS goods_id,g.name,g.price,g.weight_unit,g.number,g.security_detection_info,g.bill_id
+        FROM (SELECT tbl.bid FROM t_customer_bill_link tbl WHERE tbl.cid = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b ON tmp.bid = b.id
         LEFT JOIN t_goods g ON b.id = g.bill_id
         <where>
-            b.create_customer_id=#{createCustomerId}
             <if test="customerName != null and customerName != ''">
                 AND b.customer_name=#{customerName}
             </if>

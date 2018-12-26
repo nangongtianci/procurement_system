@@ -7,16 +7,16 @@ import com.personal.common.cache.RedisUtils;
 import com.personal.common.enume.BusinessStatusEnum;
 import com.personal.common.enume.IsPeerBillEnum;
 import com.personal.common.enume.MasterShareEnum;
+import com.personal.common.json.JsonUtils;
+import com.personal.common.utils.base.StringUtils;
 import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.Collections3;
 import com.personal.common.utils.collections.ListUtils;
 import com.personal.common.utils.result.Result;
+import com.personal.communicate.HttpUtil;
 import com.personal.conditions.BillQueryParam;
 import com.personal.config.redis.RedisService;
-import com.personal.entity.Bill;
-import com.personal.entity.Customer;
-import com.personal.entity.CustomerBill;
-import com.personal.entity.Goods;
+import com.personal.entity.*;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;
 import com.personal.entity.vo.BillStatisticsVO;
 import com.personal.mapper.BillMapper;
@@ -30,9 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * <p>
@@ -61,28 +60,70 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
     @Transactional
     @Override
-    public boolean insertCascadeGoods(Bill bill) {
-        insert(bill);
-        goodsService.insertBatch(bill.getGoods());
-        CustomerBill customerBill =  new CustomerBill();
-        customerBill.setId(UUIDUtils.getUUID());
-        customerBill.setBid(bill.getId());
-        customerBill.setCid(bill.getCreateCustomerId());
-        customerBill.setMasterShare(MasterShareEnum.master.getValue());
-        customerBill.setCreateTime(new Date());
-        customerBill.setUpdateTime(new Date());
-        customerBillMapper.insert(customerBill);
-        if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
-            // 只有销售账单参与销售排行榜
-            setRanking(bill.getCreateCustomerId());
+    public Result insertCascadeGoods(Bill bill) {
+        try{
+            insert(bill);
+            goodsService.insertBatch(bill.getGoods());
+            CustomerBill customerBill =  new CustomerBill();
+            customerBill.setId(UUIDUtils.getUUID());
+            customerBill.setBid(bill.getId());
+            customerBill.setCid(bill.getCreateCustomerId());
+            customerBill.setMasterShare(MasterShareEnum.master.getValue());
+            customerBill.setCreateTime(new Date());
+            customerBill.setUpdateTime(new Date());
+            customerBillMapper.insert(customerBill);
+
+            HashMap<String,String> rt = new HashMap<>();
+            if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+                // 只有销售账单参与销售排行榜
+                setRanking(bill.getCreateCustomerId());
+                // 只有销售账单才会计算获得红包累计次数
+                BigDecimal redPacket = computeRedPacket(bill.getCreateCustomerId());
+                rt.put("redPacketTip","恭喜您得到了"+redPacket+"元红包，继续加油哦!");
+            }
+
+
+            if(StringUtils.isNotBlank(bill.getFeedBacks())){
+                // 反馈语义信息
+                feedBacks(bill.getCreateCustomerId(),bill.getFeedBacks());
+            }
+            rt.put("billId",bill.getId());
+            return Result.OK().setData(rt);
+        }catch (Exception e){
+            return Result.FAIL();
         }
-        return true;
+    }
+
+    /**
+     * 语义反馈
+     * @param userId
+     * @param feedBacks
+     */
+    private static void feedBacks(String userId,String feedBacks){
+        String[] splitComma = feedBacks.split(",");
+
+        List<Map<String,Object>> data = new ArrayList<>();
+        String[] item;
+        FeedBack feedBack = new FeedBack();
+        Map<String,Object> param;
+        for(int i = 0;i<splitComma.length;i++){
+            item = splitComma[i].split(":");
+            param = new HashMap<>();
+            param.put("userId",userId);
+            param.put("operationId",item[0]);
+            feedBack.setProductName(item[1]);
+            param.put("result",feedBack);
+            data.add(param);
+        }
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("contentType","application/json");
+        HttpUtil.httpPost("http://112.125.89.15/bill/feedbacks", JsonUtils.toJson(data),headerMap);
     }
 
     @Transactional
     @Override
     public boolean insertScan(Bill bill,String originId) {
-        if(billService.insertCascadeGoods(bill)){
+        if(billService.insertCascadeGoods(bill).getStatus() == 0){
             Customer curCustomer = customerMapper.selectById(bill.getCreateCustomerId());
             // 更新原始账单为对等账单
             Bill original = new Bill();
@@ -101,16 +142,16 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
                 cb.setCreateTime(bill.getCreateTime());
                 cb.setUpdateTime(bill.getUpdateTime());
                 customerBillMapper.insert(cb);
-                if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
-                    // 只有销售账单参与销售排行榜
-                    setRanking(bill.getCreateCustomerId());
-                }
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * 排行榜
+     * @param cid
+     */
     private void setRanking(String cid){
         BigDecimal sellPrice = new BigDecimal(0);
         Customer customer = customerMapper.selectById(cid);
@@ -132,30 +173,67 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         }
     }
 
+    /**
+     * 计算红包
+     * @param cid
+     */
+    private BigDecimal computeRedPacket(String cid){
+        String ct = redisService.get(RedisUtils.redPacketKey(cid));
+        if(StringUtils.isNotBlank(ct) && Integer.parseInt(ct)+1 < 5){ // 小于5，不会获取红包hongbao
+            redisService.set(RedisUtils.redPacketKey(cid),(Integer.parseInt(ct)+1)+"");
+            return null;
+        }else{
+            redisService.del(RedisUtils.redPacketKey(cid));
+            // 随机赠送0.1-3.0元
+            double min = 0.1; // 最小值
+            double max = 3; // 总和
+            int scl =  1; // 小数最大位数
+            int pow = (int) Math.pow(max, scl);// 指定小数位
+            BigDecimal bg = new BigDecimal(Math.floor((Math.random() * (max - min) + min) * pow) / pow);
+            BigDecimal price = bg.setScale(1,BigDecimal.ROUND_DOWN);
+            if(price.intValue() == 0){
+                price = new BigDecimal(min);
+            }
+
+            Customer cs = new Customer();
+            cs.setId(cid);
+            cs.setRedPacket(price);
+            customerMapper.updateById(cs);
+            return price;
+        }
+    }
+
     @Transactional
     @Override
-    public boolean updateCascadeGoods(Bill bill) {
-        List<Goods> exists = goodsService.selectList(new EntityWrapper<Goods>().where("bill_id={0}",bill.getId()));
-        if(exists.size()>0){
-            List<String> goodsIds = Collections3.extractToList(exists,"id");
-            if(!goodsService.deleteBatchIds(goodsIds)){
-                return false;
+    public Result updateCascadeGoods(Bill bill) {
+        try{
+            List<Goods> exists = goodsService.selectList(new EntityWrapper<Goods>().where("bill_id={0}",bill.getId()));
+            if(exists.size()>0){
+                List<String> goodsIds = Collections3.extractToList(exists,"id");
+                if(!goodsService.deleteBatchIds(goodsIds)){
+                    return Result.FAIL();
+                }
             }
-        }
 
-        if(!ListUtils.isEmpty(bill.getGoods()) && !goodsService.insertBatch(bill.getGoods())){
-            return false;
-        }
+            if(!ListUtils.isEmpty(bill.getGoods()) && !goodsService.insertBatch(bill.getGoods())){
+                return Result.FAIL();
+            }
 
-        if(!updateById(bill)){
-            return false;
-        }
+            if(!updateById(bill)){
+                return Result.FAIL();
+            }
 
-        if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
-            // 只有销售账单参与销售排行榜
-            setRanking(bill.getCreateCustomerId());
+            if(BusinessStatusEnum.out.getValue().equalsIgnoreCase(bill.getBusinessStatus())){
+                // 只有销售账单参与销售排行榜
+                setRanking(bill.getCreateCustomerId());
+                // 只有销售账单才会计算获得红包累计次数
+                BigDecimal redPacket = computeRedPacket(bill.getCreateCustomerId());
+                return Result.OK().setData("恭喜您得到了"+redPacket+"元红包，继续加油哦!");
+            }
+            return Result.OK();
+        }catch (Exception e){
+            return Result.FAIL();
         }
-        return true;
     }
 
     @Override

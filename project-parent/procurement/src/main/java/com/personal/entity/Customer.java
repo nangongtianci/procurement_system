@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.personal.common.base.BaseEntity;
 import org.springframework.data.annotation.Transient;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -52,6 +53,13 @@ public class Customer extends BaseEntity {
      */
     @TableField("market_name")
     private String marketName;
+
+    /**
+     * 红包金额
+     */
+    @TableField("red_packet")
+    private BigDecimal redPacket;
+
     /**
      * 邮箱
      */
@@ -188,6 +196,14 @@ public class Customer extends BaseEntity {
         this.status = status;
     }
 
+    public BigDecimal getRedPacket() {
+        return redPacket;
+    }
+
+    public void setRedPacket(BigDecimal redPacket) {
+        this.redPacket = redPacket;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -204,6 +220,7 @@ public class Customer extends BaseEntity {
         ", isAgreeProtocol=" + isAgreeProtocol +
         ", loginTime=" + loginTime +
         ", status=" + status +
+        ", redPacket=" + redPacket +
         ", createTime=" + super.getCreateTime() +
         ", updateTime=" + super.getUpdateTime() +
         "}";

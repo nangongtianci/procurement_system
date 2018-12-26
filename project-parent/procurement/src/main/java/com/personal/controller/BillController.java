@@ -209,40 +209,7 @@ public class BillController extends BaseController{
         bill.setBillSnType(BillSnTypeEnum.manual.getValue());
         // 设置对等账单为no
         bill.setIsPeerBill(IsPeerBillEnum.no.getValue());
-        if(billService.insertCascadeGoods(bill)){
-            feedBacks(customerId,bill.getFeedBacks());
-            return Result.OK(bill.getId());
-        }
-        return Result.FAIL();
-    }
-
-    private static void feedBacks(String userId,String feedBacks){
-        if(StringUtils.isBlank(feedBacks)){
-            return;
-        }
-
-        String[] splitComma = feedBacks.split(",");
-
-        List<Map<String,Object>> data = new ArrayList<>();
-        String[] item;
-        FeedBack feedBack = new FeedBack();
-        Map<String,Object> param;
-        for(int i = 0;i<splitComma.length;i++){
-            item = splitComma[i].split(":");
-            param = new HashMap<>();
-            param.put("userId",userId);
-            param.put("operationId",item[0]);
-            feedBack.setProductName(item[1]);
-            param.put("result",feedBack);
-            data.add(param);
-        }
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("contentType","application/json");
-        HttpUtil.httpPost("http://112.125.89.15/bill/feedbacks",JsonUtils.toJson(data),headerMap);
-        //System.out.println("request:http://112.125.89.15/bill/feedBacks:method->post");
-        //System.out.println("feedBacks:reponse:"+rt);
-        //String my = HttpUtil.doGet("http://112.125.89.15/product/list?userId="+userId+"&number="+ RandomNum.createSmsAuthCode(6),null);
-        //System.out.println("request:http://112.125.89.15/product/list?userId=+"+userId+"--------------->reponse:"+my);
+        return billService.insertCascadeGoods(bill);
     }
 
     /**
@@ -460,10 +427,7 @@ public class BillController extends BaseController{
 
         bill.setIsReceive(null);
         bill.setIsSource(null);
-        if(billService.updateCascadeGoods(bill)){
-            return Result.OK();
-        }
-        return Result.FAIL();
+        return billService.updateCascadeGoods(bill);
     }
 
 

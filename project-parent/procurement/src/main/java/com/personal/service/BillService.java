@@ -25,7 +25,7 @@ public interface BillService extends IService<Bill> {
      * @param bill
      * @return
      */
-    boolean insertCascadeGoods(Bill bill);
+    Result insertCascadeGoods(Bill bill);
 
     /**
      * 扫描生成账单
@@ -39,7 +39,7 @@ public interface BillService extends IService<Bill> {
      * @param bill
      * @return
      */
-    boolean updateCascadeGoods(Bill bill);
+    Result updateCascadeGoods(Bill bill);
 
     /**
      * 根据主键查询，级联查询商品

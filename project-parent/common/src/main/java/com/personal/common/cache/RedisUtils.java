@@ -1,6 +1,7 @@
 package com.personal.common.cache;
 
 import com.personal.common.utils.base.DateUtil;
+import com.personal.common.utils.base.UUIDUtils;
 
 /**
  * 例如redis实现用户账单排名工具
@@ -19,8 +20,18 @@ public class RedisUtils {
         return "bill_ranking_"+DateUtil.getFormatDate(DateUtil.DATE_FORMAT_01);
     }
 
+    /**
+     * 积分(红包)key
+     * @param customerId
+     * @return
+     */
+    public static String redPacketKey(String customerId){
+        return "customer_integral_"+customerId;
+    }
+
     public static void main(String[] args) {
-        System.out.println(DateUtil.getFormateDateSimple());
-        System.out.println("bill_ranking_"+DateUtil.getFormatDate(DateUtil.DATE_FORMAT_01));
+//        System.out.println(DateUtil.getFormateDateSimple());
+//        System.out.println("bill_ranking_"+DateUtil.getFormatDate(DateUtil.DATE_FORMAT_01));
+        System.out.println(redPacketKey(UUIDUtils.getUUID()));
     }
 }

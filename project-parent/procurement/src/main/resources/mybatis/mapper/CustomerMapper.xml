@@ -19,6 +19,7 @@
     <result column="is_agree_protocol" property="isAgreeProtocol" />
     <result column="login_time" property="loginTime" />
     <result column="status" property="status" />
+    <result column="red_packet" property="redPacket"/>
     </resultMap>
 
 </mapper>
