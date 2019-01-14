@@ -18,6 +18,7 @@
 		<module>procurement</module>
 		<module>common</module>
 		<module>generator</module>
+		<module>msb-admin</module>
 	</modules>
 
 	<properties>
