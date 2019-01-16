@@ -20,15 +20,41 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
+		<!--redis 依赖-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
+		<!--aop-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
+		<!-- MP start -->
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatisplus-spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus</artifactId>
+		</dependency>
+		<!-- MP end -->
+
+		<!-- druid阿里巴巴数据库连接池 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- mysql驱动包 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 

@@ -2,8 +2,7 @@ package com.personal.entity;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.personal.common.base.BaseEntity;
-import org.springframework.data.annotation.Transient;
+import com.personal.common.base.entity.BaseWeChatEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -17,7 +16,7 @@ import java.util.Date;
  * @since 2018-05-13
  */
 @TableName("t_customer")
-public class Customer extends BaseEntity {
+public class Customer extends BaseWeChatEntity {
 
     private static final long serialVersionUID = 1L;
 

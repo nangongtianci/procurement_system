@@ -3,7 +3,7 @@ package com.personal.entity;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -18,7 +18,7 @@ import java.util.List;
  * @since 2018-05-13
  */
 @TableName("t_bill")
-public class Bill extends BaseEntity {
+public class Bill extends BaseWeChatEntity {
 
     private static final long serialVersionUID = 1L;
 

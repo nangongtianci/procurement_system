@@ -49,12 +49,7 @@
 			<version>1.7.25</version>
 		</dependency>
 
-		<!-- 数据库连接池和监控druid -->
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>druid</artifactId>
-			<version>1.1.6</version>
-		</dependency>
+
 
 		<!-- JSON解析转换工具fastjson -->
 		<dependency>
@@ -115,6 +110,12 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
@@ -138,11 +139,18 @@
 			</dependency>
 			<!-- MP end -->
 
-			<!-- 数据库连接池和监控druid -->
+			<!-- druid阿里巴巴数据库连接池 -->
 			<dependency>
 				<groupId>com.alibaba</groupId>
-				<artifactId>druid</artifactId>
-				<version>1.1.6</version>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>1.1.10</version>
+			</dependency>
+
+			<!-- 数据库连接池和监控druid -->
+			<dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>1.1.6</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

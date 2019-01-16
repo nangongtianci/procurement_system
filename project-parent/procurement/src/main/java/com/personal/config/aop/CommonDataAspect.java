@@ -1,6 +1,6 @@
 package com.personal.config.aop;
 
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
 import com.personal.common.base.page.AbstractPageQueryParam;
 import com.personal.common.constant.SysConstant;
 import com.personal.common.utils.base.ReflectionUtils;
@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +40,7 @@ public class CommonDataAspect {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length>0){
                 for(int i=0;i<args.length;i++){
-                    if(args[i] instanceof BaseEntity){
+                    if(args[i] instanceof BaseWeChatEntity){
                         setInsertData(args[i]);
                     }
                 }
@@ -64,7 +63,7 @@ public class CommonDataAspect {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length>0){
                 for(int i=0;i<args.length;i++){
-                    if(args[i] instanceof BaseEntity){
+                    if(args[i] instanceof BaseWeChatEntity){
                         setUpdateData(args[i]);
                     }
                 }
@@ -108,7 +107,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     private void setInsertData(Object obj) throws Exception {
-        if(!(obj instanceof BaseEntity)){
+        if(!(obj instanceof BaseWeChatEntity)){
             return;
         }
 
@@ -160,7 +159,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     private void setUpdateData(Object obj) throws Exception {
-        if(!(obj instanceof BaseEntity)){
+        if(!(obj instanceof BaseWeChatEntity)){
             return;
         }
 

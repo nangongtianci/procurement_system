@@ -2,9 +2,8 @@ package com.personal.entity;
 
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
 
 /**
  * <p>
@@ -15,7 +14,7 @@ import com.personal.common.base.BaseEntity;
  * @since 2018-10-28
  */
 @TableName("t_code_manage")
-public class CodeManage extends BaseEntity {
+public class CodeManage extends BaseWeChatEntity {
 
     private static final long serialVersionUID = 1L;
 

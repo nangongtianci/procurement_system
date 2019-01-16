@@ -1,9 +1,8 @@
 package com.personal.entity;
 
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
 
 /**
  * <p>
@@ -14,7 +13,7 @@ import com.personal.common.base.BaseEntity;
  * @since 2018-05-22
  */
 @TableName("t_customer_virtual_coin")
-public class CustomerVirtualCoin extends BaseEntity {
+public class CustomerVirtualCoin extends BaseWeChatEntity {
 
     private static final long serialVersionUID = 1L;
 

@@ -1,6 +1,7 @@
 package com.personal.entity;
 
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
+
 /**
  * 语音识别参数
  * @author ylw
@@ -8,7 +9,7 @@ import com.personal.common.base.BaseEntity;
  * @param
  * @return
  */
-public class Voice extends BaseEntity {
+public class Voice extends BaseWeChatEntity {
     private String text;
     private String userId;
     private String operationId;

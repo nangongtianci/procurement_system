@@ -3,7 +3,7 @@ package com.personal.entity;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.personal.common.base.BaseEntity;
+import com.personal.common.base.entity.BaseWeChatEntity;
 
 import java.math.BigDecimal;
 
@@ -17,7 +17,7 @@ import java.math.BigDecimal;
  */
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 @TableName("t_goods")
-public class Goods extends BaseEntity {
+public class Goods extends BaseWeChatEntity {
 
     private static final long serialVersionUID = 1L;
 

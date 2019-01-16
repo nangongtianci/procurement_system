@@ -11,6 +11,7 @@ public class MsbAdminApplicationTests {
 
 	@Test
 	public void contextLoads() {
+
 	}
 
 }

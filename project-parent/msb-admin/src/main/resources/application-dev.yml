@@ -1,0 +1,30 @@
+spring:
+  # redis 集群配置
+  redis:
+    cluster:
+      nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/procurement_system?characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: root
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait-thread-count: 10
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+
+  resources:
+    static-locations: file:/data/template/img/
+  mvc:
+    static-path-pattern: /static/img/**
+
+
+
+
+
+
+

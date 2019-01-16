@@ -20,9 +20,14 @@ import java.util.Map;
  * @param
  * @return
  */
-public class Generator {
+public class AdminGenerator {
     public static void main(String[] args) {
-            generate("procurement","t_code_manage");
+            generate("msb-admin","t_global_goods_category",
+                    "t_global_goods_category_rel",
+                    "t_global_goods",
+                    "t_dept",
+                    "t_employee",
+                    "t_dept_employee_rel");
     }
 
     private static void generate(String model,String ... tableName){
@@ -57,15 +62,17 @@ public class Generator {
         strategy.setTablePrefix(new String[]{"t_"});
         strategy.setInclude(tableName);
 
-        strategy.setSuperEntityClass("com.personal.common.base.BaseEntity");
-        strategy.setSuperEntityColumns(new String[] {"id","create_time","update_time"});
+        // 微小本后台
+        strategy.setSuperEntityClass("com.personal.common.base.entity.BaseAdminEntity");
+        strategy.setSuperEntityColumns(new String[] {"id","create_user","update_user","create_time","update_time"});
+
         strategy.setLogicDeleteFieldName("");
         strategy.setRestControllerStyle(true); // 生成Rest风格控制器
         mpg.setStrategy(strategy);
 
         // 包配置
         PackageConfig pc = new PackageConfig();
-        pc.setParent("com.personal");
+        pc.setParent("com.msb");
         pc.setController("controller");
         mpg.setPackageInfo(pc);
 
@@ -96,4 +103,7 @@ public class Generator {
         mpg.execute();
         System.out.println("生成完成.........");
     }
+
+
+
 }
