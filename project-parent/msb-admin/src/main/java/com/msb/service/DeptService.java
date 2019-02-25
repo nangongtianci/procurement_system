@@ -1,7 +1,7 @@
 package com.msb.service;
 
-import com.msb.entity.Dept;
 import com.baomidou.mybatisplus.service.IService;
+import com.msb.entity.Dept;
 
 /**
  * <p>

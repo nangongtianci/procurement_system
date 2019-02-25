@@ -1,6 +1,5 @@
 package com.msb.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.personal.common.base.entity.BaseAdminEntity;
 

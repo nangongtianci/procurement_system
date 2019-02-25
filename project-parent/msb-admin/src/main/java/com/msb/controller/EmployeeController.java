@@ -17,5 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/employee")
 public class EmployeeController {
 
+    public static void main(String[] args) {
+        int a = 10,b=10;
+        modify(a,b);
+        System.out.println(a);
+        System.out.println(b);
+        // 有参数无返回值
+        // 无参无返回值
+        // 无参有返回值
+
+    }
+
+    private static void modify(int a,int b){
+        a = 0;
+        b = 0;
+    }
 }
 

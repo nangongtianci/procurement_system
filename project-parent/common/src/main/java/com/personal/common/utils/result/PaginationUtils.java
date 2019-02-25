@@ -1,4 +1,8 @@
 package com.personal.common.utils.result;
+
+import com.baomidou.mybatisplus.plugins.Page;
+import com.personal.common.base.page.AbstractPageQueryParam;
+
 /**
  * 分页工具
  * @author ylw
@@ -22,6 +26,24 @@ public class PaginationUtils {
         pageResult.setPageNow(pageNow);
         pageResult.setPageSize(pageSize);
         pageResult.setRows(obj);
+        return Result.OK(pageResult);
+    }
+
+    public static Result getResultObj(Object obj,int total,AbstractPageQueryParam param){
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(total);
+        pageResult.setPageNow(param.getPageNow());
+        pageResult.setPageSize(param.getPageSize());
+        pageResult.setRows(obj);
+        return Result.OK(pageResult);
+    }
+
+    public static <T> Result getResultObj(Page<T> page){
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(page.getTotal());
+        pageResult.setPageNow(page.getCurrent());
+        pageResult.setPageSize(page.getSize());
+        pageResult.setRows(page.getRecords());
         return Result.OK(pageResult);
     }
 }
