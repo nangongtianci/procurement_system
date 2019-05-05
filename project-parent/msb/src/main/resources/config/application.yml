@@ -1,0 +1,40 @@
+server:
+  port: 8443
+  ssl:
+    key-store: classpath:certificate/keystore.jks
+    key-store-password: 50167515853
+
+logging:
+  config: classpath:log/logback-spring.xml
+
+spring:
+  http:
+    converters:
+      preferred-json-mapper: fastjson
+  devtools:
+      restart:
+        enabled: true
+
+  # 邮箱配置
+  mail:
+      host: smtp.qq.com
+      username: 3393024626@qq.com
+      password: gfyboxieuibgcifh
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+              required: true
+            socketFactory:
+              class: javax.net.ssl.SSLSocketFactory
+              port: 465
+  profiles:
+      active: @profileActive@
+
+
+
+
+
+
