@@ -2,11 +2,7 @@ package com.msb.query;
 
 import com.personal.common.base.BaseQueryParam;
 
-public class ResourceImageQueryParam extends BaseQueryParam {
-    /**
-     * 资源图片组主键
-     */
-    private String gid;
+public class ResourceImageGroupQueryParam extends BaseQueryParam {
     /**
      * 图片名称
      */
@@ -15,14 +11,6 @@ public class ResourceImageQueryParam extends BaseQueryParam {
      * 排序
      */
     private Integer sort;
-
-    public String getGid() {
-        return gid;
-    }
-
-    public void setGid(String gid) {
-        this.gid = gid;
-    }
 
     public String getName() {
         return name;

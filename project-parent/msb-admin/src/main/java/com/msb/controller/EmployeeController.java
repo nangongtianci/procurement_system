@@ -1,8 +1,15 @@
 package com.msb.controller;
 
 
+import com.msb.entity.Employee;
+import com.msb.service.EmployeeService;
+import com.personal.common.base.controller.BaseMsbAdminController;
+import com.personal.common.utils.base.StringUtils;
+import com.personal.common.utils.result.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -15,22 +22,22 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/employee")
-public class EmployeeController {
+public class EmployeeController extends BaseMsbAdminController{
 
-    public static void main(String[] args) {
-        int a = 10,b=10;
-        modify(a,b);
-        System.out.println(a);
-        System.out.println(b);
-        // 有参数无返回值
-        // 无参无返回值
-        // 无参有返回值
+    @Autowired
+    private EmployeeService employeeService;
 
-    }
+    @PostMapping("add")
+    public Result add(@RequestBody Employee employee){
+        if(StringUtils.isBlank(employee.getAccount()) || StringUtils.isBlank(employee.getPassword())){
+            return render("用户名，密码不能为空！");
+        }
 
-    private static void modify(int a,int b){
-        a = 0;
-        b = 0;
+        if(StringUtils.isBlank(employee.getName())){
+            return render("用户名不能为空!");
+        }
+
+        return render(employeeService.insert(employee));
     }
 }
 

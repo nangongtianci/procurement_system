@@ -1,5 +1,6 @@
 package com.personal.common.base.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.personal.common.utils.base.StringUtils;
 import com.personal.common.utils.result.PaginationUtils;
@@ -26,6 +27,7 @@ public class BaseMsbAdminController extends BaseController{
         }
 
         if (Objects.isNull(msg)){
+            result.setStatus(Result.FAIL_CODE);
             result.setMessage("msg:"+StringUtils.join(msg,","));
         }
         return result;
@@ -36,9 +38,17 @@ public class BaseMsbAdminController extends BaseController{
         return rt?Result.OK():Result.FAIL();
     }
 
-    public static void main(String[] args) {
-        int a[] = new int[]{1,2,3};
-        int[] b = new int[10];
-
+    /**
+     * @desc 从json串格式的请求参数中，获取指定的字段值(本方法适合那些请求参数非常少的情况)
+     * @param param json串
+     * @param fieldName key名称
+     * @return
+     */
+    protected Object getParamByKey(String param,String fieldName){
+        if(StringUtils.isBlank(param) || !param.contains(fieldName)){
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(param);
+        return jsonObject.getString(fieldName);
     }
 }

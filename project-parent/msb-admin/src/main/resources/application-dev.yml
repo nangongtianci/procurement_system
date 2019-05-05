@@ -17,10 +17,10 @@ spring:
       max-wait: 60000
       time-between-eviction-runs-millis: 60000
 
-  resources:
-    static-locations: file:/data/template/img/
-  mvc:
-    static-path-pattern: /static/img/**
+#  resources:
+#    static-locations: file:/data/fileTest/
+#  mvc:
+#    static-path-pattern: /static/**
 
 
 

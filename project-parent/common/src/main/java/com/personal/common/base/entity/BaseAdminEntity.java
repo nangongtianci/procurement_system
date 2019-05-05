@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 public class BaseAdminEntity extends BaseTimeEntity {
     @TableField("create_user")
     private String createUser;
-    @TableField("update_time")
+    @TableField("update_user")
     private String updateUser;
 
     public String getCreateUser() {

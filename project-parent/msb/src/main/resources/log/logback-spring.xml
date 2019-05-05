@@ -2,7 +2,7 @@
 <configuration>
     <timestamp key="date" datePattern="yyyyMMdd"/>
     <property name="LOG_PATH" value="/data/project/logs" />
-    <property name="LOG_NAME" value="quickers" />
+    <property name="LOG_NAME" value="msb" />
 
     <!-- Output to Console -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">

@@ -1,4 +1,4 @@
-package com.personal.config.redis;
+package com.msb.config.redis;
 
 import org.springframework.data.redis.core.ZSetOperations;
 
@@ -160,21 +160,21 @@ public interface RedisService {
      * @param key
      * @param value
      */
-    void zsadd(String key,String value,double score);
+    void zsadd(String key, String value, double score);
 
     /**
      * zset:返回指定key中的集合中指定member元素对应的分值
      * @param key
      * @param member
      */
-    double zscore(String key,Object member);
+    double zscore(String key, Object member);
 
     /**
      * zset:返回指定key对应的集合中，指定member在其中的排名，注意排名从0开始且按照分值从大到小降序
      * @param key
      * @param member
      */
-    long zrevrank(String key,Object member);
+    long zrevrank(String key, Object member);
 
     /**
      * zset:返回指定key对应的有序集合的元素数量

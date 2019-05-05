@@ -1,4 +1,4 @@
-package com.personal.config.redis;
+package com.msb.config.redis;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

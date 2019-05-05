@@ -1,4 +1,4 @@
-package com.personal.config.mybatis;
+package com.msb.config.mybatis;
 
 import com.baomidou.mybatisplus.enums.DBType;
 import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 @EnableTransactionManagement
 @Configuration
-@MapperScan(basePackages={"com.personal.mapper"})
+@MapperScan(basePackages={"com.msb.mapper"})
 public class MybatisPlusConfig {
     @Autowired
     private DataSource dataSource;
@@ -81,7 +81,7 @@ public class MybatisPlusConfig {
         if (StringUtils.hasLength(this.properties.getTypeAliasesPackage())) {
             mybatisPlus.setTypeAliasesPackage(this.properties.getTypeAliasesPackage());
         }else{
-            mybatisPlus.setTypeAliasesPackage("com.personal.entity;com.personal.conditions");
+            mybatisPlus.setTypeAliasesPackage("com.msb.entity;com.msb.query");
         }
 
         if (StringUtils.hasLength(this.properties.getTypeHandlersPackage())) {

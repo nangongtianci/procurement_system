@@ -20,32 +20,17 @@ spring:
   # 数据源配置
   datasource:
     name: quickers
-    url: jdbc:mysql://127.0.0.1:3306/procurement_system?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false
     username: root
     password: Yangxianfeng99?
-    # 使用druid数据源
-    type: com.alibaba.druid.pool.DruidDataSource
-    driver-class-name: com.mysql.jdbc.Driver
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait-thread-count: 10
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
 
-
-# 快鸽自定义配置信息
-kuaige:
-  generate:
-    excelSavePath: /data/template/excel
-    imgPath: /data/template/img/
-    staticBrowsePath: /static/img/
-  mail:
-    report:
-      subject: 报表信息
-      content: 由快鸽发送的报表信息！
-  sms:
-    tpl: 【快鸽】尊敬的用户：您的校验码：%s，工作人员不会索取，请勿泄漏。
-    url: http://118.178.117.163/plain/SmsMt
-    acctno: 100710
-    passwd: oemMXV4C
-  ssl:
-      port: 80
-      redirect: 443
 
 
 

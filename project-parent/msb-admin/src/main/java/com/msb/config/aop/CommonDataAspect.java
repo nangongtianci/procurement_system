@@ -1,11 +1,11 @@
 package com.msb.config.aop;
 
 import com.msb.config.redis.RedisService;
+import com.personal.common.base.entity.BaseAdminEntity;
 import com.personal.common.base.entity.BaseWeChatEntity;
 import com.personal.common.base.page.AbstractPageQueryParam;
 import com.personal.common.constant.SysConstant;
 import com.personal.common.utils.base.ReflectionUtils;
-import com.personal.common.utils.base.UUIDUtils;
 import com.personal.common.utils.collections.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -26,9 +26,9 @@ import java.util.Set;
  * @param   
  * @return   
  */
-//@Aspect
-//@Order(1)
-//@Configuration
+@Aspect
+@Order(1)
+@Configuration
 public class CommonDataAspect {
     @Autowired
     private RedisService redisService;
@@ -45,7 +45,7 @@ public class CommonDataAspect {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length>0){
                 for(int i=0;i<args.length;i++){
-                    if(args[i] instanceof BaseWeChatEntity){
+                    if(args[i] instanceof BaseAdminEntity){
                         setInsertData(args[i]);
                     }
                 }
@@ -68,7 +68,7 @@ public class CommonDataAspect {
             Object[] args = pjp.getArgs();
             if(!ArrayUtils.isEmpty(args) && args.length>0){
                 for(int i=0;i<args.length;i++){
-                    if(args[i] instanceof BaseWeChatEntity){
+                    if(args[i] instanceof BaseAdminEntity){
                         setUpdateData(args[i]);
                     }
                 }
@@ -112,7 +112,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     private void setInsertData(Object obj) throws Exception {
-        if(!(obj instanceof BaseWeChatEntity)){
+        if(!(obj instanceof BaseAdminEntity)){
             return;
         }
 
@@ -121,9 +121,9 @@ public class CommonDataAspect {
         for(Field field : fields){
             field.setAccessible(true);
 
-//            if(field.getName().equalsIgnoreCase("id")){
-//                field.set(obj,UUIDUtils.getUUID());
-//            }
+            if(field.getName().equalsIgnoreCase("createUser") || field.getName().equalsIgnoreCase("updateUser")){
+                field.set(obj,"ylw");
+            }
 
             if(field.getName().equalsIgnoreCase("createTIme") || field.getName().equalsIgnoreCase("updateTime")){
                 field.set(obj,date);
@@ -164,7 +164,7 @@ public class CommonDataAspect {
      * @throws Exception
      */
     private void setUpdateData(Object obj) throws Exception {
-        if(!(obj instanceof BaseWeChatEntity)){
+        if(!(obj instanceof BaseAdminEntity)){
             return;
         }
 
@@ -175,6 +175,10 @@ public class CommonDataAspect {
 
             if(field.getName().equalsIgnoreCase("updateTime")){
                 field.set(obj,date);
+            }
+
+            if(field.getName().equalsIgnoreCase("createUser")){
+                field.set(obj,"ylw");
             }
 
             if(field.getType().toString().equalsIgnoreCase("interface java.util.List")){

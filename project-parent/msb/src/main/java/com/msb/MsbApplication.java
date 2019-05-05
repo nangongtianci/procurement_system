@@ -2,15 +2,12 @@ package com.msb;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-
 
 @SpringBootApplication
-public class MsbAdminApplication {
+public class MsbApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MsbAdminApplication.class, args);
+		SpringApplication.run(MsbApplication.class, args);
 	}
 
 }
-
