@@ -3,7 +3,7 @@ package com.personal.controller;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.personal.common.annotation.InsertMethodFlag;
 import com.personal.common.annotation.UpdateMethodFlag;
-import com.personal.common.base.BaseController;
+import com.personal.common.base.controller.BaseController;
 import com.personal.common.enume.ModuleEnum;
 import com.personal.common.enume.StatusEnum;
 import com.personal.common.enume.UserTypeEnum;

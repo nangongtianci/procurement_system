@@ -8,11 +8,15 @@ package com.personal.common.enume;
  * @return   
  */ 
 public enum ModuleEnum {
+    // 微信小程序
     bill("bill","账单"),
     goods("goods","商品"),
     customer("customer","用户主键"),
     applyLoanRecord("applyLoanRecord","贷款记录"),
     codeManage("codeManage","产品管理"),
+
+    // 后台
+    dict("dict","字典"),
     ;
 
 

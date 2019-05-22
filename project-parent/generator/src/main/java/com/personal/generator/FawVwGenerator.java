@@ -20,9 +20,14 @@ import java.util.Map;
  * @param
  * @return
  */
-public class Generator {
+public class FawVwGenerator {
     public static void main(String[] args) {
-            generate("procurement","t_code_manage");
+            generate("/home/ylw/Desktop/一起大众/2019-03-19/商城/generater/",
+                    "vw_rent_evaluate",
+                    "vw_rent_order",
+                    "vw_rent_vehicle",
+                    "vw_rent_vehicle_image",
+                    "vw_rent_order_generate_record");
     }
 
     private static void generate(String model,String ... tableName){
@@ -48,24 +53,26 @@ public class Generator {
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");
         dsc.setPassword("root");
-        dsc.setUrl("jdbc:mysql://127.0.0.1:3306/procurement_system?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull");
+        dsc.setUrl("jdbc:mysql://127.0.0.1:3306/faw_vw?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull");
         mpg.setDataSource(dsc);
 
         // 策略配置
         StrategyConfig strategy = new StrategyConfig();
         strategy.setNaming(NamingStrategy.underline_to_camel);
-        strategy.setTablePrefix(new String[]{"t_"});
+        strategy.setTablePrefix(new String[]{"vw_"});
         strategy.setInclude(tableName);
 
-        strategy.setSuperEntityClass("com.personal.common.base.BaseEntity");
+        // 微小本后台
+        strategy.setSuperEntityClass("com.vw.rent.utils.base.BaseEntity");
         strategy.setSuperEntityColumns(new String[] {"id","create_time","update_time"});
+
         strategy.setLogicDeleteFieldName("");
         strategy.setRestControllerStyle(true); // 生成Rest风格控制器
         mpg.setStrategy(strategy);
 
         // 包配置
         PackageConfig pc = new PackageConfig();
-        pc.setParent("com.personal");
+        pc.setParent("com.vw.rent");
         pc.setController("controller");
         mpg.setPackageInfo(pc);
 
@@ -96,4 +103,7 @@ public class Generator {
         mpg.execute();
         System.out.println("生成完成.........");
     }
+
+
+
 }

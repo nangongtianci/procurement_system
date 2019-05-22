@@ -1,4 +1,4 @@
-package com.personal.common.base;
+package com.personal.common.base.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;

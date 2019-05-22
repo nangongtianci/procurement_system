@@ -1,0 +1,39 @@
+server:
+  port: 443
+spring:
+  resources:
+    static-locations: file:${kuaige.generate.imgPath},file:/data/template/wx-verify
+  mvc:
+    static-path-pattern: ${kuaige.generate.staticBrowsePath}**
+  # 单点配置
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: 3000 # 连接超时时间 单位 ms（毫秒）
+    jedis:
+      pool:
+        max-idle: 500
+        min-idle: 50
+        max-active: 2000
+        max-wait: 100
+  # 数据源配置
+  datasource:
+    name: quickers
+    url: jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: Yangxianfeng99?
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait-thread-count: 10
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+
+
+
+
+
+
+
