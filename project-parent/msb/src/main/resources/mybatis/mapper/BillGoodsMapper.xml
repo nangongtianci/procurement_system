@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.msb.mapper.BillGoodsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.msb.entity.BillGoods">
+    <result column="id" property="id" />
+    <result column="create_time" property="createTime" />
+    <result column="update_time" property="updateTime" />
+        <result column="bill_id" property="billId" />
+        <result column="name" property="name" />
+        <result column="number" property="number" />
+        <result column="price" property="price" />
+        <result column="weight" property="weight" />
+        <result column="weight_unit" property="weightUnit" />
+        <result column="quality" property="quality" />
+        <result column="product_img_path" property="productImgPath" />
+        <result column="is_goods" property="isGoods" />
+        <result column="goods_is_show" property="goodsIsShow" />
+        <result column="goods_fix_price" property="goodsFixPrice" />
+        <result column="goods_start_count" property="goodsStartCount" />
+        <result column="goods_desc" property="goodsDesc" />
+        <result column="goods_brand" property="goodsBrand" />
+        <result column="goods_spec" property="goodsSpec" />
+        <result column="goods_product_place" property="goodsProductPlace" />
+        <result column="goods_address" property="goodsAddress" />
+        <result column="goods_freight" property="goodsFreight" />
+        <result column="goods_cost_ratio" property="goodsCostRatio" />
+        <result column="goods_img_path" property="goodsImgPath" />
+        <result column="goods_video_path" property="goodsVideoPath" />
+        <result column="create_customer_id" property="createCustomerId" />
+    </resultMap>
+
+</mapper>

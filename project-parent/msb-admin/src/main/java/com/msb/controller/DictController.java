@@ -7,22 +7,22 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.msb.entity.Dict;
 import com.msb.query.DictQueryParam;
 import com.msb.service.DictService;
-import com.personal.common.annotation.InsertMethodFlag;
-import com.personal.common.annotation.PageQueryMethodFlag;
-import com.personal.common.annotation.UpdateMethodFlag;
-import com.personal.common.base.controller.BaseMsbAdminController;
-import com.personal.common.enume.ModuleEnum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.annotation.InsertMethodFlag;
+import com.msb.common.annotation.PageQueryMethodFlag;
+import com.msb.common.annotation.UpdateMethodFlag;
+import com.msb.common.base.controller.BaseMsbAdminController;
+import com.msb.common.enume.ModuleEnum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
-import static com.personal.common.utils.result.CommonResultMsg.assignModuleNameForName;
-import static com.personal.common.utils.result.CommonResultMsg.assignModuleNameForPK;
-import static com.personal.common.utils.result.RegUtils.matchesIds;
+import static com.msb.common.utils.result.CommonResultMsg.assignModuleNameForName;
+import static com.msb.common.utils.result.CommonResultMsg.assignModuleNameForPK;
+import static com.msb.common.utils.result.RegUtils.matchesIds;
 
 /**
  * <p>

@@ -1,12 +1,12 @@
 package com.personal.controller;
 
-import com.personal.common.enume.UserTypeEnum;
+import com.msb.common.enume.UserTypeEnum;
 import com.personal.common.json.JsonUtils;
-import com.personal.common.random.RandomNum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.constants.AppConstant;
-import com.personal.common.utils.result.Result;
-import com.personal.common.utils.sms.Sms;
+import com.msb.common.random.RandomNum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.constants.AppConstant;
+import com.msb.common.utils.result.Result;
+import com.msb.common.utils.sms.Sms;
 import com.personal.communicate.HttpUtil;
 import com.personal.config.redis.RedisService;
 import com.personal.config.system.sms.SmsConfig;
@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.personal.common.utils.result.CommonResultMsg.assignFieldNotNull;
+import static com.msb.common.utils.result.CommonResultMsg.assignFieldNotNull;
 
 @RestController
 @RequestMapping("/common")

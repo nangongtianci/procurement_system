@@ -1,8 +1,8 @@
 package com.msb.entity;
 
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.personal.common.base.entity.BaseAdminEntity;
-import com.personal.common.utils.validate.type.Insert;
+import com.msb.common.base.entity.BaseAdminEntity;
+import com.msb.common.utils.validate.type.Insert;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotBlank;

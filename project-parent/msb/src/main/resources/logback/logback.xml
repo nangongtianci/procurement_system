@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+     -->
+    <!-- 日志最大的历史 30天 -->
+    <property name="maxHistory" value="30"/>
+    <property name="maxFileSize" value="64 MB"/>
+    <include resource="logback/logback-@profiles.active@.xml"/>
+</configuration>

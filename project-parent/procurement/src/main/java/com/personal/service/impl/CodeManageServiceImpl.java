@@ -1,7 +1,7 @@
 package com.personal.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.utils.result.Result;
+import com.msb.common.utils.result.Result;
 import com.personal.entity.CodeManage;
 import com.personal.entity.Goods;
 import com.personal.mapper.CodeManageMapper;

@@ -1,6 +1,6 @@
 package com.msb.query;
 
-import com.personal.common.base.page.BasePageQueryParam;
+import com.msb.common.base.page.BasePageQueryParam;
 
 import java.math.BigDecimal;
 import java.util.Map;

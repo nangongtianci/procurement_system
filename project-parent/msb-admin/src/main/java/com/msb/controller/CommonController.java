@@ -1,8 +1,8 @@
 package com.msb.controller;
 
-import com.personal.common.base.controller.BaseMsbAdminController;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.base.controller.BaseMsbAdminController;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.result.Result;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,28 +1,25 @@
 server:
   port: 443
 spring:
-  resources:
-    static-locations: file:${kuaige.generate.imgPath},file:/data/template/wx-verify
-  mvc:
-    static-path-pattern: ${kuaige.generate.staticBrowsePath}**
   # 单点配置
   redis:
     database: 0
     host: 127.0.0.1
     port: 6379
-    timeout: 3000 # 连接超时时间 单位 ms（毫秒）
     jedis:
       pool:
         max-idle: 500
         min-idle: 50
         max-active: 2000
         max-wait: 100
+    timeout: 5000
+
   # 数据源配置
   datasource:
     name: quickers
     url: jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false
     username: root
-    password: Yangxianfeng99?
+    password: Yangxianfeng99
     druid:
       initial-size: 0
       max-active: 10
@@ -30,6 +27,27 @@ spring:
       max-wait-thread-count: 10
       max-wait: 60000
       time-between-eviction-runs-millis: 60000
+
+
+# 快鸽自定义配置信息
+quickers:
+  generate:
+    excelSavePath: /data/template/excel
+    imgPath: /data/template/img/
+    verifyPath: /data/template/wx-verify/
+    staticBrowsePath: /static/img/
+  mail:
+    report:
+      subject: 报表信息
+      content: 由快鸽发送的报表信息！
+  sms:
+    tpl: 【快鸽】尊敬的用户：您的校验码：%s，工作人员不会索取，请勿泄漏。
+    url: http://118.178.117.163/plain/SmsMt
+    acctno: 100710
+    passwd: oemMXV4C
+  ssl:
+    port: 80
+    redirect: 443
 
 
 

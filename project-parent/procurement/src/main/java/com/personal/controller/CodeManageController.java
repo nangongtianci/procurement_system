@@ -1,14 +1,14 @@
 package com.personal.controller;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.annotation.InsertMethodFlag;
-import com.personal.common.annotation.UpdateMethodFlag;
-import com.personal.common.base.controller.BaseController;
-import com.personal.common.enume.ModuleEnum;
-import com.personal.common.enume.StatusEnum;
-import com.personal.common.enume.UserTypeEnum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.annotation.InsertMethodFlag;
+import com.msb.common.annotation.UpdateMethodFlag;
+import com.msb.common.base.controller.BaseController;
+import com.msb.common.enume.ModuleEnum;
+import com.msb.common.enume.StatusEnum;
+import com.msb.common.enume.UserTypeEnum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.result.Result;
 import com.personal.config.redis.RedisService;
 import com.personal.config.token.TokenUtils;
 import com.personal.entity.CodeManage;
@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.personal.common.utils.result.CommonResultMsg.*;
-import static com.personal.common.utils.result.RegUtils.*;
+import static com.msb.common.utils.result.CommonResultMsg.*;
+import static com.msb.common.utils.result.RegUtils.*;
 
 /**
  * <p>

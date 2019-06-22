@@ -5,10 +5,10 @@ spring:
       nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
   # 数据源配置
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/procurement_system?characterEncoding=UTF-8&useSSL=false
+    name: quickers
+    url: jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false
     username: root
-    password: root
+    password: 1234qweR?
     druid:
       initial-size: 0
       max-active: 10

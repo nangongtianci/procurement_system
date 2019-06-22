@@ -1,7 +1,7 @@
 package com.personal.conditions;
 
-import com.personal.common.base.BaseQueryParam;
-import com.personal.common.base.marking.POJOSerializable;
+import com.msb.common.base.BaseQueryParam;
+import com.msb.common.base.marking.POJOSerializable;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;

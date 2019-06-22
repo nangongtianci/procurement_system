@@ -1,6 +1,6 @@
 package com.msb.query;
 
-import com.personal.common.base.BaseQueryParam;
+import com.msb.common.base.BaseQueryParam;
 
 public class ResourceImageQueryParam extends BaseQueryParam {
     /**

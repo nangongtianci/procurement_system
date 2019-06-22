@@ -1,7 +1,7 @@
 package com.personal.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.personal.common.base.page.PageQueryParam;
+import com.msb.common.base.page.PageQueryParam;
 import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;

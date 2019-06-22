@@ -1,6 +1,6 @@
 package com.personal.config.interceptor;
 
-import com.personal.common.enume.UserTypeEnum;
+import com.msb.common.enume.UserTypeEnum;
 import com.personal.config.redis.RedisService;
 import com.personal.config.token.TokenUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;

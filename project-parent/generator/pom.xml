@@ -8,7 +8,7 @@
 
 	<parent>
 		<artifactId>project-parent</artifactId>
-		<groupId>com.personal</groupId>
+		<groupId>com.msb</groupId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -16,7 +16,7 @@
 	<dependencies>
 		<!--基础项目-->
 		<dependency>
-			<groupId>com.personal</groupId>
+			<groupId>com.msb</groupId>
 			<artifactId>common</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>

@@ -3,9 +3,9 @@ package com.msb.controller;
 
 import com.msb.entity.Employee;
 import com.msb.service.EmployeeService;
-import com.personal.common.base.controller.BaseMsbAdminController;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.base.controller.BaseMsbAdminController;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

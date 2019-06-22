@@ -2,10 +2,10 @@ package com.personal.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.enume.IsReceiveEnum;
-import com.personal.common.enume.ModuleEnum;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.enume.IsReceiveEnum;
+import com.msb.common.enume.ModuleEnum;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.result.Result;
 import com.personal.entity.Bill;
 import com.personal.entity.CustomerVirtualCoin;
 import com.personal.service.BillService;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
-import static com.personal.common.utils.result.CommonResultMsg.assignModuleNameForPK;
-import static com.personal.common.utils.result.RegUtils.matchesIds;
+import static com.msb.common.utils.result.CommonResultMsg.assignModuleNameForPK;
+import static com.msb.common.utils.result.RegUtils.matchesIds;
 
 /**
  * <p>

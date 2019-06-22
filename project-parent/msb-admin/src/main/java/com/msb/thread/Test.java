@@ -1,11 +1,10 @@
 package com.msb.thread;
 
 import com.msb.query.DictQueryParam;
-import com.personal.common.utils.base.Qp2EwUtils;
+import com.msb.common.utils.base.Qp2EwUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class Test {
 //    public static void main(String[] args) throws InterruptedException {

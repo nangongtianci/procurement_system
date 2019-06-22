@@ -2,17 +2,17 @@ package com.personal.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.personal.common.base.page.PageQueryParam;
-import com.personal.common.cache.RedisUtils;
-import com.personal.common.enume.BusinessStatusEnum;
-import com.personal.common.enume.IsPeerBillEnum;
-import com.personal.common.enume.MasterShareEnum;
+import com.msb.common.base.page.PageQueryParam;
+import com.msb.common.cache.RedisUtils;
+import com.msb.common.enume.BusinessStatusEnum;
+import com.msb.common.enume.IsPeerBillEnum;
+import com.msb.common.enume.MasterShareEnum;
 import com.personal.common.json.JsonUtils;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.collections.Collections3;
-import com.personal.common.utils.collections.ListUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.collections.Collections3;
+import com.msb.common.utils.collections.ListUtils;
+import com.msb.common.utils.result.Result;
 import com.personal.communicate.HttpUtil;
 import com.personal.conditions.BillQueryParam;
 import com.personal.config.redis.RedisService;
@@ -23,14 +23,12 @@ import com.personal.mapper.BillMapper;
 import com.personal.mapper.CustomerBillMapper;
 import com.personal.mapper.CustomerMapper;
 import com.personal.service.BillService;
-import com.personal.service.CustomerService;
 import com.personal.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**

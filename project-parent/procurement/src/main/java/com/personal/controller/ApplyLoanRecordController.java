@@ -1,11 +1,11 @@
 package com.personal.controller;
 
 
-import com.personal.common.annotation.InsertMethodFlag;
-import com.personal.common.enume.ModuleEnum;
-import com.personal.common.enume.MortgageThingEnum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.annotation.InsertMethodFlag;
+import com.msb.common.enume.ModuleEnum;
+import com.msb.common.enume.MortgageThingEnum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.result.Result;
 import com.personal.entity.ApplyLoanRecord;
 import com.personal.service.ApplyLoanRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
-import static com.personal.common.utils.result.CommonResultMsg.*;
-import static com.personal.common.utils.result.RegUtils.*;
+import static com.msb.common.utils.result.CommonResultMsg.*;
+import static com.msb.common.utils.result.RegUtils.*;
 
 /**
  * <p>

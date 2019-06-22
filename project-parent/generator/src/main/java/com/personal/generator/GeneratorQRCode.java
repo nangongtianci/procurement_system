@@ -6,7 +6,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.personal.common.utils.base.StringUtils;
+import com.msb.common.utils.base.StringUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

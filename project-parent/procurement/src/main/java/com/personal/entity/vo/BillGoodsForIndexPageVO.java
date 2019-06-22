@@ -2,7 +2,7 @@ package com.personal.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.personal.common.base.BaseVO;
+import com.msb.common.base.BaseVO;
 
 import java.math.BigDecimal;
 import java.util.Date;

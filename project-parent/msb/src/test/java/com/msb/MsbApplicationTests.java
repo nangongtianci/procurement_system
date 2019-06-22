@@ -11,6 +11,7 @@ public class MsbApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		System.out.println("hello world!");
 	}
 
 }

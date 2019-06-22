@@ -1,6 +1,6 @@
 package com.msb.config.redis;
 
-import com.personal.common.utils.base.SerializeUtil;
+import com.msb.common.utils.base.SerializeUtil;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.lang.Nullable;

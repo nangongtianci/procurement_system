@@ -1,6 +1,6 @@
 package com.personal.service;
 
-import com.personal.common.utils.result.Result;
+import com.msb.common.utils.result.Result;
 import com.personal.entity.CodeManage;
 import com.baomidou.mybatisplus.service.IService;
 

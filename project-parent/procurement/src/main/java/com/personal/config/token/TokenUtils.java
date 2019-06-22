@@ -1,9 +1,9 @@
 package com.personal.config.token;
 
 
-import com.personal.common.enume.UserTypeEnum;
-import com.personal.common.utils.constants.AppConstant;
-import com.personal.common.utils.encode.MD5Util;
+import com.msb.common.enume.UserTypeEnum;
+import com.msb.common.utils.constants.AppConstant;
+import com.msb.common.utils.encode.MD5Util;
 import com.personal.config.redis.RedisService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;

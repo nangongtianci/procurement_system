@@ -1,9 +1,8 @@
 package com.personal.service.impl;
 
-import com.personal.common.enume.*;
-import com.personal.common.utils.base.GenerateOrderUtil;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.enume.*;
+import com.msb.common.utils.base.GenerateOrderUtil;
+import com.msb.common.utils.base.UUIDUtils;
 import com.personal.entity.Bill;
 import com.personal.entity.Customer;
 import com.personal.entity.CustomerBill;

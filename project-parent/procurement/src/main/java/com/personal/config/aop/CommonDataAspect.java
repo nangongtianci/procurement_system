@@ -1,11 +1,11 @@
 package com.personal.config.aop;
 
-import com.personal.common.base.entity.BaseWeChatEntity;
-import com.personal.common.base.page.AbstractPageQueryParam;
-import com.personal.common.constant.SysConstant;
-import com.personal.common.utils.base.ReflectionUtils;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.collections.ArrayUtils;
+import com.msb.common.base.entity.BaseWeChatEntity;
+import com.msb.common.base.page.AbstractPageQueryParam;
+import com.msb.common.constant.SysConstant;
+import com.msb.common.utils.base.ReflectionUtils;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.collections.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -34,7 +34,7 @@ public class CommonDataAspect {
      * @return
      * @throws Exception
      */
-    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.InsertMethodFlag)")
+    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.msb.common.annotation.InsertMethodFlag)")
     public Object insertData(ProceedingJoinPoint pjp) throws Throwable {
         try {
             Object[] args = pjp.getArgs();
@@ -57,7 +57,7 @@ public class CommonDataAspect {
      * @return
      * @throws Exception
      */
-    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.UpdateMethodFlag)")
+    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.msb.common.annotation.UpdateMethodFlag)")
     public Object updateData(ProceedingJoinPoint pjp) throws Throwable{
         try {
             Object[] args = pjp.getArgs();
@@ -81,7 +81,7 @@ public class CommonDataAspect {
      * @return
      * @throws Exception
      */
-    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.personal.common.annotation.PageQueryMethodFlag)")
+    @Around("execution(* com.personal.controller.*.*(..)) && @annotation(com.msb.common.annotation.PageQueryMethodFlag)")
     public Object pageQueryData(ProceedingJoinPoint pjp) throws Throwable{
         try {
             Object[] args = pjp.getArgs();
@@ -122,6 +122,13 @@ public class CommonDataAspect {
 
             if(field.getName().equalsIgnoreCase("createTIme") || field.getName().equalsIgnoreCase("updateTime")){
                 field.set(obj,date);
+            }
+
+            if(field.getType().toString().matches("^class [a-zA-Z0-9.]+")){
+                if(field.get(obj) != null){
+                    Object subObj = field.get(obj);
+                    setInsertData(subObj);
+                }
             }
 
             if(field.getType().toString().equalsIgnoreCase("interface java.util.List")){

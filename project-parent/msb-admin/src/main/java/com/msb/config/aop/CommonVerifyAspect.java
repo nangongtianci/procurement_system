@@ -1,15 +1,15 @@
 package com.msb.config.aop;
 
-import com.personal.common.base.marking.POJOSerializable;
-import com.personal.common.utils.collections.ArrayUtils;
-import com.personal.common.utils.exceptions.ValidateException;
-import com.personal.common.utils.exceptions.enums.ValidateExceptionEnum;
-import com.personal.common.utils.validate.BeanValidator;
-import com.personal.common.utils.validate.ValidatorResult;
-import com.personal.common.utils.validate.type.Delete;
-import com.personal.common.utils.validate.type.Insert;
-import com.personal.common.utils.validate.type.Select;
-import com.personal.common.utils.validate.type.Update;
+import com.msb.common.base.marking.POJOSerializable;
+import com.msb.common.utils.collections.ArrayUtils;
+import com.msb.common.utils.exceptions.ValidateException;
+import com.msb.common.utils.exceptions.enums.ValidateExceptionEnum;
+import com.msb.common.utils.validate.BeanValidator;
+import com.msb.common.utils.validate.ValidatorResult;
+import com.msb.common.utils.validate.type.Delete;
+import com.msb.common.utils.validate.type.Insert;
+import com.msb.common.utils.validate.type.Select;
+import com.msb.common.utils.validate.type.Update;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

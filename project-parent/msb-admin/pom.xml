@@ -4,18 +4,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>project-parent</artifactId>
-		<groupId>com.personal</groupId>
+		<groupId>com.msb</groupId>
 		<version>1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.msb</groupId>
 	<artifactId>msb-admin</artifactId>
 	<name>msb-admin</name>
 
 	<dependencies>
 		<!--通用模块-->
 		<dependency>
-			<groupId>com.personal</groupId>
+			<groupId>com.msb</groupId>
 			<artifactId>common</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>

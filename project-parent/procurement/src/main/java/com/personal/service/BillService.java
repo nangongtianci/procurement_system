@@ -1,8 +1,8 @@
 package com.personal.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.personal.common.base.page.PageQueryParam;
-import com.personal.common.utils.result.Result;
+import com.msb.common.base.page.PageQueryParam;
+import com.msb.common.utils.result.Result;
 import com.personal.conditions.BillQueryParam;
 import com.personal.entity.Bill;
 import com.personal.entity.vo.BillGoodsForIndexPageVO;

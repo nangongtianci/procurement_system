@@ -2,7 +2,7 @@ package com.personal.entity;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.personal.common.base.entity.BaseWeChatEntity;
+import com.msb.common.base.entity.BaseWeChatEntity;
 
 /**
  * <p>

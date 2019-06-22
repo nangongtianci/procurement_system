@@ -1,6 +1,6 @@
 package com.personal.entity.vo;
 
-import com.personal.common.base.BaseVO;
+import com.msb.common.base.BaseVO;
 
 /**
  * 账单统计试图对象

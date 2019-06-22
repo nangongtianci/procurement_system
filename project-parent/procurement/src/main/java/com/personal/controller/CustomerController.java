@@ -2,18 +2,18 @@ package com.personal.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.personal.common.annotation.InsertMethodFlag;
-import com.personal.common.enume.IsAgreeProtocolEnum;
-import com.personal.common.enume.LoginStatusEnum;
-import com.personal.common.enume.ModuleEnum;
-import com.personal.common.enume.UserTypeEnum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.base.UUIDUtils;
-import com.personal.common.utils.collections.ArrayUtils;
-import com.personal.common.utils.constants.AppConstant;
-import com.personal.common.utils.encode.MD5Util;
-import com.personal.common.utils.file.FileUploadUtils;
-import com.personal.common.utils.result.Result;
+import com.msb.common.annotation.InsertMethodFlag;
+import com.msb.common.enume.IsAgreeProtocolEnum;
+import com.msb.common.enume.LoginStatusEnum;
+import com.msb.common.enume.ModuleEnum;
+import com.msb.common.enume.UserTypeEnum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.base.UUIDUtils;
+import com.msb.common.utils.collections.ArrayUtils;
+import com.msb.common.utils.constants.AppConstant;
+import com.msb.common.utils.encode.MD5Util;
+import com.msb.common.utils.file.FileUploadUtils;
+import com.msb.common.utils.result.Result;
 import com.personal.config.redis.RedisService;
 import com.personal.config.system.file.FileConfig;
 import com.personal.config.token.TokenUtils;
@@ -29,8 +29,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.personal.common.utils.result.CommonResultMsg.*;
-import static com.personal.common.utils.result.RegUtils.*;
+import static com.msb.common.utils.result.CommonResultMsg.*;
+import static com.msb.common.utils.result.RegUtils.*;
 
 /**
  * <p>

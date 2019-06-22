@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.msb.mapper.ApplyLoanRecordMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.msb.entity.ApplyLoanRecord">
+    <result column="id" property="id" />
+    <result column="create_time" property="createTime" />
+    <result column="update_time" property="updateTime" />
+    <result column="need_money" property="needMoney" />
+    <result column="use_cycle" property="useCycle" />
+    <result column="accept_rate" property="acceptRate" />
+    <result column="mortgage_thing" property="mortgageThing" />
+    <result column="purpose" property="purpose" />
+    <result column="create_customer_id" property="createCustomerId" />
+    </resultMap>
+</mapper>

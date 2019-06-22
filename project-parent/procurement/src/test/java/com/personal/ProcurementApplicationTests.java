@@ -1,7 +1,6 @@
 package com.personal;
 
-import com.personal.common.cache.RedisUtils;
-import com.personal.common.utils.base.DateUtil;
+import com.msb.common.cache.RedisUtils;
 import com.personal.config.redis.RedisService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,14 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.File;
 import java.util.Set;
 
 @RunWith(SpringRunner.class)

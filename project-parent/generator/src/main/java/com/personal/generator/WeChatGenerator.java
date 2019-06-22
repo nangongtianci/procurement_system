@@ -58,7 +58,7 @@ public class WeChatGenerator {
         strategy.setInclude(tableName);
 
         // 微信客户端
-        strategy.setSuperEntityClass("com.personal.common.base.entity.BaseWeChatEntity");
+        strategy.setSuperEntityClass("BaseWeChatEntity");
         strategy.setSuperEntityColumns(new String[] {"id","create_time","update_time"});
 
         strategy.setLogicDeleteFieldName("");

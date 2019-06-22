@@ -23,8 +23,7 @@ import java.util.Map;
 public class AdminGenerator {
     public static void main(String[] args) {
             generate("msb-admin",
-                    "t_source_image_group",
-                    "t_source_image");
+                    "t_customer");
     }
 
     private static void generate(String model,String ... tableName){
@@ -49,8 +48,8 @@ public class AdminGenerator {
         dsc.setDbType(DbType.MYSQL);
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");
-        dsc.setPassword("root");
-        dsc.setUrl("jdbc:mysql://127.0.0.1:3306/procurement_system?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull");
+        dsc.setPassword("1234qweR?");
+        dsc.setUrl("jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false");
         mpg.setDataSource(dsc);
 
         // 策略配置
@@ -60,7 +59,7 @@ public class AdminGenerator {
         strategy.setInclude(tableName);
 
         // 微小本后台
-        strategy.setSuperEntityClass("com.personal.common.base.entity.BaseAdminEntity");
+        strategy.setSuperEntityClass("BaseAdminEntity");
         strategy.setSuperEntityColumns(new String[] {"id","create_user","update_user","create_time","update_time"});
 
         strategy.setLogicDeleteFieldName("");

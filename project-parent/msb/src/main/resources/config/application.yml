@@ -4,9 +4,6 @@ server:
     key-store: classpath:certificate/keystore.jks
     key-store-password: 50167515853
 
-logging:
-  config: classpath:log/logback-spring.xml
-
 spring:
   http:
     converters:
@@ -14,6 +11,15 @@ spring:
   devtools:
       restart:
         enabled: true
+  jackson:
+    #参数意义：
+    #JsonInclude.Include.ALWAYS       默认
+    #JsonInclude.Include.NON_DEFAULT   属性为默认值不序列化
+    #JsonInclude.Include.NON_EMPTY     属性为 空（””） 或者为 NULL 都不序列化
+    #JsonInclude.Include.NON_NULL      属性为NULL  不序列化
+    default-property-inclusion: ALWAYS
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
 
   # 邮箱配置
   mail:

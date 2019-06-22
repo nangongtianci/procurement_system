@@ -2,11 +2,10 @@ package com.personal.config.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.personal.common.enume.UserTypeEnum;
-import com.personal.common.utils.base.StringUtils;
-import com.personal.common.utils.constants.AppConstant;
-import com.personal.common.utils.exceptions.enums.BizExceptionEnum;
-import com.personal.common.utils.result.Result;
+import com.msb.common.enume.UserTypeEnum;
+import com.msb.common.utils.base.StringUtils;
+import com.msb.common.utils.exceptions.enums.BizExceptionEnum;
+import com.msb.common.utils.result.Result;
 import com.personal.config.redis.RedisService;
 import com.personal.config.token.TokenUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;

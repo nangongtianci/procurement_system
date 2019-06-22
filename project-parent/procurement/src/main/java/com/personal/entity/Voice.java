@@ -1,6 +1,6 @@
 package com.personal.entity;
 
-import com.personal.common.base.entity.BaseWeChatEntity;
+import com.msb.common.base.entity.BaseWeChatEntity;
 
 /**
  * 语音识别参数
