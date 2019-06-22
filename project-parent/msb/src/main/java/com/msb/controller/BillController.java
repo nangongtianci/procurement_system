@@ -276,7 +276,7 @@ public class BillController extends BaseMsbController {
         }
 
         // 查询用户信息
-        Customer customer = customerService.selectById(bill.getCreateCustomerId());
+        Customer customer = customerService.selectById(bill.getCid());
         bill.setCustomer(customer);
 
         // 查询货品|商品信息
