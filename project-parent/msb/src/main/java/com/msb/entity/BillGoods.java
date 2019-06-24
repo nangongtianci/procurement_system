@@ -38,7 +38,7 @@ public class BillGoods extends BaseWeChatEntity {
     /**
      * 重量
      */
-    private Integer weight;
+    private Integer weight = 0;
     /**
      * 商品单位（元/斤，元/箱）
      */
@@ -72,7 +72,7 @@ public class BillGoods extends BaseWeChatEntity {
      * 商品启购量
      */
     @TableField("goods_start_count")
-    private Integer goodsStartCount;
+    private Integer goodsStartCount = 1;
     /**
      * 商品描述
      */

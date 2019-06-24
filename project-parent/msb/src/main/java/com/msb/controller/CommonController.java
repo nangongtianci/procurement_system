@@ -69,7 +69,7 @@ public class CommonController {
         }
     }
 
-    @GetMapping("/send/sms/{mobile}")
+    @PostMapping("/send/sms/{mobile}")
     public Result sendSms(@PathVariable String mobile){
         if(StringUtils.isBlank(mobile)){
             return Result.FAIL(assignFieldNotNull("手机号"));
@@ -98,7 +98,7 @@ public class CommonController {
      * @param request
      * @return
      */
-    @GetMapping("checkToken")
+    @PostMapping("checkToken")
     public String checkToken(HttpServletRequest request){
         if(TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
             return "false";

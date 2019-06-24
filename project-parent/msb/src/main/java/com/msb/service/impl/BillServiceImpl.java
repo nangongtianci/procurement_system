@@ -110,7 +110,10 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     private HashMap<String,String> extra(Bill bill){
         HashMap<String,String> rt = new HashMap<>();
-        if("1".equalsIgnoreCase(bill.getBusinessStatus())){ // 卖出
+        if("1".equalsIgnoreCase(bill.getBusinessStatus())
+                && !Objects.isNull(bill.getTotalPrice())
+                && bill.getTotalPrice().compareTo(new BigDecimal(0))>0
+        ){ // 卖出
             // 只有销售账单参与销售排行榜
             setRanking(bill.getCreateCustomerId());
             // 只有销售账单才会计算获得红包累计次数
@@ -134,7 +137,12 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             billGoods.setWeightUnit("1"); // 默认元/斤
         }
 
+        if(Objects.isNull(billGoods.getPrice())){
+            billGoods.setPrice(new BigDecimal(0));
+        }
+
         if("0".equalsIgnoreCase(bill.getBusinessStatus())
+                && !Objects.isNull(bill.getTotalPrice())
                 && bill.getTotalPrice().compareTo(new BigDecimal(0))>0){
             // 账单为买入，并且总价大于零，则货品自动升级为商品！
             billGoods.setIsGoods("1"); // 商品
@@ -302,7 +310,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             if(price.intValue() == 0){
                 price = new BigDecimal(min);
             }
-
 
             Customer cs = customerMapper.selectById(cid);
             cs.setRedPacket(price.add(cs.getRedPacket()));

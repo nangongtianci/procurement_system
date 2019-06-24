@@ -79,18 +79,11 @@ public class BillController extends BaseMsbController {
     public Result add(HttpServletRequest request,@RequestBody Bill bill) {
         String cid = getCid(request.getHeader("token"));
         bill.setCreateCustomerId(cid);
-        /**
-         * 校验货品|商品信息
-         */
-        Result result = validateBillGoods((byte)1,bill);
-        if(!Objects.isNull(result)){
-            return result;
-        }
 
         /**
          * 校验客户信息
          */
-        result = validateCustomer((byte)1,bill.getCustomer());
+        Result result = validateCustomer((byte)1,bill.getCustomer());
         if(!Objects.isNull(result)){
             return result;
         }
@@ -102,6 +95,15 @@ public class BillController extends BaseMsbController {
         if(!Objects.isNull(result)){
             return result;
         }
+
+        /**
+         * 校验货品|商品信息
+         */
+        result = validateBillGoods((byte)1,bill);
+        if(!Objects.isNull(result)){
+            return result;
+        }
+
 
         return billService.add(bill);
     }
@@ -315,10 +317,13 @@ public class BillController extends BaseMsbController {
                 return render(null,assignFieldNotNull("品名"));
             }
 
-            int ct = dictService.selectCount(new EntityWrapper<Dict>().
-                    where("pid={0} and code={1}",DictConstant.WEIGHT_UNIT_CATEGORY_ID,billGoods.getWeightUnit()));
-            if(ct<=0){
-                return render(null,assignFieldIllegalValueRange("重量单位"));
+            if("0".equalsIgnoreCase(bill.getBusinessStatus())
+                    || "1".equalsIgnoreCase(bill.getBusinessStatus())) { // 买入卖出
+                int ct = dictService.selectCount(new EntityWrapper<Dict>().
+                        where("pid={0} and code={1}",DictConstant.WEIGHT_UNIT_CATEGORY_ID,billGoods.getWeightUnit()));
+                if(ct<=0){
+                    return render(null,assignFieldIllegalValueRange("重量单位"));
+                }
             }
         }else{ // 更新
             if(!Objects.isNull(billGoods)){
@@ -367,52 +372,54 @@ public class BillController extends BaseMsbController {
 
     private Result validateBill(byte isAdd,Bill bill){
         if(isAdd == 1) { // 新增
-            bill.setCid(bill.getCustomer().getId());
             int bs = dictService.selectCount(new EntityWrapper<Dict>().
                     where("pid={0} and code={1}",DictConstant.BUSINESS_STATUS_CATEGORY_ID,bill.getBusinessStatus()));
             if(bs<=0){
                 return render(null,assignFieldIllegalValueRange("交易状态"));
             }
 
-            int bt = dictService.selectCount(new EntityWrapper<Dict>().
-                    where("pid={0} and code={1}",DictConstant.BILL_STATUS_CATEGORY_ID,bill.getBillStatus()));
-            if(bt<=0){
-                return render(null,assignFieldIllegalValueRange("账单状态"));
-            }
-
-            // 卖货校验
-            if(StringUtils.isNotBlank(bill.getPid())){
-                if("0".equalsIgnoreCase(bill.getBusinessStatus())){
-                    return render(null,"卖货不能为买入状态！");
+            if("0".equalsIgnoreCase(bill.getBusinessStatus())
+                || "1".equalsIgnoreCase(bill.getBusinessStatus())){ // 买入卖出
+                int bt = dictService.selectCount(new EntityWrapper<Dict>().
+                        where("pid={0} and code={1}",DictConstant.BILL_STATUS_CATEGORY_ID,bill.getBillStatus()));
+                if(bt<=0){
+                    return render(null,assignFieldIllegalValueRange("账单状态"));
                 }
 
-                BillGoods billGoods = billGoodsService.
-                        selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getPid()));
-                if(!billGoods.getWeightUnit().equalsIgnoreCase(bill.getBillGoods().getWeightUnit())){
-                    return render(null,"卖出货品单位与母账单不一致！");
-                }
-
-                if(!billGoods.getName().equalsIgnoreCase(bill.getBillGoods().getName())){
-                    return render(null,"卖出品名与母账单不一致！");
-                }
-
-                List<Bill> subBills = billService.getBillsByPidLinkGoods(bill.getPid());
-                float number=0,weight=0;
-                if(!ListUtils.isEmpty(subBills)){
-                    for(Bill tmp : subBills){
-                        number+=tmp.getBillGoods().getNumber();
-                        weight+=tmp.getBillGoods().getWeight();
+                // 卖货校验
+                if(StringUtils.isNotBlank(bill.getPid())){
+                    if("0".equalsIgnoreCase(bill.getBusinessStatus())){
+                        return render(null,"卖货不能为买入状态！");
                     }
-                }
 
-                if("1".equalsIgnoreCase(billGoods.getWeightUnit())
-                    && bill.getBillGoods().getNumber()>(billGoods.getNumber()-number)){ // 元/箱
-                    return render(null,"本账单所需货品数量已超过母账单剩余数量！");
-                }
+                    BillGoods billGoods = billGoodsService.
+                            selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getPid()));
+                    if(!billGoods.getWeightUnit().equalsIgnoreCase(bill.getBillGoods().getWeightUnit())){
+                        return render(null,"卖出货品单位与母账单不一致！");
+                    }
 
-                if("0".equalsIgnoreCase(billGoods.getWeightUnit())
-                        && bill.getBillGoods().getWeight()>(billGoods.getWeight()-weight)){ // 元/斤
-                    return render(null,"本账单所需货品斤数已超过母账单剩余斤数！");
+                    if(!billGoods.getName().equalsIgnoreCase(bill.getBillGoods().getName())){
+                        return render(null,"卖出品名与母账单不一致！");
+                    }
+
+                    List<Bill> subBills = billService.getBillsByPidLinkGoods(bill.getPid());
+                    float number=0,weight=0;
+                    if(!ListUtils.isEmpty(subBills)){
+                        for(Bill tmp : subBills){
+                            number+=tmp.getBillGoods().getNumber();
+                            weight+=tmp.getBillGoods().getWeight();
+                        }
+                    }
+
+                    if("1".equalsIgnoreCase(billGoods.getWeightUnit())
+                            && bill.getBillGoods().getNumber()>(billGoods.getNumber()-number)){ // 元/箱
+                        return render(null,"本账单所需货品数量已超过母账单剩余数量！");
+                    }
+
+                    if("0".equalsIgnoreCase(billGoods.getWeightUnit())
+                            && bill.getBillGoods().getWeight()>(billGoods.getWeight()-weight)){ // 元/斤
+                        return render(null,"本账单所需货品斤数已超过母账单剩余斤数！");
+                    }
                 }
             }
         }else{
