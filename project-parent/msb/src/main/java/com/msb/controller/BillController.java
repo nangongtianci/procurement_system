@@ -9,8 +9,6 @@ import com.msb.common.base.controller.BaseMsbController;
 import com.msb.common.base.validate.ValidateUtils;
 import com.msb.common.cache.RedisService;
 import com.msb.common.cache.RedisUtils;
-import com.msb.common.enume.BillStatusEnum;
-import com.msb.common.enume.BusinessStatusEnum;
 import com.msb.common.enume.ModuleEnum;
 import com.msb.common.utils.base.DateUtil;
 import com.msb.common.utils.base.GenerateOrderUtil;
@@ -28,9 +26,14 @@ import com.msb.entity.vo.BillProductsForIndexPageVO;
 import com.msb.entity.vo.BillProductsForQueryPageVO;
 import com.msb.requestParam.BillQueryParam;
 import com.msb.service.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -47,6 +50,7 @@ import static com.msb.common.utils.result.RegUtils.matchesIds;
  * @author ylw
  * @since 2019-06-05
  */
+@Api(value = "账单controller",description = "账单控制器")
 @RestController
 @RequestMapping("/bill")
 public class BillController extends BaseMsbController {
@@ -143,23 +147,23 @@ public class BillController extends BaseMsbController {
             customerService.insert(customer);
         }
 
-        EntityWrapper<CustomerBillRelation> cbrEW = new EntityWrapper<>();
-        cbrEW.where("cid={0} and bid={1} and pid={2} and relation_type='4'",customer.getId(),billId,cid);
-        int ct = customerBillRelationService.selectCount(cbrEW);
-        if(ct>0){
-            return render(null,"手机号已被分享过，无法重复分享！");
-        }
-
         Bill bill = billService.selectById(billId.toString());
         if(bill == null){
             return render(null,"您要分享的账单不存在！");
+        }
+
+        EntityWrapper<CustomerBillRelation> cbrEW = new EntityWrapper<>();
+        cbrEW.where("create_id={0} and bill_id={1} and relation_type='4'",customer.getId(),billId);
+        int ct = customerBillRelationService.selectCount(cbrEW);
+        if(ct>0){
+            return render(null,"手机号已被分享过，无法重复分享！");
         }
 
         if(!"0".equalsIgnoreCase(bill.getBusinessStatus())){
             return render(null,"非买入账单无法分享！");
         }
 
-        billService.shareBill(customer.getId(),bill.getCreateCustomerId(),bill.getId());
+        billService.shareBill(customer.getId(),bill);
         return render(true);
     }
 
@@ -184,7 +188,7 @@ public class BillController extends BaseMsbController {
         }
 
         int ct = customerBillRelationService.selectCount(new EntityWrapper<CustomerBillRelation>()
-                .where("pbid={0} and relation_type={1}",exist.getId(),"1"));
+                .where("bill_id={0} and relation_type={1}",exist.getId(),"1"));
         if(ct>0){
             return render("当前账单已存在对等账单！");
         }
@@ -515,6 +519,58 @@ public class BillController extends BaseMsbController {
             return Result.EMPTY();
         List<BillProductsForIndexPageVO> content = billService.getPageForBillIndexPage(param);
         return PaginationUtils.getResultObj(content,count,param);
+    }
+
+
+    /**
+     * 账单分页多条件查询（查询界面）-（级联商品名称分页）
+     * @param param
+     * @return
+     */
+    @ApiOperation(value = "查询界面-分页查询接口",notes = "任何条件都可以不传!")
+    @PageQueryMethodFlag
+    @PostMapping("/query/page")
+    public Result getPageForQueryPage(HttpServletRequest request, @RequestBody BillQueryParam param){
+        Result result = multiQueryValidate(param);
+        if(result != null){
+            return result;
+        }
+        param.setCreateCustomerId(getCid(request.getHeader("token")));
+        int count = billService.getCounts(param);
+        if (count == 0)
+            return Result.EMPTY();
+        List<BillProductsForQueryPageVO> content = billService.getPageForQueryPage(param);
+        return PaginationUtils.getResultObj(content,count,param);
+    }
+
+    /**
+     * 账单统计信息
+     * @return
+     */
+    @ApiOperation(value = "统计",notes = "注意，开始和结束日期如果用户不选择，那么默认传当天日期,开始：xxxx-xx-xx 00:00:00 结束：xxxx-xx-xx 23:59:59")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="startDate",value="开始日期",required = true,dataType="string", paramType = "body",example="xxxx-xx-xx 00:00:00"),
+            @ApiImplicitParam(name="endDate",value="结束日期",required = true,dataType="string", paramType = "body",example = "xxxx-xx-xx 23:59:59")
+    })
+    @PostMapping("stat")
+    public Result selectStatisticsForBill(HttpServletRequest request,@RequestBody @ApiIgnore String param){
+        Object startDate = getParamByKey(param,"startDate");
+        if(Objects.isNull(startDate) || StringUtils.isBlank(startDate.toString())){
+            return render(null,assignFieldNotNull("开始日期不能为空！"));
+        }
+
+        Object endDate = getParamByKey(param,"endDate");
+        if(Objects.isNull(endDate) || StringUtils.isBlank(endDate.toString())){
+            return render(null,assignFieldNotNull("结束日期不能为空！"));
+        }
+
+        // DateUtil.parse(startDate.toString(),DateUtil.DATE_TIME_FORMAT);
+        String cid = getCid(request.getHeader("token"));
+        Map<String,Object> map = new HashMap<>();
+        map.put("createCustomerId",cid);
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        return Result.OK(billService.getStatisticsForBill(map));
     }
 
 

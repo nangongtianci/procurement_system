@@ -4,13 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.msb.entity.CustomerBillRelation">
-    <result column="id" property="id" />
-    <result column="create_time" property="createTime" />
-    <result column="update_time" property="updateTime" />
-    <result column="cid" property="cid" />
-    <result column="bid" property="bid" />
-    <result column="relation_type" property="relationType" />
-    <result column="pid" property="pid" />
-    <result column="pbid" property="pbid" />
+        <result column="id" property="id" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="create_id" property="createId" />
+        <result column="source_id" property="sourceId" />
+        <result column="customer_id" property="customerId" />
+        <result column="relation_type" property="relationType" />
+        <result column="bill_id" property="billId" />
+        <result column="source_bill_id" property="sourceBillId" />
+        <result column="business_status" property="businessStatus" />
+        <result column="bill_status" property="billStatus" />
+        <result column="total_price" property="totalPrice" />
+        <result column="actual_total_price" property="actualTotalPrice" />
     </resultMap>
+
 </mapper>

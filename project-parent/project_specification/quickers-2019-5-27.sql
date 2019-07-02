@@ -421,3 +421,22 @@ alter table t_bill drop column is_peer_bill;
 
 alter table t_customer_bill_relation add column `pbid` varchar(32) DEFAULT '' COMMENT '通过哪个账单生成而来' after pid;
 
+
+DROP TABLE IF EXISTS `t_customer_bill_relation`;
+CREATE TABLE `t_customer_bill_relation` (
+    `id` char(32) NOT NULL COMMENT '主键',
+    `create_id` char(32) NOT NULL COMMENT '创建人主键（自己）',
+    `source_id` char(32) DEFAULT '' COMMENT '来自哪个客户（分享,代卖账单创建人主键）',
+    `customer_id` char(32) NOT NULL COMMENT '客户主键（对方）',
+    `relation_type` char(1) NOT NULL DEFAULT '0' COMMENT '新建，扫描，卖货，代卖，分享',
+    `bill_id` char(32) NOT NULL COMMENT '账单主键',
+    `source_bill_id` char(32) DEFAULT '' COMMENT '通过哪个账单生成而来',
+    `business_status` char(1) NOT NULL DEFAULT '0' COMMENT '交易状态,默认买入：0',
+    `bill_status` char(1) NOT NULL DEFAULT '2' COMMENT '账单状态,默认：应付:2',
+    `total_price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '总价格',
+    `actual_total_price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '实收总价格',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户账单关系表';
+

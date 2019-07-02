@@ -3,12 +3,6 @@ package com.msb.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.msb.common.utils.constants.DictConstant;
-import com.msb.common.utils.token.TokenUtils;
-import com.msb.entity.Customer;
-import com.msb.entity.Dict;
-import com.msb.requestParam.LoginParam;
-import com.msb.service.CustomerService;
 import com.msb.common.annotation.UpdateMethodFlag;
 import com.msb.common.base.controller.BaseMsbController;
 import com.msb.common.cache.RedisService;
@@ -18,19 +12,28 @@ import com.msb.common.enume.UserTypeEnum;
 import com.msb.common.utils.base.StringUtils;
 import com.msb.common.utils.base.UUIDUtils;
 import com.msb.common.utils.communicate.HttpUtil;
+import com.msb.common.utils.constants.DictConstant;
 import com.msb.common.utils.encode.AESUtil;
 import com.msb.common.utils.result.Result;
+import com.msb.common.utils.token.TokenUtils;
+import com.msb.entity.Customer;
+import com.msb.entity.Dict;
+import com.msb.entity.vo.UpAndDownStreamListVO;
+import com.msb.requestParam.LoginParam;
+import com.msb.service.CustomerService;
 import com.msb.service.DictService;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.msb.common.utils.result.CommonResultMsg.assignFieldIllegalValueRange;
-import static com.msb.common.utils.result.CommonResultMsg.assignModuleNameForPK;
+import static com.msb.common.utils.result.CommonResultMsg.*;
 import static com.msb.common.utils.result.RegUtils.matchesIds;
 
 /**
@@ -41,6 +44,7 @@ import static com.msb.common.utils.result.RegUtils.matchesIds;
  * @author ylw
  * @since 2019-05-27
  */
+@Api(value = "用户controller",description = "用户控制器")
 @RestController
 @RequestMapping("/customer")
 public class CustomerController extends BaseMsbController {
@@ -119,8 +123,9 @@ public class CustomerController extends BaseMsbController {
      * @param loginParam
      * @return
      */
+    @ApiOperation(value = "登录")
     @PostMapping(value = "/login")
-    public Result login(@RequestBody LoginParam loginParam){
+    public Result login(@RequestBody @ApiParam(name="登录参数",value="传入json格式",required=true) LoginParam loginParam){
         if(StringUtils.isBlank(loginParam.getEncryptedData()) ||
            StringUtils.isBlank(loginParam.getIv()) ||
            StringUtils.isBlank(loginParam.getSessionKey()) ||
@@ -175,6 +180,37 @@ public class CustomerController extends BaseMsbController {
     public Result logout(String token){
         TokenUtils.delToekn(UserTypeEnum.customer,token,redisService);
         return render("退出成功！");
+    }
+
+    /**
+     * 上下游
+     * @param param
+     * @return
+     */
+    @ApiOperation(value = "查询上下游",notes = "id不传，默认为当前登录用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="isTop",value="是否上游",required = true,dataType="string", paramType = "body",example="1:上游"),
+            @ApiImplicitParam(name="id",value="用户id",required = true,dataType="string", paramType = "body")
+    })
+    @PostMapping("/up/down/stream")
+    public Result getUpAndDownStreamList(HttpServletRequest request,@ApiIgnore @RequestBody String param){
+        Object id = getParamByKey(param,"id");
+        if(Objects.isNull(id) || StringUtils.isBlank(id.toString())){
+            id = getCid(request.getHeader("token"));
+        }
+
+        Object isTop = getParamByKey(param,"isTop");
+        if(Objects.isNull(isTop) || StringUtils.isBlank(isTop.toString())){
+            return render(null,assignFieldNotNull("是否上游"));
+        }
+
+        int bt = dictService.selectCount(new EntityWrapper<Dict>().
+                where("pid={0} and code={1}", DictConstant.YES_NO_CATEGORY_ID,isTop));
+        if(bt<=0){
+            return render(null,assignFieldIllegalValueRange("是否上游"));
+        }
+
+        return render(customerService.getUpAndDownStreamList(id.toString(),isTop.toString()));
     }
 }
 

@@ -20,4 +20,34 @@
         <result column="status" property="status" />
     </resultMap>
 
+
+    <!--查询上下游列表-->
+    <select id="getUpAndDownStreamList" resultType="upAndDownStreamListVO">
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                SELECT
+                cbr.customer_id as id,
+                c.name,c.icon,c.phone,
+                count(cbr.customer_id) ct,
+                SUM(cbr.actual_total_price) actualTotalPrice,
+                (select IFNULL(sum(actual_total_price),0.00) from t_customer_bill_relation
+                WHERE bill_status = '2' and create_id = #{id} and customer_id = cbr.customer_id) payable
+                FROM `t_customer_bill_relation` cbr
+                left join t_customer c on cbr.customer_id = c.id
+                where business_status = '0' and create_id = #{id} group by customer_id
+            </when>
+            <otherwise><!--下游-->
+                SELECT
+                cbr.customer_id id,
+                c.name,c.icon,c.phone,
+                count(cbr.customer_id) ct,
+                SUM(cbr.actual_total_price) actualTotalPrice,
+                (select IFNULL(sum(actual_total_price),0.00) from t_customer_bill_relation WHERE bill_status = '3'
+                and create_id = #{id} and customer_id = cbr.customer_id) receivable
+                FROM `t_customer_bill_relation` cbr
+                left join t_customer c on cbr.customer_id = c.id
+                where business_status = '1' and create_id = #{id} group by customer_id
+            </otherwise>
+        </choose>
+    </select>
 </mapper>

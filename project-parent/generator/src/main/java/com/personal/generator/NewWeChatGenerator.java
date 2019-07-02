@@ -27,7 +27,8 @@ public class NewWeChatGenerator {
 
     private static void generate(String model,String ... tableName){
         File file = new File(model);
-        String path = file.getAbsolutePath();
+        //String path = file.getAbsolutePath();
+        String path = "C:\\Users\\ylw\\Desktop\\generator";
         AutoGenerator mpg = new AutoGenerator();
 
         // 全局配置

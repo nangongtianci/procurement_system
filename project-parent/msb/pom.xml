@@ -141,6 +141,7 @@
 					<include>application.yml</include>
 					<include>application-${profileActive}.yml</include>
 					<include>logback/logback.xml</include>
+					<include>logback/logback-spring.xml</include>
 					<include>logback/logback-level-config.xml</include>
 					<include>logback/logback-${profileActive}.xml</include>
 				</includes>

@@ -64,10 +64,10 @@
         SELECT
         count(b.id)
         FROM
-        (SELECT tcbr.bid
+        (SELECT tcbr.bill_id
         FROM t_customer_bill_relation tcbr
-        WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
+        WHERE tcbr.create_id = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b on tmp.bill_id = b.id
         LEFT JOIN t_bill_goods g on b.id = g.bill_id
         LEFT JOIN t_customer c on c.id = b.create_customer_id
         <where>
@@ -109,10 +109,10 @@
         b.is_top as isTop,
         b.create_time AS createTime,b.update_time AS updateTime
         FROM
-        (SELECT tcbr.bid
+        (SELECT tcbr.bill_id
          FROM t_customer_bill_relation tcbr
-         WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
+         WHERE tcbr.create_id = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b on tmp.bill_id = b.id
         LEFT JOIN t_bill_goods g on b.id = g.bill_id
         LEFT JOIN t_customer c on c.id = b.create_customer_id
         <where>
@@ -156,10 +156,10 @@
         b.is_top as isTop,
         b.create_time AS createTime,b.update_time AS updateTime
         FROM
-        (SELECT tcbr.bid
+        (SELECT tcbr.bill_id
         FROM t_customer_bill_relation tcbr
-        WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
+        WHERE tcbr.create_id = #{createCustomerId}) tmp
+        LEFT JOIN t_bill b on tmp.bill_id = b.id
         LEFT JOIN t_bill_goods g on b.id = g.bill_id
         LEFT JOIN t_customer c on c.id = b.create_customer_id
         <where>
@@ -186,5 +186,112 @@
             </if>
         </where>
         ORDER BY b.create_time desc,b.update_time desc
+    </select>
+
+    <!--账单多条件查询含分页(查询界面使用)（级联商品名称，创建时间降序排序,更新时间降序）-->
+    <select id="getPageForQueryPage" resultType="billProductsForQueryPageVO">
+        SELECT
+        c.name AS customerName,c.phone AS customerPhone,
+        g.name AS goodsName,g.product_img_path AS productImgPath,
+        tcbr.bill_id id,tcbr.business_status AS businessStatus,tcbr.bill_status AS billStatus,
+        tcbr.total_price AS totalPrice,tcbr.actual_total_price AS actualTotalPrice
+        FROM t_customer_bill_relation tcbr
+        LEFT JOIN t_customer c on c.id = tcbr.customer_id
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
+        <where>
+            tcbr.create_id = #{createCustomerId}
+            <if test="customerName != null and customerName != ''">
+                AND c.name=#{customerName}
+            </if>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND c.phone=#{customerPhone}
+            </if>
+            <if test="businessStatus != null and businessStatus != ''">
+                AND tcbr.business_status=#{businessStatus}
+            </if>
+            <if test="billStatus != null and billStatus != ''">
+                AND tcbr.bill_status=#{billStatus}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND g.name=#{goodsName}
+            </if>
+            <if test="isGoods != null and isGoods != ''">
+                AND g.is_goods=#{isGoods}
+            </if>
+            <if test="startDate != null">
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY tcbr.create_time desc
+        LIMIT #{pageSize} offset #{offSet}
+    </select>
+
+    <!--统计-->
+    <sql id="statisticsForBill">
+      count(bill_id) ct,ifnull(sum(actual_total_price),0.00) atp
+    </sql>
+    <select id="getStatisticsForBill" resultType="billStatisticsVO">
+        SELECT <include refid="statisticsForBill"/>,'买入' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'卖出' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1'
+        <if test="startDate != null and endDate != null">
+          AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'盘盈' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='2'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'盘损' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='3'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'费用' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'应付' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0' and bill_status='2'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'应收' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1' and bill_status='3'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'已收' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1' and bill_status='1'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'已付' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0' and bill_status='0'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
     </select>
 </mapper>

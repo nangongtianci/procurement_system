@@ -35,7 +35,7 @@ quickers:
     excelSavePath: /data/template/excel
     imgPath: /data/template/img/
     verifyPath: /data/template/wx-verify/
-    staticBrowsePath: /static/img/
+    staticBrowsePath: /static/
   mail:
     report:
       subject: 报表信息

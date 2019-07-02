@@ -23,11 +23,11 @@ public class FileUploadUtils {
      */
     public static String saveImg(MultipartFile multipartFile, String path, String browsePath) throws IOException {
         File file = new File(path);
-        if (!file.exists()) {
+            if (!file.exists()) {
             file.mkdirs();
         }
         FileInputStream fileInputStream = (FileInputStream) multipartFile.getInputStream();
-        String fileName = UUIDUtils.getUUID() + ".png";
+        String fileName = UUIDUtils.getUUID() + "." + FileUitls.getExtensionName(multipartFile.getOriginalFilename());
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path + File.separator + fileName));
         byte[] bs = new byte[1024];
         int len;

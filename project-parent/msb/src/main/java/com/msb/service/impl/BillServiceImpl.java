@@ -8,13 +8,13 @@ import com.msb.common.cache.RedisUtils;
 import com.msb.common.utils.base.GenerateOrderUtil;
 import com.msb.common.utils.base.StringUtils;
 import com.msb.common.utils.base.UUIDUtils;
-import com.msb.common.utils.collections.Collections3;
 import com.msb.common.utils.collections.ListUtils;
 import com.msb.common.utils.communicate.HttpUtil;
 import com.msb.common.utils.result.Result;
 import com.msb.entity.*;
 import com.msb.entity.vo.BillProductsForIndexPageVO;
 import com.msb.entity.vo.BillProductsForQueryPageVO;
+import com.msb.entity.vo.BillStatisticsVO;
 import com.msb.mapper.BillGoodsMapper;
 import com.msb.mapper.BillMapper;
 import com.msb.mapper.CustomerBillRelationMapper;
@@ -63,14 +63,31 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         // 客户账单关系（新建|卖货）
         CustomerBillRelation cbr = new CustomerBillRelation();
         cbr.setId(UUIDUtils.getUUID());
-        cbr.setCid(bill.getCreateCustomerId());
-        cbr.setBid(bill.getId());
+        cbr.setCreateId(bill.getCreateCustomerId());
+        cbr.setCustomerId(bill.getCid());
+        cbr.setBillId(bill.getId());
+
+        // 业务字段
+        cbr.setBusinessStatus(bill.getBusinessStatus());
+        cbr.setBillStatus(bill.getBillStatus());
+        cbr.setTotalPrice(bill.getTotalPrice());
+        cbr.setActualTotalPrice(bill.getActualTotalPrice());
+
         if(StringUtils.isNotBlank(bill.getPid())){
             cbr.setRelationType("2"); // 卖货
-            cbr.setPbid(bill.getPid());
-            Bill source = billMapper.selectById(bill.getPid());
-            cbr.setPid(source.getCreateCustomerId());
+            cbr.setSourceBillId(bill.getPid());
+
+            CustomerBillRelation condition = new CustomerBillRelation();
+            condition.setBillId(bill.getPid());
+            CustomerBillRelation isShare = customerBillRelationMapper.selectOne(condition);
+            if("4".equalsIgnoreCase(isShare.getRelationType())){ // 卖货为分享账单
+                Bill source = billMapper.selectById(bill.getPid());
+                cbr.setSourceId(source.getCreateCustomerId());
+            }else{
+                cbr.setSourceId(bill.getCreateCustomerId());
+            }
         }else{
+            cbr.setSourceId(bill.getCreateCustomerId());
             cbr.setRelationType("0"); // 新建
         }
         customerBillRelationMapper.insert(cbr);
@@ -83,19 +100,24 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         try{
             billMapper.insert(bill);
             billGoodsMapper.insert(bill.getBillGoods());
+
             CustomerBillRelation cbr = new CustomerBillRelation();
             cbr.setId(UUIDUtils.getUUID());
-            cbr.setBid(bill.getId());
-            cbr.setCid(bill.getCreateCustomerId());
+            cbr.setCreateId(bill.getCreateCustomerId());
+            cbr.setSourceId(bill.getCid());
+            cbr.setCustomerId(bill.getCid());
+            cbr.setBillId(bill.getId());
+            cbr.setRelationType("1"); // 扫描
+            cbr.setSourceBillId(bill.getSourceBillId());
+//            Bill source = billMapper.selectById(bill.getSourceBillId());
+//            cbr.setPid(source.getCreateCustomerId());
+//            cbr.setPbid(bill.getSourceBillId());
+            // 业务字段
+            cbr.setBusinessStatus(bill.getBusinessStatus());
+            cbr.setBillStatus(bill.getBillStatus());
+            cbr.setTotalPrice(bill.getTotalPrice());
+            cbr.setActualTotalPrice(bill.getActualTotalPrice());
 
-            if(StringUtils.isNotBlank(bill.getSourceBillId())){
-                cbr.setRelationType("1"); // 扫描
-                Bill source = billMapper.selectById(bill.getSourceBillId());
-                cbr.setPid(source.getCreateCustomerId());
-                cbr.setPbid(bill.getSourceBillId());
-            }else{
-                cbr.setRelationType("0"); // 新建
-            }
             customerBillRelationMapper.insert(cbr);
             return Result.OK().setData(extra(bill));
         }catch (Exception e){
@@ -212,13 +234,20 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
     @Transactional
     @Override
-    public Result shareBill(String cid,String pid,String billId) {
+    public Result shareBill(String cid,Bill bill) {
         CustomerBillRelation cbr = new CustomerBillRelation();
         cbr.setId(UUIDUtils.getUUID());
-        cbr.setCid(cid);
-        cbr.setPid(pid);
-        cbr.setBid(billId);
+        cbr.setCreateId(bill.getCreateCustomerId());
+        cbr.setSourceId(bill.getCid());
+        cbr.setCustomerId(bill.getCid());
+        cbr.setBillId(bill.getId());
         cbr.setRelationType("4"); // 分享
+
+        // 业务字段
+        cbr.setBusinessStatus(bill.getBusinessStatus());
+        cbr.setBillStatus(bill.getBillStatus());
+        cbr.setTotalPrice(bill.getTotalPrice());
+        cbr.setActualTotalPrice(bill.getActualTotalPrice());
         customerBillRelationMapper.insert(cbr);
         return Result.OK();
     }
@@ -234,8 +263,18 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
+    public List<BillProductsForQueryPageVO> getPageForQueryPage(BillQueryParam param) {
+        return billMapper.getPageForQueryPage(param);
+    }
+
+    @Override
     public List<BillProductsForIndexPageVO> getPageForBillIndexPage(PageQueryParam param) {
         return billMapper.getPageForBillIndexPage(param);
+    }
+
+    @Override
+    public List<BillStatisticsVO> getStatisticsForBill(Map<String, Object> param) {
+        return billMapper.getStatisticsForBill(param);
     }
 
     /**
@@ -272,20 +311,20 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         BigDecimal sellPrice = new BigDecimal(0);
         Customer customer = customerMapper.selectById(cid);
         List<CustomerBillRelation> customerBillList = customerBillRelationMapper.
-                selectList(new EntityWrapper<CustomerBillRelation>().where("cid={0}",cid));
+                selectList(new EntityWrapper<CustomerBillRelation>().where("create_id={0}",cid));
         if(!ListUtils.isEmpty(customerBillList)){
-            List<String> billIds = Collections3.extractToList(customerBillList,"bid");
-            EntityWrapper<Bill> ew = new EntityWrapper<>();
-            ew.setSqlSelect("actual_total_price as actualTotalPrice");
-            ew.where("business_status={0}","1").and().in("id",billIds);
-            List<Bill> atps = billMapper.selectList(ew);
-            if(!ListUtils.isEmpty(atps)){
-                for(Bill tmp : atps){
+//            List<String> billIds = Collections3.extractToList(customerBillList,"bid");
+//            EntityWrapper<Bill> ew = new EntityWrapper<>();
+//            ew.setSqlSelect("actual_total_price as actualTotalPrice");
+//            ew.where("business_status={0}","1").and().in("id",billIds);
+//            List<Bill> atps = billMapper.selectList(ew);
+//            if(!ListUtils.isEmpty(atps)){
+                for(CustomerBillRelation tmp : customerBillList){
                     sellPrice = sellPrice.add(tmp.getActualTotalPrice());
                 }
                 String key = RedisUtils.zsetKey();
                 redisService.zsadd(key,customer.getId()+":"+customer.getPhone()+":"+customer.getName(),sellPrice.doubleValue());
-            }
+//            }
         }
     }
 
