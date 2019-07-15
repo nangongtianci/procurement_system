@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- 定义日志文件 输入位置 -->
-    <property name="log_dir" value="F:\\project-log" />
-    <property name="log_name" value="msb" />
+    <property name="log_dir" value="F:\\project-log\\msb-admin" />
+    <property name="log_name" value="msb-admin" />
     <!-- ConsoleAppender 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 对日志进行格式化 -->

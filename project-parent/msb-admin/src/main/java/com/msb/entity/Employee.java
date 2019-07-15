@@ -2,6 +2,7 @@ package com.msb.entity;
 
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.msb.common.base.entity.BaseAdminEntity;
 
@@ -62,6 +63,11 @@ public class Employee extends BaseAdminEntity {
      * 排序
      */
     private Integer sort;
+    /**
+     * 是否删除
+     */
+    @TableLogic
+    private Integer deleted;
 
 
     public String getAvatar() {
@@ -152,20 +158,29 @@ public class Employee extends BaseAdminEntity {
         this.sort = sort;
     }
 
+    public Integer getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Integer deleted) {
+        this.deleted = deleted;
+    }
+
     @Override
     public String toString() {
         return "Employee{" +
-        ", avatar=" + avatar +
-        ", account=" + account +
-        ", password=" + password +
-        ", salt=" + salt +
-        ", name=" + name +
-        ", birthday=" + birthday +
-        ", sex=" + sex +
-        ", email=" + email +
-        ", phone=" + phone +
-        ", status=" + status +
-        ", sort=" + sort +
-        "}";
+                "avatar='" + avatar + '\'' +
+                ", account='" + account + '\'' +
+                ", password='" + password + '\'' +
+                ", salt='" + salt + '\'' +
+                ", name='" + name + '\'' +
+                ", birthday=" + birthday +
+                ", sex='" + sex + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", status='" + status + '\'' +
+                ", sort=" + sort +
+                ", deleted=" + deleted +
+                '}';
     }
 }

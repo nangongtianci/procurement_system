@@ -17,6 +17,7 @@ public enum ModuleEnum {
 
     // 后台
     dict("dict","字典"),
+    employee("employee","员工管理"),
     ;
 
 

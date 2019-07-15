@@ -38,7 +38,7 @@ public class BillGoods extends BaseWeChatEntity {
     /**
      * 重量
      */
-    private Integer weight = 0;
+    private float weight;
     /**
      * 商品单位（元/斤，元/箱）
      */
@@ -157,11 +157,11 @@ public class BillGoods extends BaseWeChatEntity {
         this.price = price;
     }
 
-    public Integer getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(Integer weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 

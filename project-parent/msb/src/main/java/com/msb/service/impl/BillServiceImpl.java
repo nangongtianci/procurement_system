@@ -10,6 +10,8 @@ import com.msb.common.utils.base.StringUtils;
 import com.msb.common.utils.base.UUIDUtils;
 import com.msb.common.utils.collections.ListUtils;
 import com.msb.common.utils.communicate.HttpUtil;
+import com.msb.common.utils.exceptions.BizException;
+import com.msb.common.utils.exceptions.enums.BizExceptionEnum;
 import com.msb.common.utils.result.Result;
 import com.msb.entity.*;
 import com.msb.entity.vo.BillProductsForIndexPageVO;
@@ -97,32 +99,33 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Transactional
     @Override
     public Result scan(Bill bill) {
-        try{
-            billMapper.insert(bill);
-            billGoodsMapper.insert(bill.getBillGoods());
+        billMapper.insert(bill);
+        billGoodsMapper.insert(bill.getBillGoods());
 
-            CustomerBillRelation cbr = new CustomerBillRelation();
-            cbr.setId(UUIDUtils.getUUID());
-            cbr.setCreateId(bill.getCreateCustomerId());
-            cbr.setSourceId(bill.getCid());
-            cbr.setCustomerId(bill.getCid());
-            cbr.setBillId(bill.getId());
-            cbr.setRelationType("1"); // 扫描
-            cbr.setSourceBillId(bill.getSourceBillId());
-//            Bill source = billMapper.selectById(bill.getSourceBillId());
-//            cbr.setPid(source.getCreateCustomerId());
-//            cbr.setPbid(bill.getSourceBillId());
-            // 业务字段
-            cbr.setBusinessStatus(bill.getBusinessStatus());
-            cbr.setBillStatus(bill.getBillStatus());
-            cbr.setTotalPrice(bill.getTotalPrice());
-            cbr.setActualTotalPrice(bill.getActualTotalPrice());
+        CustomerBillRelation cbr = new CustomerBillRelation();
+        cbr.setId(UUIDUtils.getUUID());
+        cbr.setCreateId(bill.getCreateCustomerId());
+        cbr.setSourceId(bill.getCid());
+        cbr.setCustomerId(bill.getCid());
+        cbr.setBillId(bill.getId());
+        cbr.setRelationType("1"); // 扫描
+        cbr.setSourceBillId(bill.getSourceBillId());
+        // 业务字段
+        cbr.setBusinessStatus(bill.getBusinessStatus());
+        cbr.setBillStatus(bill.getBillStatus());
+        cbr.setTotalPrice(bill.getTotalPrice());
+        cbr.setActualTotalPrice(bill.getActualTotalPrice());
+        cbr.setIsPeer("1"); // 对等
+        customerBillRelationMapper.insert(cbr);
 
-            customerBillRelationMapper.insert(cbr);
-            return Result.OK().setData(extra(bill));
-        }catch (Exception e){
-            return Result.FAIL();
+        CustomerBillRelation peer = new CustomerBillRelation();
+        peer.setIsPeer("1");
+        int ct = customerBillRelationMapper.update(peer,new EntityWrapper<CustomerBillRelation>().
+                where("create_id={0} and customer_id={1} and bill_id={2}",bill.getCid(),bill.getCreateCustomerId(),bill.getSourceBillId()));
+        if(ct != 1){
+            throw new BizException(BizExceptionEnum.INVALID_CLIENT_ID.DATA_UPDATED_ERROR);
         }
+        return Result.OK().setData(extra(bill));
     }
 
     /**
@@ -139,13 +142,13 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             // 只有销售账单参与销售排行榜
             setRanking(bill.getCreateCustomerId());
             // 只有销售账单才会计算获得红包累计次数
-            BigDecimal redPacket = computeRedPacket(bill.getCreateCustomerId());
+            BigDecimal redPacket = computeRedPacket(bill.getCreateCustomerId()).setScale(2,BigDecimal.ROUND_HALF_DOWN);
             rt.put("redPacketTip","恭喜您得到了"+redPacket+"元红包，继续加油哦!");
         }
 
-//            if(StringUtils.isNotBlank(bill.getFeedBacks())){ // 反馈语义信息
-//                feedBacks(bill.getCreateCustomerId(),bill.getFeedBacks());
-//            }
+        if(StringUtils.isNotBlank(bill.getFeedBacks())){ // 反馈语义信息
+            feedBacks(bill.getCreateCustomerId(),bill.getFeedBacks());
+        }
         rt.put("billId",bill.getId());
         return rt;
     }
@@ -203,12 +206,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         bill.setCid(bill.getCustomer().getId());
         // 生成账单号
         bill.setBillSn(GenerateOrderUtil.nextSN());
-        // 账单号类型(手动)
-        bill.setBillSnType("0"); // 手动
         // 是否已领取虚拟币
         bill.setIsReceive("0"); // 未领取
-        // 是否置顶
-        bill.setIsTop("0"); // 不置顶
     }
 
     @Transactional
@@ -237,8 +236,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     public Result shareBill(String cid,Bill bill) {
         CustomerBillRelation cbr = new CustomerBillRelation();
         cbr.setId(UUIDUtils.getUUID());
-        cbr.setCreateId(bill.getCreateCustomerId());
-        cbr.setSourceId(bill.getCid());
+        cbr.setCreateId(cid); // 输入手机号主键
+        cbr.setSourceId(bill.getCreateCustomerId());
         cbr.setCustomerId(bill.getCid());
         cbr.setBillId(bill.getId());
         cbr.setRelationType("4"); // 分享
@@ -265,6 +264,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Override
     public List<BillProductsForQueryPageVO> getPageForQueryPage(BillQueryParam param) {
         return billMapper.getPageForQueryPage(param);
+    }
+
+    @Override
+    public String getTotalForQueryPage(BillQueryParam param) {
+        return billMapper.getTotalForQueryPage(param);
     }
 
     @Override
@@ -300,7 +304,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         }
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("contentType","application/json");
-        HttpUtil.httpPost("http://112.125.89.15/bill/feedbacks", com.personal.common.json.JsonUtils.toJson(data),headerMap);
+        HttpUtil.httpPost("http://39.100.68.112/bill/feedbacks", com.personal.common.json.JsonUtils.toJson(data),headerMap);
     }
 
     /**

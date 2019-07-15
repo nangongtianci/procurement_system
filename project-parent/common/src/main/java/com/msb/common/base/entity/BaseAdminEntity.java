@@ -1,5 +1,6 @@
 package com.msb.common.base.entity;
 
+
 import com.baomidou.mybatisplus.annotations.TableField;
 
 public class BaseAdminEntity extends BaseTimeEntity {

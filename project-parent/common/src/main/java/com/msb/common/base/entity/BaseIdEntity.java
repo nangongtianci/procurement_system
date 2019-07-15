@@ -1,5 +1,6 @@
 package com.msb.common.base.entity;
 
+
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.msb.common.utils.validate.type.Update;

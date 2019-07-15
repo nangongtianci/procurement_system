@@ -24,12 +24,10 @@ import com.msb.config.system.mail.ReportConfig;
 import com.msb.entity.*;
 import com.msb.entity.vo.BillProductsForIndexPageVO;
 import com.msb.entity.vo.BillProductsForQueryPageVO;
+import com.msb.entity.vo.BillStatisticsVO;
 import com.msb.requestParam.BillQueryParam;
 import com.msb.service.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.web.bind.annotation.*;
@@ -108,7 +106,6 @@ public class BillController extends BaseMsbController {
             return result;
         }
 
-
         return billService.add(bill);
     }
 
@@ -152,6 +149,10 @@ public class BillController extends BaseMsbController {
             return render(null,"您要分享的账单不存在！");
         }
 
+        if(bill.getCid().equalsIgnoreCase(customer.getId())){
+            return render(null,"分享手机号不能为本账单客户手机号!");
+        }
+
         EntityWrapper<CustomerBillRelation> cbrEW = new EntityWrapper<>();
         cbrEW.where("create_id={0} and bill_id={1} and relation_type='4'",customer.getId(),billId);
         int ct = customerBillRelationService.selectCount(cbrEW);
@@ -188,9 +189,13 @@ public class BillController extends BaseMsbController {
         }
 
         int ct = customerBillRelationService.selectCount(new EntityWrapper<CustomerBillRelation>()
-                .where("bill_id={0} and relation_type={1}",exist.getId(),"1"));
+                .where("bill_id={0} and is_peer='1'",exist.getId()));
         if(ct>0){
             return render("当前账单已存在对等账单！");
+        }
+
+        if(!cid.equalsIgnoreCase(exist.getCid())){
+            return render(null,"当前用户非账单客户，无法生成对等账单！");
         }
 
         exist.setSourceBillId(exist.getId()); // 原始账单
@@ -198,6 +203,7 @@ public class BillController extends BaseMsbController {
         // 组件对等账单
         if("1".equals(exist.getBusinessStatus())){ // (卖出)卖家
             exist.setBusinessStatus("0");
+            exist.setPid(null);
             // 应收-应付,已收-已付
             if("3".equals(exist.getBillStatus())){
                 exist.setBillStatus("2");
@@ -228,7 +234,6 @@ public class BillController extends BaseMsbController {
         exist.setCreateCustomerId(cid);
         exist.setBillDate(new Date());
         exist.setBillSn(GenerateOrderUtil.nextSN());
-        exist.setBillSnType("0"); // 扫描
         return billService.scan(exist);
     }
 
@@ -281,6 +286,14 @@ public class BillController extends BaseMsbController {
            return render(null,"账单不存在！");
         }
 
+        CustomerBillRelation cbr = customerBillRelationService.selectOne(new EntityWrapper<CustomerBillRelation>().
+                where("bill_id={0} and create_id={1} and customer_id={2}",bill.getId(),bill.getCreateCustomerId(),bill.getCid()));
+        if(Objects.isNull(cbr)){
+            return render(null,"账单不存在！");
+        }
+
+        bill.setIsPeer(cbr.getIsPeer());
+
         // 查询用户信息
         Customer customer = customerService.selectById(bill.getCid());
         bill.setCustomer(customer);
@@ -289,7 +302,7 @@ public class BillController extends BaseMsbController {
         BillGoods billGoods = billGoodsService.selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getId()));
         bill.setBillGoods(billGoods);
 
-        if("0".equalsIgnoreCase(bill.getBillStatus())){ // 买入
+        if("0".equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
             List<Bill> bills = billService.getBillsByPidLinkGoods(bill.getId());
             bill.setSubBills(bills);
         }
@@ -482,23 +495,33 @@ public class BillController extends BaseMsbController {
      * @param top
      * @return
      */
+    @ApiOperation(value = "是否置顶",notes = "注意：id=客户账单关系主键,top:0:不置顶，1：置顶")
     @PostMapping("top/{id}/{top}")
-    public Result billTop(@PathVariable String id,@PathVariable int top){
+    public Result billTop(@PathVariable @ApiParam(name = "id",value = "客户关系主键",required = true) String id,
+                          @PathVariable @ApiParam(name = "top",value = "是否置顶",required = true) String top){
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
-        Bill bill = new Bill();
-        bill.setId(id);
-        if(top > 0){
-            bill.setIsTop("1"); // 置顶
-        }else{
-            bill.setIsTop("0"); // 不置顶
+
+        int ct = dictService.selectCount(new EntityWrapper<Dict>().
+                where("pid={0} and code={1}",DictConstant.YES_NO_CATEGORY_ID,top));
+        if(ct<=0){
+            return render(null,assignFieldIllegalValueRange("是否置顶"));
         }
-        if(billService.updateById(bill)){
-            return render(true);
-        }else{
-            return render(false);
+
+        CustomerBillRelation exist = customerBillRelationService.selectById(id);
+        if(Objects.isNull(exist) || StringUtils.isBlank(exist.getBillId())){
+            return render(null,"账单不存在，置顶失败!");
         }
+
+        if(!"0".equalsIgnoreCase(exist.getBusinessStatus())){
+            return render(null,"非买入账单无法置顶！");
+        }
+
+        CustomerBillRelation cbr = new CustomerBillRelation();
+        cbr.setId(id);
+        cbr.setIsTop(top);
+        return render(customerBillRelationService.updateById(cbr));
     }
 
     /**
@@ -540,7 +563,11 @@ public class BillController extends BaseMsbController {
         if (count == 0)
             return Result.EMPTY();
         List<BillProductsForQueryPageVO> content = billService.getPageForQueryPage(param);
-        return PaginationUtils.getResultObj(content,count,param);
+        String total = billService.getTotalForQueryPage(param);
+        Map<String,Object> map = new HashMap<>();
+        map.put("total",total);
+        map.put("page",PaginationUtils.getResultObj(content,count,param).getData());
+        return render(map);
     }
 
     /**
@@ -573,6 +600,65 @@ public class BillController extends BaseMsbController {
         return Result.OK(billService.getStatisticsForBill(map));
     }
 
+    @ApiOperation(value = "发送统计邮件",notes = "注意，开始和结束日期如果用户不选择，那么默认传当天日期,开始：xxxx-xx-xx 00:00:00 结束：xxxx-xx-xx 23:59:59")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="startDate",value="开始日期",required = true,dataType="string", paramType = "body",example="xxxx-xx-xx 00:00:00"),
+            @ApiImplicitParam(name="endDate",value="结束日期",required = true,dataType="string", paramType = "body",example = "xxxx-xx-xx 23:59:59"),
+            @ApiImplicitParam(name="mail",value="邮箱",required = true,dataType="string", paramType = "body",example = "xxx@xxx.xxx")
+    })
+    @PostMapping("stat/mail")
+    public Result getStatMail(HttpServletRequest request, @RequestBody @ApiIgnore String param) throws Exception{
+        Object startDate = getParamByKey(param,"startDate");
+        if(Objects.isNull(startDate) || StringUtils.isBlank(startDate.toString())){
+            return render(null,assignFieldNotNull("开始日期不能为空！"));
+        }
+
+        Object endDate = getParamByKey(param,"endDate");
+        if(Objects.isNull(endDate) || StringUtils.isBlank(endDate.toString())){
+            return render(null,assignFieldNotNull("结束日期不能为空！"));
+        }
+
+        Object mail = getParamByKey(param,"mail");
+        if(Objects.isNull(mail) || !ValidateUtils.isEmail(mail.toString())){
+            return render(null,"邮箱不合法!");
+        }
+
+        String cid = getCid(request.getHeader("token"));
+        Map<String,Object> condition = new HashMap<>();
+        condition.put("createCustomerId",cid);
+        condition.put("startDate",startDate);
+        condition.put("endDate",endDate);
+        List<BillStatisticsVO> list = billService.getStatisticsForBill(condition);
+
+        if(ListUtils.isEmpty(list)){
+            return render(null,"数据为空，无需发送邮件！");
+        }
+
+        List<Map<String,Object>> mapList = new ArrayList<>();
+        Map<String,Object> map = new HashMap<>();
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        map.put("buy",list.get(0).getCt()+"笔，"+list.get(0).getAtp()+"元");
+        map.put("sale",list.get(1).getCt()+"笔，"+list.get(1).getAtp()+"元");
+        map.put("ip",list.get(2).getCt()+"笔，"+list.get(2).getAtp()+"元");
+        map.put("ad",list.get(3).getCt()+"笔，"+list.get(3).getAtp()+"元");
+        map.put("cost",list.get(4).getCt()+"笔，"+list.get(4).getAtp()+"元");
+        map.put("profit",(list.get(1).getAtp().add(list.get(2).getAtp()).subtract(list.get(0).getAtp()).subtract(list.get(3).getAtp()).subtract(list.get(4).getAtp()))+"元");
+        map.put("payable",list.get(5).getCt()+"笔，"+list.get(5).getAtp()+"元");
+        map.put("receive",list.get(6).getCt()+"笔，"+list.get(6).getAtp()+"元");
+        map.put("received",list.get(7).getCt()+"笔，"+list.get(7).getAtp()+"元");
+        map.put("paid",list.get(8).getCt()+"笔，"+list.get(8).getAtp()+"元");
+        map.put("cashSurplus",list.get(7).getAtp().subtract(list.get(8).getAtp()).subtract(list.get(4).getAtp())+"元");
+        map.put("totalSurplus",list.get(1).getAtp().subtract(list.get(0).getAtp()).subtract(list.get(4).getAtp())+"元");
+        mapList.add(map);
+
+        String[] headList = new String[]{"开始日期","结束日期","买入","卖出","盘盈","盘损","费用","利润合计","应付","应收","已收","已付","现金结余","合计结余"};
+        String[] fieldList = new String[]{"startDate","endDate","buy","sale","ip","ad","cost","profit","payable","receive","received","paid","cashSurplus","totalSurplus"};
+        String filePathName = fileConfig.getExcelSavePath() + File.separator + "bill_stat_"
+                + DateUtil.format(new Date(),"yyyyMMddHHmmss")+".xlsx";
+        ExcelUtils.createExcel(filePathName,headList,fieldList,mapList);
+        return render(mailService.sendAttachmentsMail(mail.toString(),reportConfig.getSubject(),reportConfig.getContent(),filePathName));
+    }
 
     /**
      * 发送报表邮件
@@ -605,21 +691,19 @@ public class BillController extends BaseMsbController {
             map.put("customerPhone",tmp.getCustomerPhone());
             map.put("goodsName",tmp.getGoodsName());
             map.put("totalPrice",tmp.getTotalPrice());
+            map.put("actualTotalPrice",tmp.getActualTotalPrice());
             map.put("billStatus",getDictName(dicts,tmp.getBusinessStatus()));
             mapList.add(map);
         }
-        String[] headList = new String[]{"客户名称","客户手机号","商品名称","总价格","账单状态"};
-        String[] fieldList = new String[]{"customerName","customerPhone","goodsName","totalPrice","billStatus"};
+        String[] headList = new String[]{"客户名称","客户手机号","商品名称","总价格","实收总价","账单状态"};
+        String[] fieldList = new String[]{"customerName","customerPhone","goodsName","totalPrice","actualTotalPrice","billStatus"};
         String filePathName = fileConfig.getExcelSavePath() + File.separator + "bill_"
                 + DateUtil.format(new Date(),"yyyyMMddHHmmss")+".xlsx";
         ExcelUtils.createExcel(filePathName,headList,fieldList,mapList);
 
         // 发送邮件
         Customer customer = customerService.selectById(param.getCreateCustomerId());
-        if(mailService.sendAttachmentsMail(customer.getEmail(),reportConfig.getSubject(),reportConfig.getContent(),filePathName)){
-            return render(true);
-        }
-        return render(false);
+        return render(mailService.sendAttachmentsMail(customer.getEmail(),reportConfig.getSubject(),reportConfig.getContent(),filePathName));
     }
 
     /**

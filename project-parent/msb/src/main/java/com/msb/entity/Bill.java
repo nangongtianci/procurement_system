@@ -74,16 +74,6 @@ public class Bill extends BaseWeChatEntity {
     @TableField("actual_total_price")
     private BigDecimal actualTotalPrice;
     /**
-     * 扫描，手动
-     */
-    @TableField("bill_sn_type")
-    private String billSnType;
-    /**
-     * 置顶，不置顶
-     */
-    @TableField("is_top")
-    private String isTop;
-    /**
      * 记账日期
      */
     @TableField("bill_date")
@@ -119,6 +109,19 @@ public class Bill extends BaseWeChatEntity {
      */
     @TableField(exist = false)
     private String sourceBillId;
+    /**
+     * 对等，不对等
+     */
+    @TableField(exist = false)
+    private String isPeer;
+
+    public String getIsPeer() {
+        return isPeer;
+    }
+
+    public void setIsPeer(String isPeer) {
+        this.isPeer = isPeer;
+    }
 
     public String getSourceBillId() {
         return sourceBillId;
@@ -224,22 +227,6 @@ public class Bill extends BaseWeChatEntity {
         this.actualTotalPrice = actualTotalPrice;
     }
 
-    public String getBillSnType() {
-        return billSnType;
-    }
-
-    public void setBillSnType(String billSnType) {
-        this.billSnType = billSnType;
-    }
-
-    public String getIsTop() {
-        return isTop;
-    }
-
-    public void setIsTop(String isTop) {
-        this.isTop = isTop;
-    }
-
     public Date getBillDate() {
         return billDate;
     }
@@ -294,8 +281,6 @@ public class Bill extends BaseWeChatEntity {
                 ", otherCost=" + otherCost +
                 ", totalPrice=" + totalPrice +
                 ", actualTotalPrice=" + actualTotalPrice +
-                ", billSnType='" + billSnType + '\'' +
-                ", isTop='" + isTop + '\'' +
                 ", billDate=" + billDate +
                 ", isReceive='" + isReceive + '\'' +
                 ", createCustomerId='" + createCustomerId + '\'' +
@@ -303,6 +288,7 @@ public class Bill extends BaseWeChatEntity {
                 ", subBills=" + subBills +
                 ", feedBacks='" + feedBacks + '\'' +
                 ", sourceBillId='" + sourceBillId + '\'' +
+                ", isPeer='" + isPeer + '\'' +
                 '}';
     }
 }

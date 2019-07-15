@@ -133,8 +133,8 @@ public class SourceImageController extends BaseMsbAdminController{
     @PostMapping("batch/delete")
     public Result batchInDelete(@RequestBody String param){
         String ids = (String) getParamByKey(param,"ids");
-        if(null == ids){
-            return render("主键不能为空!");
+        if(StringUtils.isBlank(ids)){
+            return render(null,"主键不能为空!");
         }
         return render(sourceImageService.deleteBatchIds(Lists.newArrayList(ids.split(","))));
     }

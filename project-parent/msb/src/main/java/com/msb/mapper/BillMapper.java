@@ -49,6 +49,13 @@ public interface BillMapper extends BaseMapper<Bill> {
     List<BillProductsForQueryPageVO> getPageForQueryPage(BillQueryParam param);
 
     /**
+     * 账单多条件查询合计(查询界面使用)
+     * @param param
+     * @return
+     */
+    String getTotalForQueryPage(BillQueryParam param);
+
+    /**
      * 账单首页分页查询（级联商品名称，创建时间降序排序）
      * @param param
      * @return

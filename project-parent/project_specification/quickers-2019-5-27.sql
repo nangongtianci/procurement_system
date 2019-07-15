@@ -440,3 +440,60 @@ CREATE TABLE `t_customer_bill_relation` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户账单关系表';
 
+# 2019-07-02
+alter table t_bill drop column is_top;
+alter table t_customer_bill_relation add column `is_top` char(1) NOT NULL default '0' COMMENT '置顶1，不置顶0' after actual_total_price;
+alter table t_bill drop column bill_sn_type;
+alter table t_customer_bill_relation add column `is_peer` char(1) NOT NULL default '0' COMMENT '对等：1，不对等：0' after is_top;
+
+# 收付款记录
+DROP TABLE IF EXISTS `t_receipt_payment_record`;
+CREATE TABLE `t_receipt_payment_record` (
+    `id` char(32) NOT NULL COMMENT '主键',
+    `create_id` char(32) NOT NULL COMMENT '创建人主键（自己）',
+    `is_payment` char(1) NOT NULL DEFAULT '0' COMMENT '0:收款，1：付款',
+    `amount` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '收款|付款金额',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='收付款记录';
+
+# 收付款对应账单关系
+DROP TABLE IF EXISTS `t_receipt_payment_record_bill`;
+CREATE TABLE `t_receipt_payment_record_bill` (
+    `id` char(32) NOT NULL COMMENT '主键',
+    `rp_id` char(32) NOT NULL COMMENT '首付款记录主键',
+    `remain_id` char(32) DEFAULT '' COMMENT '留存主键',
+    `bill_id` char(32) NOT NULL COMMENT '账单主键',
+    `create_id` char(32) NOT NULL COMMENT '创建人主键（自己）',
+    `is_payment` char(1) NOT NULL DEFAULT '0' COMMENT '0:收款，1：付款',
+    `split_amount` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '拆分后金额（单个账单还款金额）',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账单收付款对应关系';
+
+# 收付款对应账单关系
+DROP TABLE IF EXISTS `t_remain_record`;
+CREATE TABLE `t_remain_record` (
+   `id` char(32) NOT NULL COMMENT '主键',
+   `rp_id` char(32) NOT NULL COMMENT '首付款记录主键',
+   `create_id` char(32) NOT NULL COMMENT '创建人主键（自己）',
+   `is_payment` char(1) NOT NULL DEFAULT '0' COMMENT '0:收款，1：付款',
+   `is_used` char(1) NOT NULL DEFAULT '0' COMMENT '1:使用，0：未用',
+   `remain_amount` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '留存金额',
+   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='留存记录';
+
+
+alter table t_receipt_payment_record_bill drop column remain_id;
+alter table t_remain_record drop column rp_id;
+alter table t_remain_record drop column is_used;
+
+# 2019-07-07
+alter table t_receipt_payment_record add column `customer_id` char(32) NOT NULL COMMENT '客户主键（对方）' after create_id;
+
+# 2019-7-15
+alter table t_bill_goods modify column `weight` float(11,2) NOT NULL DEFAULT '0' COMMENT '重量';

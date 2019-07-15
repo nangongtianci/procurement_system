@@ -113,8 +113,10 @@ public class BillGoodsController extends BaseMsbController {
         }
 
         Page<BillGoods> condition = new Page<>(param.getPageNow(),param.getPageSize());
-        Page<BillGoods> billGoodsPage = billGoodsService.selectPage(condition,
-                new EntityWrapper<BillGoods>().where("create_customer_id={0} and is_goods={1}",param.getCreateCustomerId(),param.getIsGoods()));
+        EntityWrapper ew = new EntityWrapper<BillGoods>();
+        ew.where("create_customer_id={0} and is_goods={1}",param.getCreateCustomerId(),param.getIsGoods());
+        ew.orderBy("update_time",false);
+        Page<BillGoods> billGoodsPage = billGoodsService.selectPage(condition,ew);
         return PaginationUtils.getResultObj(billGoodsPage);
     }
 }

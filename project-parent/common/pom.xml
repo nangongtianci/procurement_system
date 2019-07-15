@@ -16,6 +16,7 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus</artifactId>
+			<version>2.1.9</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-lang3</artifactId>
@@ -80,5 +81,5 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 </project>

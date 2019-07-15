@@ -17,6 +17,96 @@
         <result column="bill_status" property="billStatus" />
         <result column="total_price" property="totalPrice" />
         <result column="actual_total_price" property="actualTotalPrice" />
+        <result column="is_top" property="isTop" />
+        <result column="is_peer" property="isPeer" />
     </resultMap>
 
+
+    <!--查询上下游列表-->
+    <select id="getUpAndDownStream" resultType="upAndDownStreamListVO">
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                SELECT
+                cbr.customer_id id,
+                cr.name,cr.icon,cr.phone,
+                count(cbr.customer_id) ct,
+                ifnull(SUM(cbr.actual_total_price),0.00) actualTotalPrice,
+                (select IFNULL(sum(actual_total_price),0.00) from t_customer_bill_relation
+                WHERE bill_status = '2' and relation_type != '4' and create_id = #{createId} and customer_id = #{customerId}) payable
+                FROM `t_customer_bill_relation` cbr
+                left join t_customer cr on cbr.customer_id = cr.id
+                where cbr.business_status = '0' and cbr.relation_type != '4'
+                and cbr.create_id = #{createId} and cbr.customer_id = #{customerId}
+            </when>
+            <otherwise><!--下游-->
+                SELECT
+                cbr.customer_id id,
+                cr.name,cr.icon,cr.phone,
+                count(cbr.customer_id) ct,
+                ifnull(SUM(cbr.actual_total_price),0.00) actualTotalPrice,
+                (select IFNULL(sum(actual_total_price),0.00) from t_customer_bill_relation
+                WHERE bill_status = '3' and create_id = #{createId} and customer_id = #{customerId}) receivable
+                FROM `t_customer_bill_relation` cbr
+                left join t_customer cr on cbr.customer_id = cr.id
+                where business_status = '1' and create_id = #{createId} and customer_id = #{customerId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--查询应收或应付账单列表信息-->
+    <select id="getReceiveOrPaymentBillCount" resultType="int">
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                select
+                count(tcbr.id)
+                from t_customer_bill_relation tcbr
+                left join t_bill b on tcbr.bill_id = b.id
+                left join t_bill_goods g on tcbr.bill_id = g.bill_id
+                where tcbr.create_id=#{createId} and tcbr.customer_id=#{customerId}
+                and tcbr.business_status='0' and tcbr.bill_status='2' and tcbr.relation_type != '4'
+            </when>
+            <otherwise><!--下游-->
+                select
+                count(tcbr.id)
+                from t_customer_bill_relation tcbr
+                left join t_bill b on tcbr.bill_id = b.id
+                left join t_bill_goods g on tcbr.bill_id = g.bill_id
+                where tcbr.create_id=#{createId} and tcbr.customer_id=#{customerId}
+                and tcbr.business_status='1' and tcbr.bill_status='3'
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--查询应收或应付账单列表信息-->
+    <select id="getReceiveOrPaymentBillList" resultType="billInfoForUpAndDownStreamVO">
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                select
+                  b.id,b.create_time as createTime,b.other_cost as otherCost,
+                  b.actual_total_price as receiveOrPaymentAmount,
+                  tcbr.is_peer as isPeer,
+                  g.name,g.number,g.weight,g.price,g.weight_unit AS weightUnit
+                from t_customer_bill_relation tcbr
+                left join t_bill b on tcbr.bill_id = b.id
+                left join t_bill_goods g on tcbr.bill_id = g.bill_id
+                where tcbr.create_id=#{createId} and tcbr.customer_id=#{customerId}
+                and tcbr.business_status='0' and tcbr.bill_status='2' and tcbr.relation_type != '4'
+                ORDER BY b.create_time
+                LIMIT #{pageSize} offset #{offSet}
+            </when>
+            <otherwise><!--下游-->
+                select
+                  b.id,b.create_time as createTime,b.other_cost as otherCost,
+                  b.actual_total_price as receiveOrPaymentAmount,
+                  tcbr.is_peer as isPeer,
+                  g.name,g.number,g.weight,g.price,g.weight_unit AS weightUnit
+                from t_customer_bill_relation tcbr
+                left join t_bill b on tcbr.bill_id = b.id
+                left join t_bill_goods g on tcbr.bill_id = g.bill_id
+                where tcbr.create_id=#{createId} and tcbr.customer_id=#{customerId} and tcbr.business_status='1' and tcbr.bill_status='3'
+                ORDER BY b.create_time
+                LIMIT #{pageSize} offset #{offSet}
+            </otherwise>
+        </choose>
+    </select>
 </mapper>

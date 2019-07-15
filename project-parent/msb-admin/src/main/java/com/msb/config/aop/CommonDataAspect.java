@@ -1,8 +1,8 @@
 package com.msb.config.aop;
 
-import com.msb.config.redis.RedisService;
 import com.msb.common.base.entity.BaseAdminEntity;
 import com.msb.common.base.page.AbstractPageQueryParam;
+import com.msb.common.cache.RedisService;
 import com.msb.common.constant.SysConstant;
 import com.msb.common.utils.base.ReflectionUtils;
 import com.msb.common.utils.collections.ArrayUtils;

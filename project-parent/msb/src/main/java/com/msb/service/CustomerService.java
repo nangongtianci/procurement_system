@@ -1,8 +1,10 @@
 package com.msb.service;
 
+import com.msb.common.utils.result.Result;
 import com.msb.entity.Customer;
 import com.baomidou.mybatisplus.service.IService;
 import com.msb.entity.vo.UpAndDownStreamListVO;
+import com.msb.requestParam.ReceiveOrPaymentParam;
 
 import java.util.List;
 
@@ -23,4 +25,11 @@ public interface CustomerService extends IService<Customer> {
      * @return
      */
     List<UpAndDownStreamListVO> getUpAndDownStreamList(String id, String isTop);
+
+    /**
+     * 付款|收款
+     * @param param
+     * @return
+     */
+    Result billing(ReceiveOrPaymentParam param);
 }

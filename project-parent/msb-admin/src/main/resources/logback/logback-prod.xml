@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- 定义日志文件 输入位置 -->
-    <property name="log_dir" value="F:\\project-log" />
-    <property name="log_name" value="msb" />
+    <property name="log_dir" value="/data/project/msb-admin" />
+    <property name="log_name" value="msb-admin" />
+
     <!-- ConsoleAppender 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 对日志进行格式化 -->
@@ -30,7 +31,7 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>GBK</charset> <!-- 此处设置字符集 -->
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <!-- 最常用的滚动策略，它根据时间来制定滚动策略.既负责滚动也负责出发滚动 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -75,7 +76,7 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>GBK</charset> <!-- 此处设置字符集 -->
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
@@ -107,7 +108,7 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>GBK</charset> <!-- 此处设置字符集 -->
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
@@ -139,11 +140,12 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>GBK</charset> <!-- 此处设置字符集 -->
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
-            <fileNamePattern>${log_dir}/%d{yyyy-MM-dd}/debug.log</fileNamePattern>
+            <fileNamePattern>${log_dir}/%d{yyyy-MM-dd}/debug.log
+            </fileNamePattern>
             <!-- 日志最大的历史 60天 -->
             <maxHistory>${maxHistory}</maxHistory>
             <!--<timeBasedFileNamingAndTriggeringPolicy
@@ -174,7 +176,8 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
-            <fileNamePattern>${log_dir}/%d{yyyy-MM-dd}/trace.log</fileNamePattern>
+            <fileNamePattern>${log_dir}/%d{yyyy-MM-dd}/trace.log
+            </fileNamePattern>
             <!-- 日志最大的历史 60天 -->
             <maxHistory>${maxHistory}</maxHistory>
             <!--<timeBasedFileNamingAndTriggeringPolicy
@@ -225,7 +228,7 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>GBK</charset> <!-- 此处设置字符集 -->
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy" >
             <FileNamePattern>${log_dir}/%d{yyyy-MM-dd}/sql.%i.log</FileNamePattern>

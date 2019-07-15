@@ -1,6 +1,10 @@
 package com.msb.config.mybatis;
 
+import com.baomidou.mybatisplus.entity.GlobalConfiguration;
 import com.baomidou.mybatisplus.enums.DBType;
+import com.baomidou.mybatisplus.enums.IdType;
+import com.baomidou.mybatisplus.mapper.ISqlInjector;
+import com.baomidou.mybatisplus.mapper.LogicSqlInjector;
 import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean;
 import com.baomidou.mybatisplus.spring.boot.starter.MybatisPlusProperties;
@@ -55,6 +59,11 @@ public class MybatisPlusConfig {
         return page;
     }
 
+    @Bean
+    public ISqlInjector sqlInjector() {
+        return new LogicSqlInjector();
+    }
+
     /**
      * 这里全部使用mybatis-autoconfigure 已经自动加载的资源。不手动指定
      * 配置文件和mybatis-boot的配置文件同步
@@ -63,6 +72,14 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisSqlSessionFactoryBean mybatisSqlSessionFactoryBean() {
         MybatisSqlSessionFactoryBean mybatisPlus = new MybatisSqlSessionFactoryBean();
+        // 逻辑删除
+        GlobalConfiguration globalConfig = new GlobalConfiguration();
+        globalConfig.setSqlInjector(sqlInjector());
+        globalConfig.setLogicDeleteValue("1");
+        globalConfig.setLogicNotDeleteValue("0");
+        globalConfig.setIdType(IdType.UUID.getKey());
+        mybatisPlus.setGlobalConfig(globalConfig);
+
         mybatisPlus.setDataSource(dataSource);
         mybatisPlus.setVfs(SpringBootVFS.class);
         if (StringUtils.hasText(this.properties.getConfigLocation())) {
@@ -81,7 +98,7 @@ public class MybatisPlusConfig {
         if (StringUtils.hasLength(this.properties.getTypeAliasesPackage())) {
             mybatisPlus.setTypeAliasesPackage(this.properties.getTypeAliasesPackage());
         }else{
-            mybatisPlus.setTypeAliasesPackage("com.msb.entity;com.msb.conditions");
+            mybatisPlus.setTypeAliasesPackage("com.msb.entity;com.msb.query");
         }
 
         if (StringUtils.hasLength(this.properties.getTypeHandlersPackage())) {

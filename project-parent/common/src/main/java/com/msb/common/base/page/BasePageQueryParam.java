@@ -7,4 +7,5 @@ package com.msb.common.base.page;
  * @return
  */
 public class BasePageQueryParam extends AbstractPageQueryParam {
+
 }

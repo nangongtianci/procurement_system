@@ -69,7 +69,16 @@ public class CustomerBillRelation extends BaseWeChatEntity {
      */
     @TableField("actual_total_price")
     private BigDecimal actualTotalPrice;
-
+    /**
+     * 置顶，不置顶
+     */
+    @TableField("is_top")
+    private String isTop;
+    /**
+     * 对等，不对等
+     */
+    @TableField("is_peer")
+    private String isPeer;
 
     public String getCreateId() {
         return createId;
@@ -151,19 +160,37 @@ public class CustomerBillRelation extends BaseWeChatEntity {
         this.actualTotalPrice = actualTotalPrice;
     }
 
+    public String getIsTop() {
+        return isTop;
+    }
+
+    public void setIsTop(String isTop) {
+        this.isTop = isTop;
+    }
+
+    public String getIsPeer() {
+        return isPeer;
+    }
+
+    public void setIsPeer(String isPeer) {
+        this.isPeer = isPeer;
+    }
+
     @Override
     public String toString() {
         return "CustomerBillRelation{" +
-        ", createId=" + createId +
-        ", sourceId=" + sourceId +
-        ", customerId=" + customerId +
-        ", relationType=" + relationType +
-        ", billId=" + billId +
-        ", sourceBillId=" + sourceBillId +
-        ", businessStatus=" + businessStatus +
-        ", billStatus=" + billStatus +
-        ", totalPrice=" + totalPrice +
-        ", actualTotalPrice=" + actualTotalPrice +
-        "}";
+                "createId='" + createId + '\'' +
+                ", sourceId='" + sourceId + '\'' +
+                ", customerId='" + customerId + '\'' +
+                ", relationType='" + relationType + '\'' +
+                ", billId='" + billId + '\'' +
+                ", sourceBillId='" + sourceBillId + '\'' +
+                ", businessStatus='" + businessStatus + '\'' +
+                ", billStatus='" + billStatus + '\'' +
+                ", totalPrice=" + totalPrice +
+                ", actualTotalPrice=" + actualTotalPrice +
+                ", isTop='" + isTop + '\'' +
+                ", isPeer='" + isPeer + '\'' +
+                '}';
     }
 }

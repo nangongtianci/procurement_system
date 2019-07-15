@@ -55,6 +55,8 @@ public class DictController extends BaseMsbAdminController {
             ew.where("pid={0}",param.getPid());
         }
 
+        ew.orderBy("code",true);
+
         Page<Dict> page = new Page<>(param.getPageNow(),param.getPageSize());
         dictService.selectPage(page,ew);
         return render(page);

@@ -29,7 +29,7 @@ public class Swagger2 extends WebMvcConfigurationSupport {
         return new ApiInfoBuilder()
                 .title("禾本生鲜后台管理API接口文档")
                 .description("禾本生鲜后台管理API接口文档restful风格")
-                .termsOfServiceUrl("http://192.168.1.105:8080")
+                .termsOfServiceUrl("http://192.168.0.111:8080")
                 .version("1.0")
                 .build();
     }
