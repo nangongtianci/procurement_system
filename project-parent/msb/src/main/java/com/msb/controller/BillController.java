@@ -280,33 +280,7 @@ public class BillController extends BaseMsbController {
      */
     @PostMapping("/{id}")
     public Result getById(@PathVariable String id){
-        // 查询账单信息
-        Bill bill = billService.selectById(id);
-        if(Objects.isNull(bill)){
-           return render(null,"账单不存在！");
-        }
-
-        CustomerBillRelation cbr = customerBillRelationService.selectOne(new EntityWrapper<CustomerBillRelation>().
-                where("bill_id={0} and create_id={1} and customer_id={2}",bill.getId(),bill.getCreateCustomerId(),bill.getCid()));
-        if(Objects.isNull(cbr)){
-            return render(null,"账单不存在！");
-        }
-
-        bill.setIsPeer(cbr.getIsPeer());
-
-        // 查询用户信息
-        Customer customer = customerService.selectById(bill.getCid());
-        bill.setCustomer(customer);
-
-        // 查询货品|商品信息
-        BillGoods billGoods = billGoodsService.selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getId()));
-        bill.setBillGoods(billGoods);
-
-        if("0".equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
-            List<Bill> bills = billService.getBillsByPidLinkGoods(bill.getId());
-            bill.setSubBills(bills);
-        }
-        return render(bill);
+        return render(billService.getBillDetailById(id));
     }
 
     /**

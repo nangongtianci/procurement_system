@@ -35,6 +35,13 @@ public interface BillMapper extends BaseMapper<Bill> {
     int getCounts(BillQueryParam param);
 
     /**
+     * 查询子账单统计信息
+     * @param pid
+     * @return
+     */
+    Map<String,Object> selectStat(String pid);
+
+    /**
      * 账单多条件查询无分页（级联商品名称，创建时间降序排序,更新时间降序）
      * @param param
      * @return

@@ -231,6 +231,46 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         return billMapper.getBillsByPidLinkGoods(pid);
     }
 
+    @Override
+    public Result getBillDetailById(String id) {
+        // 查询账单信息
+        Bill bill = billMapper.selectById(id);
+        if(Objects.isNull(bill)){
+            return Result.FAIL("账单不存在！");
+        }
+
+        CustomerBillRelation conditionCBR = new CustomerBillRelation();
+        conditionCBR.setCreateId(bill.getCreateCustomerId());
+        conditionCBR.setBillId(bill.getId());
+        conditionCBR.setCustomerId(bill.getCid());
+        CustomerBillRelation cbr = customerBillRelationMapper.selectOne(conditionCBR);
+        if(Objects.isNull(cbr)){
+            return Result.FAIL("账单不存在！");
+        }
+
+        bill.setIsPeer(cbr.getIsPeer());
+        bill.setRelationType(cbr.getRelationType());
+
+        // 查询用户信息
+        bill.setCustomer(customerMapper.selectById(bill.getCid()));
+
+        // 查询货品|商品信息
+        BillGoods conditionBG = new BillGoods();
+        conditionBG.setBillId(bill.getId());
+        bill.setBillGoods(billGoodsMapper.selectOne(conditionBG));
+
+        Map<String,Object> rt = new HashMap<>();
+        if("0".equalsIgnoreCase(bill.getBusinessStatus())){ // 买入
+            List<Bill> bills = billMapper.getBillsByPidLinkGoods(bill.getId());
+            bill.setSubBills(bills);
+            // 统计信息
+            rt.put("stat",billMapper.selectStat(bill.getId()));
+        }
+
+        rt.put("bill",bill);
+        return Result.OK(rt);
+    }
+
     @Transactional
     @Override
     public Result shareBill(String cid,Bill bill) {

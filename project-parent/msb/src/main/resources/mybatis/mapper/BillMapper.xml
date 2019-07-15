@@ -24,25 +24,7 @@
 
     <!--级联商品查询映射结果-->
     <resultMap id="LinkGoodsResultMap" type="bill" extends="BaseResultMap">
-        <collection property="billGoods" autoMapping="true" ofType="billGoods">
-            <id column="goods_id" property="id" />
-            <result column="bill_id" property="billId" />
-            <result column="weight_unit" property="weightUnit" />
-            <result column="product_img_path" property="productImgPath"/>
-            <result column="is_goods" property="isGoods" />
-            <result column="goods_fix_price" property="goodsFixPrice" />
-            <result column="goods_start_count" property="goodsStartCount" />
-            <result column="goods_desc" property="goodsDesc" />
-            <result column="goods_brand" property="goodsBrand" />
-            <result column="goods_spec" property="goodsSpec" />
-            <result column="goods_product_place" property="goodsProductPlace" />
-            <result column="goods_address" property="goodsAddress" />
-            <result column="goods_freight" property="goodsFreight" />
-            <result column="goods_cost_ratio" property="goodsCostRatio" />
-            <result column="goodsImgPath" property="goods_img_path" />
-            <result column="goodsVideoPath" property="goods_video_path" />
-        </collection>
-        <!--<association property="billGoods" javaType="billGoods" autoMapping="true">-->
+        <!--<collection property="billGoods" autoMapping="true" ofType="billGoods">-->
             <!--<id column="goods_id" property="id" />-->
             <!--<result column="bill_id" property="billId" />-->
             <!--<result column="weight_unit" property="weightUnit" />-->
@@ -59,20 +41,54 @@
             <!--<result column="goods_cost_ratio" property="goodsCostRatio" />-->
             <!--<result column="goodsImgPath" property="goods_img_path" />-->
             <!--<result column="goodsVideoPath" property="goods_video_path" />-->
-        <!--</association>-->
+        <!--</collection>-->
+        <association property="billGoods" javaType="billGoods" autoMapping="true">
+            <id column="goods_id" property="id" />
+            <result column="bill_id" property="billId" />
+            <result column="weight_unit" property="weightUnit" />
+            <result column="product_img_path" property="productImgPath"/>
+            <result column="is_goods" property="isGoods" />
+            <result column="goods_fix_price" property="goodsFixPrice" />
+            <result column="goods_start_count" property="goodsStartCount" />
+            <result column="goods_desc" property="goodsDesc" />
+            <result column="goods_brand" property="goodsBrand" />
+            <result column="goods_spec" property="goodsSpec" />
+            <result column="goods_product_place" property="goodsProductPlace" />
+            <result column="goods_address" property="goodsAddress" />
+            <result column="goods_freight" property="goodsFreight" />
+            <result column="goods_cost_ratio" property="goodsCostRatio" />
+            <result column="goodsImgPath" property="goods_img_path" />
+            <result column="goodsVideoPath" property="goods_video_path" />
+        </association>
+        <association property="customerVO" javaType="customerVO" autoMapping="true">
+            <id column="customer_id" property="id" />
+            <result column="name" property="name" />
+        </association>
     </resultMap>
 
     <!--查询子账单列表，级联商品-->
     <select id="getBillsByPidLinkGoods" parameterType="string" resultMap="LinkGoodsResultMap">
         SELECT
-        b.*,
+        b.*,cr.id AS customer_id,cr.name,
         g.id AS goods_id,g.bill_id,g.name,g.number,
         g.price,g.weight,g.weight_unit,g.quality,g.product_img_path,g.is_goods,
         g.goods_is_show,g.goods_fix_price,g.goods_start_count,g.goods_desc,g.goods_brand,g.goods_spec,
         g.goods_product_place,g.goods_address,g.goods_freight,g.goods_cost_ratio,g.goods_img_path,g.goods_video_path
         FROM t_bill b
         LEFT JOIN t_bill_goods g ON b.id = g.bill_id
+        LEFT JOIN t_customer cr ON cr.id = b.create_customer_id
         WHERE b.pid=#{pid} ORDER BY b.id,b.update_time
+    </select>
+
+    <!--查询子账单统计信息-->
+    <select id="selectStat" parameterType="string" resultType="map">
+        SELECT
+          sum(g.weight) AS soldOutWeight,sum(g.number) AS soldOutNumber,
+          sum(b.actual_total_price) AS soldOutPrice,sum(b.other_cost) AS soldOutOtherCost,
+          (sum(b.actual_total_price)-(select actual_total_price from t_bill where id=#{pid})-sum(b.other_cost)) AS profit
+        FROM t_bill b
+        LEFT JOIN t_bill_goods g on b.id = g.bill_id
+        WHERE pid=#{pid}
     </select>
 
     <!--分页个数查询-->
@@ -332,6 +348,13 @@
         SELECT <include refid="statisticsForBill"/>,'已付' as name
         FROM `t_customer_bill_relation`
         WHERE create_id=#{createCustomerId} and business_status='0' and bill_status='0' and relation_type != '4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT count(bill_id) ct,ifnull(sum(other_cost),0.00) atp,'内部费用' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status in ('0','1')
         <if test="startDate != null and endDate != null">
             AND create_time BETWEEN #{startDate} AND #{endDate}
         </if>

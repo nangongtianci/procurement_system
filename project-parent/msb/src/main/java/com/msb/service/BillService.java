@@ -50,6 +50,13 @@ public interface BillService extends IService<Bill> {
     List<Bill> getBillsByPidLinkGoods(String pid);
 
     /**
+     * 查询账单详情
+     * @param id
+     * @return
+     */
+    Result getBillDetailById(String id);
+
+    /**
      * 分享账单
      * @param cid
      * @param bill
