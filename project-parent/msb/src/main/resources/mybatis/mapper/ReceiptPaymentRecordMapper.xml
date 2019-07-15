@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.msb.mapper.ReceiptPaymentRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.msb.entity.ReceiptPaymentRecord">
+    <result column="id" property="id" />
+    <result column="create_time" property="createTime" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_id" property="createId" />
+    <result column="customer_id" property="customerId" />
+    <result column="is_payment" property="isPayment" />
+    <result column="amount" property="amount" />
+    </resultMap>
+
+    <!--查询收款|付款记录列表-->
+    <select id="getListByParam" resultType="receiptPaymentRecordListVO">
+        select
+        DATE_FORMAT(create_time,'%Y-%m-%d') as createTime,
+        case is_payment when 1 then '付款' else '收款' End as isPayment,amount
+        from t_receipt_payment_record
+        where create_id=#{createId} and customer_id=#{customerId}
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                 and is_payment='1'
+            </when>
+            <otherwise><!--下游-->
+                 and is_payment='0'
+            </otherwise>
+        </choose>
+        order by create_time
+    </select>
+
+    <!--查询收款|付款记录个数-->
+    <select id="getCountByParam" resultType="int">
+        select
+        count(id)
+        from t_receipt_payment_record
+        where create_id=#{createId} and customer_id=#{customerId}
+        <choose>
+            <when test="isTop != null and isTop !='' and isTop == '1'.toString()"><!--上游-->
+                and is_payment='1'
+            </when>
+            <otherwise><!--下游-->
+                and is_payment='0'
+            </otherwise>
+        </choose>
+    </select>
+</mapper>
