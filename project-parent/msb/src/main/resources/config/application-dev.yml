@@ -19,7 +19,7 @@ spring:
   # 数据源配置
   datasource:
     name: quickers
-    url: jdbc:mysql://127.0.0.1:3306/quickers?characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://192.168.1.112:3306/quickers?characterEncoding=UTF-8&useSSL=false
     username: root
     password: 1234qweR?
     druid:
