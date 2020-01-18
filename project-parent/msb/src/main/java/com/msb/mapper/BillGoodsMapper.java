@@ -1,7 +1,7 @@
 package com.msb.mapper;
 
-import com.msb.entity.BillGoods;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.msb.entity.BillGoods;
 
 /**
  * <p>

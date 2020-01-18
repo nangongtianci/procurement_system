@@ -2,21 +2,30 @@ package com.msb.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.msb.common.annotation.PageQueryMethodFlag;
 import com.msb.common.base.controller.BaseMsbController;
 import com.msb.common.enume.ModuleEnum;
 import com.msb.common.utils.base.StringUtils;
 import com.msb.common.utils.constants.DictConstant;
+import com.msb.common.utils.result.PaginationUtils;
 import com.msb.common.utils.result.Result;
 import com.msb.entity.Bill;
 import com.msb.entity.BillGoods;
+import com.msb.entity.Customer;
 import com.msb.entity.Dict;
+import com.msb.requestParam.BillQueryParam;
 import com.msb.service.BillGoodsService;
 import com.msb.service.BillService;
+import com.msb.service.CustomerService;
 import com.msb.service.DictService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.msb.common.utils.result.CommonResultMsg.assignFieldIllegalValueRange;
@@ -40,6 +49,8 @@ public class BillGoodsController extends BaseMsbController {
     private BillService billService;
     @Autowired
     private DictService dictService;
+    @Autowired
+    private CustomerService customerService;
 
     @PostMapping("/{billId}")
     public Result getById(@PathVariable String billId){
@@ -56,7 +67,12 @@ public class BillGoodsController extends BaseMsbController {
         if("0".equalsIgnoreCase(billGoods.getIsGoods())){
             return render(null,"对不起，非商品！");
         }
-        return render(billGoods);
+
+        Customer customer = customerService.selectById(billGoods.getCreateCustomerId());
+        Map<String,Object> map = new HashMap<>();
+        map.put("customer",customer);
+        map.put("billGoods",billGoods);
+        return render(map);
     }
 
     @PostMapping("update")
@@ -78,6 +94,30 @@ public class BillGoodsController extends BaseMsbController {
         }
 
         return render(billGoodsService.updateById(billGoods));
+    }
+
+    /**
+     * 商品分页查询
+     * @param param
+     * @return
+     */
+    @PageQueryMethodFlag
+    @PostMapping("/page")
+    public Result selectPageForIndex(HttpServletRequest request, @RequestBody BillQueryParam param){
+        if(StringUtils.isBlank(param.getCreateCustomerId())){
+            param.setCreateCustomerId(getCid(request.getHeader("token")));
+        }
+
+        if(StringUtils.isBlank(param.getIsGoods())){
+            param.setIsGoods("1");
+        }
+
+        Page<BillGoods> condition = new Page<>(param.getPageNow(),param.getPageSize());
+        EntityWrapper ew = new EntityWrapper<BillGoods>();
+        ew.where("create_customer_id={0} and is_goods={1}",param.getCreateCustomerId(),param.getIsGoods());
+        ew.orderBy("update_time",false);
+        Page<BillGoods> billGoodsPage = billGoodsService.selectPage(condition,ew);
+        return PaginationUtils.getResultObj(billGoodsPage);
     }
 }
 

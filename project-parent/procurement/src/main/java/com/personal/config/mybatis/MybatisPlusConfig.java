@@ -1,8 +1,10 @@
 package com.personal.config.mybatis;
 
+import com.baomidou.mybatisplus.entity.GlobalConfiguration;
 import com.baomidou.mybatisplus.enums.DBType;
 import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean;
+
 import com.baomidou.mybatisplus.spring.boot.starter.MybatisPlusProperties;
 import com.baomidou.mybatisplus.spring.boot.starter.SpringBootVFS;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
@@ -63,6 +65,12 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisSqlSessionFactoryBean mybatisSqlSessionFactoryBean() {
         MybatisSqlSessionFactoryBean mybatisPlus = new MybatisSqlSessionFactoryBean();
+        // 逻辑删除
+        GlobalConfiguration globalConfig = new GlobalConfiguration();
+        globalConfig.setLogicDeleteValue("1");
+        globalConfig.setLogicNotDeleteValue("0");
+        mybatisPlus.setGlobalConfig(globalConfig);
+
         mybatisPlus.setDataSource(dataSource);
         mybatisPlus.setVfs(SpringBootVFS.class);
         if (StringUtils.hasText(this.properties.getConfigLocation())) {

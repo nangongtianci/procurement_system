@@ -17,6 +17,10 @@ import java.util.Date;
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class BillProductsForIndexPageVO extends BaseVO{
     /**
+     * 账单主键
+     */
+    private String billId;
+    /**
      * 商品名称
      */
     private String goodsName;
@@ -49,6 +53,10 @@ public class BillProductsForIndexPageVO extends BaseVO{
      * 是否置顶
      */
     private int isTop;
+    /**
+     * 是否对等
+     */
+    private int isPeer;
 
     public String getGoodsName() {
         return goodsName;
@@ -114,10 +122,27 @@ public class BillProductsForIndexPageVO extends BaseVO{
         this.isTop = isTop;
     }
 
+    public String getBillId() {
+        return billId;
+    }
+
+    public void setBillId(String billId) {
+        this.billId = billId;
+    }
+
+    public int getIsPeer() {
+        return isPeer;
+    }
+
+    public void setIsPeer(int isPeer) {
+        this.isPeer = isPeer;
+    }
+
     @Override
     public String toString() {
         return "BillProductsForIndexPageVO{" +
-                "goodsName='" + goodsName + '\'' +
+                "billId='" + billId + '\'' +
+                ", goodsName='" + goodsName + '\'' +
                 ", billDate=" + billDate +
                 ", businessStatus='" + businessStatus + '\'' +
                 ", billStatus='" + billStatus + '\'' +
@@ -125,6 +150,7 @@ public class BillProductsForIndexPageVO extends BaseVO{
                 ", actualTotalPrice=" + actualTotalPrice +
                 ", productImgPath='" + productImgPath + '\'' +
                 ", isTop=" + isTop +
+                ", isPeer=" + isPeer +
                 '}';
     }
 }

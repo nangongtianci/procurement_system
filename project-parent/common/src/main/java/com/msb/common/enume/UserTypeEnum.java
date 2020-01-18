@@ -8,6 +8,7 @@ package com.msb.common.enume;
  */
 public enum UserTypeEnum {
     customer("customer", "客户"),
+    employee("employee", "员工"),
     ;
 
     /**

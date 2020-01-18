@@ -9,8 +9,6 @@ import com.msb.common.base.controller.BaseMsbController;
 import com.msb.common.base.validate.ValidateUtils;
 import com.msb.common.cache.RedisService;
 import com.msb.common.cache.RedisUtils;
-import com.msb.common.enume.BillStatusEnum;
-import com.msb.common.enume.BusinessStatusEnum;
 import com.msb.common.enume.ModuleEnum;
 import com.msb.common.utils.base.DateUtil;
 import com.msb.common.utils.base.GenerateOrderUtil;
@@ -26,11 +24,14 @@ import com.msb.config.system.mail.ReportConfig;
 import com.msb.entity.*;
 import com.msb.entity.vo.BillProductsForIndexPageVO;
 import com.msb.entity.vo.BillProductsForQueryPageVO;
+import com.msb.entity.vo.BillStatisticsVO;
 import com.msb.requestParam.BillQueryParam;
 import com.msb.service.*;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -47,6 +48,7 @@ import static com.msb.common.utils.result.RegUtils.matchesIds;
  * @author ylw
  * @since 2019-06-05
  */
+@Api(value = "账单controller",description = "账单控制器")
 @RestController
 @RequestMapping("/bill")
 public class BillController extends BaseMsbController {
@@ -79,18 +81,11 @@ public class BillController extends BaseMsbController {
     public Result add(HttpServletRequest request,@RequestBody Bill bill) {
         String cid = getCid(request.getHeader("token"));
         bill.setCreateCustomerId(cid);
-        /**
-         * 校验货品|商品信息
-         */
-        Result result = validateBillGoods((byte)1,bill);
-        if(!Objects.isNull(result)){
-            return result;
-        }
 
         /**
          * 校验客户信息
          */
-        result = validateCustomer((byte)1,bill.getCustomer());
+        Result result = validateCustomer((byte)1,bill.getCustomer());
         if(!Objects.isNull(result)){
             return result;
         }
@@ -99,6 +94,14 @@ public class BillController extends BaseMsbController {
          * 校验商品本身信息
          */
         result = validateBill((byte)1,bill);
+        if(!Objects.isNull(result)){
+            return result;
+        }
+
+        /**
+         * 校验货品|商品信息
+         */
+        result = validateBillGoods((byte)1,bill);
         if(!Objects.isNull(result)){
             return result;
         }
@@ -141,23 +144,27 @@ public class BillController extends BaseMsbController {
             customerService.insert(customer);
         }
 
-        EntityWrapper<CustomerBillRelation> cbrEW = new EntityWrapper<>();
-        cbrEW.where("cid={0} and bid={1} and pid={2} and relation_type='4'",customer.getId(),billId,cid);
-        int ct = customerBillRelationService.selectCount(cbrEW);
-        if(ct>0){
-            return render(null,"手机号已被分享过，无法重复分享！");
-        }
-
         Bill bill = billService.selectById(billId.toString());
         if(bill == null){
             return render(null,"您要分享的账单不存在！");
+        }
+
+        if(bill.getCid().equalsIgnoreCase(customer.getId())){
+            return render(null,"分享手机号不能为本账单客户手机号!");
+        }
+
+        EntityWrapper<CustomerBillRelation> cbrEW = new EntityWrapper<>();
+        cbrEW.where("create_id={0} and bill_id={1} and relation_type='4'",customer.getId(),billId);
+        int ct = customerBillRelationService.selectCount(cbrEW);
+        if(ct>0){
+            return render(null,"手机号已被分享过，无法重复分享！");
         }
 
         if(!"0".equalsIgnoreCase(bill.getBusinessStatus())){
             return render(null,"非买入账单无法分享！");
         }
 
-        billService.shareBill(customer.getId(),bill.getCreateCustomerId(),bill.getId());
+        billService.shareBill(customer.getId(),bill);
         return render(true);
     }
 
@@ -182,9 +189,13 @@ public class BillController extends BaseMsbController {
         }
 
         int ct = customerBillRelationService.selectCount(new EntityWrapper<CustomerBillRelation>()
-                .where("pbid={0} and relation_type={1}",exist.getId(),"1"));
+                .where("bill_id={0} and is_peer='1'",exist.getId()));
         if(ct>0){
             return render("当前账单已存在对等账单！");
+        }
+
+        if(!cid.equalsIgnoreCase(exist.getCid())){
+            return render(null,"当前用户非账单客户，无法生成对等账单！");
         }
 
         exist.setSourceBillId(exist.getId()); // 原始账单
@@ -192,6 +203,7 @@ public class BillController extends BaseMsbController {
         // 组件对等账单
         if("1".equals(exist.getBusinessStatus())){ // (卖出)卖家
             exist.setBusinessStatus("0");
+            exist.setPid(null);
             // 应收-应付,已收-已付
             if("3".equals(exist.getBillStatus())){
                 exist.setBillStatus("2");
@@ -222,7 +234,6 @@ public class BillController extends BaseMsbController {
         exist.setCreateCustomerId(cid);
         exist.setBillDate(new Date());
         exist.setBillSn(GenerateOrderUtil.nextSN());
-        exist.setBillSnType("0"); // 扫描
         return billService.scan(exist);
     }
 
@@ -269,25 +280,7 @@ public class BillController extends BaseMsbController {
      */
     @PostMapping("/{id}")
     public Result getById(@PathVariable String id){
-        // 查询账单信息
-        Bill bill = billService.selectById(id);
-        if(Objects.isNull(bill)){
-           return render(null,"账单不存在！");
-        }
-
-        // 查询用户信息
-        Customer customer = customerService.selectById(bill.getCid());
-        bill.setCustomer(customer);
-
-        // 查询货品|商品信息
-        BillGoods billGoods = billGoodsService.selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getId()));
-        bill.setBillGoods(billGoods);
-
-        if("0".equalsIgnoreCase(bill.getBillStatus())){ // 买入
-            List<Bill> bills = billService.getBillsByPidLinkGoods(bill.getId());
-            bill.setSubBills(bills);
-        }
-        return render(bill);
+        return render(billService.getBillDetailById(id));
     }
 
     /**
@@ -315,10 +308,13 @@ public class BillController extends BaseMsbController {
                 return render(null,assignFieldNotNull("品名"));
             }
 
-            int ct = dictService.selectCount(new EntityWrapper<Dict>().
-                    where("pid={0} and code={1}",DictConstant.WEIGHT_UNIT_CATEGORY_ID,billGoods.getWeightUnit()));
-            if(ct<=0){
-                return render(null,assignFieldIllegalValueRange("重量单位"));
+            if("0".equalsIgnoreCase(bill.getBusinessStatus())
+                    || "1".equalsIgnoreCase(bill.getBusinessStatus())) { // 买入卖出
+                int ct = dictService.selectCount(new EntityWrapper<Dict>().
+                        where("pid={0} and code={1}",DictConstant.WEIGHT_UNIT_CATEGORY_ID,billGoods.getWeightUnit()));
+                if(ct<=0){
+                    return render(null,assignFieldIllegalValueRange("重量单位"));
+                }
             }
         }else{ // 更新
             if(!Objects.isNull(billGoods)){
@@ -367,52 +363,54 @@ public class BillController extends BaseMsbController {
 
     private Result validateBill(byte isAdd,Bill bill){
         if(isAdd == 1) { // 新增
-            bill.setCid(bill.getCustomer().getId());
             int bs = dictService.selectCount(new EntityWrapper<Dict>().
                     where("pid={0} and code={1}",DictConstant.BUSINESS_STATUS_CATEGORY_ID,bill.getBusinessStatus()));
             if(bs<=0){
                 return render(null,assignFieldIllegalValueRange("交易状态"));
             }
 
-            int bt = dictService.selectCount(new EntityWrapper<Dict>().
-                    where("pid={0} and code={1}",DictConstant.BILL_STATUS_CATEGORY_ID,bill.getBillStatus()));
-            if(bt<=0){
-                return render(null,assignFieldIllegalValueRange("账单状态"));
-            }
-
-            // 卖货校验
-            if(StringUtils.isNotBlank(bill.getPid())){
-                if("0".equalsIgnoreCase(bill.getBusinessStatus())){
-                    return render(null,"卖货不能为买入状态！");
+            if("0".equalsIgnoreCase(bill.getBusinessStatus())
+                || "1".equalsIgnoreCase(bill.getBusinessStatus())){ // 买入卖出
+                int bt = dictService.selectCount(new EntityWrapper<Dict>().
+                        where("pid={0} and code={1}",DictConstant.BILL_STATUS_CATEGORY_ID,bill.getBillStatus()));
+                if(bt<=0){
+                    return render(null,assignFieldIllegalValueRange("账单状态"));
                 }
 
-                BillGoods billGoods = billGoodsService.
-                        selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getPid()));
-                if(!billGoods.getWeightUnit().equalsIgnoreCase(bill.getBillGoods().getWeightUnit())){
-                    return render(null,"卖出货品单位与母账单不一致！");
-                }
-
-                if(!billGoods.getName().equalsIgnoreCase(bill.getBillGoods().getName())){
-                    return render(null,"卖出品名与母账单不一致！");
-                }
-
-                List<Bill> subBills = billService.getBillsByPidLinkGoods(bill.getPid());
-                float number=0,weight=0;
-                if(!ListUtils.isEmpty(subBills)){
-                    for(Bill tmp : subBills){
-                        number+=tmp.getBillGoods().getNumber();
-                        weight+=tmp.getBillGoods().getWeight();
+                // 卖货校验
+                if(StringUtils.isNotBlank(bill.getPid())){
+                    if("0".equalsIgnoreCase(bill.getBusinessStatus())){
+                        return render(null,"卖货不能为买入状态！");
                     }
-                }
 
-                if("1".equalsIgnoreCase(billGoods.getWeightUnit())
-                    && bill.getBillGoods().getNumber()>(billGoods.getNumber()-number)){ // 元/箱
-                    return render(null,"本账单所需货品数量已超过母账单剩余数量！");
-                }
+                    BillGoods billGoods = billGoodsService.
+                            selectOne(new EntityWrapper<BillGoods>().where("bill_id={0}",bill.getPid()));
+                    if(!billGoods.getWeightUnit().equalsIgnoreCase(bill.getBillGoods().getWeightUnit())){
+                        return render(null,"卖出货品单位与母账单不一致！");
+                    }
 
-                if("0".equalsIgnoreCase(billGoods.getWeightUnit())
-                        && bill.getBillGoods().getWeight()>(billGoods.getWeight()-weight)){ // 元/斤
-                    return render(null,"本账单所需货品斤数已超过母账单剩余斤数！");
+                    if(!billGoods.getName().equalsIgnoreCase(bill.getBillGoods().getName())){
+                        return render(null,"卖出品名与母账单不一致！");
+                    }
+
+                    List<Bill> subBills = billService.getBillsByPidLinkGoods(bill.getPid());
+                    float number=0,weight=0;
+                    if(!ListUtils.isEmpty(subBills)){
+                        for(Bill tmp : subBills){
+                            number+=tmp.getBillGoods().getNumber();
+                            weight+=tmp.getBillGoods().getWeight();
+                        }
+                    }
+
+                    if("1".equalsIgnoreCase(billGoods.getWeightUnit())
+                            && bill.getBillGoods().getNumber()>(billGoods.getNumber()-number)){ // 元/箱
+                        return render(null,"本账单所需货品数量已超过母账单剩余数量！");
+                    }
+
+                    if("0".equalsIgnoreCase(billGoods.getWeightUnit())
+                            && bill.getBillGoods().getWeight()>(billGoods.getWeight()-weight)){ // 元/斤
+                        return render(null,"本账单所需货品斤数已超过母账单剩余斤数！");
+                    }
                 }
             }
         }else{
@@ -471,23 +469,33 @@ public class BillController extends BaseMsbController {
      * @param top
      * @return
      */
+    @ApiOperation(value = "是否置顶",notes = "注意：id=客户账单关系主键,top:0:不置顶，1：置顶")
     @PostMapping("top/{id}/{top}")
-    public Result billTop(@PathVariable String id,@PathVariable int top){
+    public Result billTop(@PathVariable @ApiParam(name = "id",value = "客户关系主键",required = true) String id,
+                          @PathVariable @ApiParam(name = "top",value = "是否置顶",required = true) String top){
         if(!matchesIds(id)){
             return Result.FAIL(assignModuleNameForPK(ModuleEnum.bill));
         }
-        Bill bill = new Bill();
-        bill.setId(id);
-        if(top > 0){
-            bill.setIsTop("1"); // 置顶
-        }else{
-            bill.setIsTop("0"); // 不置顶
+
+        int ct = dictService.selectCount(new EntityWrapper<Dict>().
+                where("pid={0} and code={1}",DictConstant.YES_NO_CATEGORY_ID,top));
+        if(ct<=0){
+            return render(null,assignFieldIllegalValueRange("是否置顶"));
         }
-        if(billService.updateById(bill)){
-            return render(true);
-        }else{
-            return render(false);
+
+        CustomerBillRelation exist = customerBillRelationService.selectById(id);
+        if(Objects.isNull(exist) || StringUtils.isBlank(exist.getBillId())){
+            return render(null,"账单不存在，置顶失败!");
         }
+
+        if(!"0".equalsIgnoreCase(exist.getBusinessStatus())){
+            return render(null,"非买入账单无法置顶！");
+        }
+
+        CustomerBillRelation cbr = new CustomerBillRelation();
+        cbr.setId(id);
+        cbr.setIsTop(top);
+        return render(customerBillRelationService.updateById(cbr));
     }
 
     /**
@@ -510,6 +518,121 @@ public class BillController extends BaseMsbController {
         return PaginationUtils.getResultObj(content,count,param);
     }
 
+
+    /**
+     * 账单分页多条件查询（查询界面）-（级联商品名称分页）
+     * @param param
+     * @return
+     */
+    @ApiOperation(value = "查询界面-分页查询接口",notes = "任何条件都可以不传!")
+    @PageQueryMethodFlag
+    @PostMapping("/query/page")
+    public Result getPageForQueryPage(HttpServletRequest request, @RequestBody BillQueryParam param){
+        Result result = multiQueryValidate(param);
+        if(result != null){
+            return result;
+        }
+        param.setCreateCustomerId(getCid(request.getHeader("token")));
+        int count = billService.getCounts(param);
+        if (count == 0)
+            return Result.EMPTY();
+        List<BillProductsForQueryPageVO> content = billService.getPageForQueryPage(param);
+        String total = billService.getTotalForQueryPage(param);
+        Map<String,Object> map = new HashMap<>();
+        map.put("total",total);
+        map.put("page",PaginationUtils.getResultObj(content,count,param).getData());
+        return render(map);
+    }
+
+    /**
+     * 账单统计信息
+     * @return
+     */
+    @ApiOperation(value = "统计",notes = "注意，开始和结束日期如果用户不选择，那么默认传当天日期,开始：xxxx-xx-xx 00:00:00 结束：xxxx-xx-xx 23:59:59")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="startDate",value="开始日期",required = true,dataType="string", paramType = "body",example="xxxx-xx-xx 00:00:00"),
+            @ApiImplicitParam(name="endDate",value="结束日期",required = true,dataType="string", paramType = "body",example = "xxxx-xx-xx 23:59:59")
+    })
+    @PostMapping("stat")
+    public Result selectStatisticsForBill(HttpServletRequest request,@RequestBody @ApiIgnore String param){
+        Object startDate = getParamByKey(param,"startDate");
+        if(Objects.isNull(startDate) || StringUtils.isBlank(startDate.toString())){
+            return render(null,assignFieldNotNull("开始日期不能为空！"));
+        }
+
+        Object endDate = getParamByKey(param,"endDate");
+        if(Objects.isNull(endDate) || StringUtils.isBlank(endDate.toString())){
+            return render(null,assignFieldNotNull("结束日期不能为空！"));
+        }
+
+        // DateUtil.parse(startDate.toString(),DateUtil.DATE_TIME_FORMAT);
+        String cid = getCid(request.getHeader("token"));
+        Map<String,Object> map = new HashMap<>();
+        map.put("createCustomerId",cid);
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        return Result.OK(billService.getStatisticsForBill(map));
+    }
+
+    @ApiOperation(value = "发送统计邮件",notes = "注意，开始和结束日期如果用户不选择，那么默认传当天日期,开始：xxxx-xx-xx 00:00:00 结束：xxxx-xx-xx 23:59:59")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="startDate",value="开始日期",required = true,dataType="string", paramType = "body",example="xxxx-xx-xx 00:00:00"),
+            @ApiImplicitParam(name="endDate",value="结束日期",required = true,dataType="string", paramType = "body",example = "xxxx-xx-xx 23:59:59"),
+            @ApiImplicitParam(name="mail",value="邮箱",required = true,dataType="string", paramType = "body",example = "xxx@xxx.xxx")
+    })
+    @PostMapping("stat/mail")
+    public Result getStatMail(HttpServletRequest request, @RequestBody @ApiIgnore String param) throws Exception{
+        Object startDate = getParamByKey(param,"startDate");
+        if(Objects.isNull(startDate) || StringUtils.isBlank(startDate.toString())){
+            return render(null,assignFieldNotNull("开始日期不能为空！"));
+        }
+
+        Object endDate = getParamByKey(param,"endDate");
+        if(Objects.isNull(endDate) || StringUtils.isBlank(endDate.toString())){
+            return render(null,assignFieldNotNull("结束日期不能为空！"));
+        }
+
+        Object mail = getParamByKey(param,"mail");
+        if(Objects.isNull(mail) || !ValidateUtils.isEmail(mail.toString())){
+            return render(null,"邮箱不合法!");
+        }
+
+        String cid = getCid(request.getHeader("token"));
+        Map<String,Object> condition = new HashMap<>();
+        condition.put("createCustomerId",cid);
+        condition.put("startDate",startDate);
+        condition.put("endDate",endDate);
+        List<BillStatisticsVO> list = billService.getStatisticsForBill(condition);
+
+        if(ListUtils.isEmpty(list)){
+            return render(null,"数据为空，无需发送邮件！");
+        }
+
+        List<Map<String,Object>> mapList = new ArrayList<>();
+        Map<String,Object> map = new HashMap<>();
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        map.put("buy",list.get(0).getCt()+"笔，"+list.get(0).getAtp()+"元");
+        map.put("sale",list.get(1).getCt()+"笔，"+list.get(1).getAtp()+"元");
+        map.put("ip",list.get(2).getCt()+"笔，"+list.get(2).getAtp()+"元");
+        map.put("ad",list.get(3).getCt()+"笔，"+list.get(3).getAtp()+"元");
+        map.put("cost",list.get(4).getCt()+"笔，"+list.get(4).getAtp()+"元");
+        map.put("profit",(list.get(1).getAtp().add(list.get(2).getAtp()).subtract(list.get(0).getAtp()).subtract(list.get(3).getAtp()).subtract(list.get(4).getAtp()))+"元");
+        map.put("payable",list.get(5).getCt()+"笔，"+list.get(5).getAtp()+"元");
+        map.put("receive",list.get(6).getCt()+"笔，"+list.get(6).getAtp()+"元");
+        map.put("received",list.get(7).getCt()+"笔，"+list.get(7).getAtp()+"元");
+        map.put("paid",list.get(8).getCt()+"笔，"+list.get(8).getAtp()+"元");
+        map.put("cashSurplus",list.get(7).getAtp().subtract(list.get(8).getAtp()).subtract(list.get(4).getAtp())+"元");
+        map.put("totalSurplus",list.get(1).getAtp().subtract(list.get(0).getAtp()).subtract(list.get(4).getAtp())+"元");
+        mapList.add(map);
+
+        String[] headList = new String[]{"开始日期","结束日期","买入","卖出","盘盈","盘损","费用","利润合计","应付","应收","已收","已付","现金结余","合计结余"};
+        String[] fieldList = new String[]{"startDate","endDate","buy","sale","ip","ad","cost","profit","payable","receive","received","paid","cashSurplus","totalSurplus"};
+        String filePathName = fileConfig.getExcelSavePath() + File.separator + "bill_stat_"
+                + DateUtil.format(new Date(),"yyyyMMddHHmmss")+".xlsx";
+        ExcelUtils.createExcel(filePathName,headList,fieldList,mapList);
+        return render(mailService.sendAttachmentsMail(mail.toString(),reportConfig.getSubject(),reportConfig.getContent(),filePathName));
+    }
 
     /**
      * 发送报表邮件
@@ -542,21 +665,19 @@ public class BillController extends BaseMsbController {
             map.put("customerPhone",tmp.getCustomerPhone());
             map.put("goodsName",tmp.getGoodsName());
             map.put("totalPrice",tmp.getTotalPrice());
+            map.put("actualTotalPrice",tmp.getActualTotalPrice());
             map.put("billStatus",getDictName(dicts,tmp.getBusinessStatus()));
             mapList.add(map);
         }
-        String[] headList = new String[]{"客户名称","客户手机号","商品名称","总价格","账单状态"};
-        String[] fieldList = new String[]{"customerName","customerPhone","goodsName","totalPrice","billStatus"};
+        String[] headList = new String[]{"客户名称","客户手机号","商品名称","总价格","实收总价","账单状态"};
+        String[] fieldList = new String[]{"customerName","customerPhone","goodsName","totalPrice","actualTotalPrice","billStatus"};
         String filePathName = fileConfig.getExcelSavePath() + File.separator + "bill_"
                 + DateUtil.format(new Date(),"yyyyMMddHHmmss")+".xlsx";
         ExcelUtils.createExcel(filePathName,headList,fieldList,mapList);
 
         // 发送邮件
         Customer customer = customerService.selectById(param.getCreateCustomerId());
-        if(mailService.sendAttachmentsMail(customer.getEmail(),reportConfig.getSubject(),reportConfig.getContent(),filePathName)){
-            return render(true);
-        }
-        return render(false);
+        return render(mailService.sendAttachmentsMail(customer.getEmail(),reportConfig.getSubject(),reportConfig.getContent(),filePathName));
     }
 
     /**

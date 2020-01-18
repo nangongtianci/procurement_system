@@ -5,9 +5,11 @@ import com.msb.common.base.page.PageQueryParam;
 import com.msb.entity.Bill;
 import com.msb.entity.vo.BillProductsForIndexPageVO;
 import com.msb.entity.vo.BillProductsForQueryPageVO;
+import com.msb.entity.vo.BillStatisticsVO;
 import com.msb.requestParam.BillQueryParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -33,6 +35,13 @@ public interface BillMapper extends BaseMapper<Bill> {
     int getCounts(BillQueryParam param);
 
     /**
+     * 查询子账单统计信息
+     * @param pid
+     * @return
+     */
+    Map<String,Object> selectStat(String pid);
+
+    /**
      * 账单多条件查询无分页（级联商品名称，创建时间降序排序,更新时间降序）
      * @param param
      * @return
@@ -40,9 +49,30 @@ public interface BillMapper extends BaseMapper<Bill> {
     List<BillProductsForQueryPageVO> getBillsByParams(BillQueryParam param);
 
     /**
+     * 账单多条件查询含分页(查询界面使用)（级联商品名称，创建时间降序排序,更新时间降序）
+     * @param param
+     * @return
+     */
+    List<BillProductsForQueryPageVO> getPageForQueryPage(BillQueryParam param);
+
+    /**
+     * 账单多条件查询合计(查询界面使用)
+     * @param param
+     * @return
+     */
+    String getTotalForQueryPage(BillQueryParam param);
+
+    /**
      * 账单首页分页查询（级联商品名称，创建时间降序排序）
      * @param param
      * @return
      */
     List<BillProductsForIndexPageVO> getPageForBillIndexPage(PageQueryParam param);
+
+    /**
+     * 账单统计查询
+     * @param param
+     * @return
+     */
+    List<BillStatisticsVO> getStatisticsForBill(Map<String,Object> param);
 }

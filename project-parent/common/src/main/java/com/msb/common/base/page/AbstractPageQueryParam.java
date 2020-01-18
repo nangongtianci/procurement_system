@@ -1,6 +1,7 @@
 package com.msb.common.base.page;
 
 import com.msb.common.constant.SysConstant;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
   * @Title: AbstractPageQueryParam
@@ -14,16 +15,19 @@ public abstract class AbstractPageQueryParam implements PageQueryParam {
     /**
      * @desc 每页多少条
      */
+    @ApiModelProperty(value="每页多少条",name="pageSize")
     private int pageSize = SysConstant.PAGE_SIZE_DEFAULT;
 
     /**
      * @desc 当前第几页 (外部分页显示使用)
      */
+    @ApiModelProperty(value="当前第几页 (外部分页显示使用)",name="pageNow")
     private int pageNow = SysConstant.PAGE_NOW_DEFAULT;
 
     /**
      * @desc 开始索引位置
      */
+    @ApiModelProperty(hidden = true)
     private int offSet;
 
     public int getOffSet() {

@@ -26,10 +26,6 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.baomidou</groupId>
-			<artifactId>mybatis-plus</artifactId>
-		</dependency>
 		<!--模板执行引擎-->
 		<dependency>
 			<groupId>org.apache.velocity</groupId>

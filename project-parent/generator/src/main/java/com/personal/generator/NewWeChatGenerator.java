@@ -22,12 +22,13 @@ import java.util.Map;
  */
 public class NewWeChatGenerator {
     public static void main(String[] args) {
-            generate("msb","t_customer_bill_relation");
+            generate("msb","t_receipt_payment_record","t_receipt_payment_record_bill","t_remain_record");
     }
 
     private static void generate(String model,String ... tableName){
         File file = new File(model);
         String path = file.getAbsolutePath();
+        //String path = "C:\\Users\\ylw\\Desktop\\generator";
         AutoGenerator mpg = new AutoGenerator();
 
         // 全局配置

@@ -1,5 +1,6 @@
 package com.msb.controller;
 
+import com.msb.common.base.controller.BaseMsbController;
 import com.msb.common.cache.RedisService;
 import com.msb.common.enume.UserTypeEnum;
 import com.msb.common.random.RandomNum;
@@ -31,7 +32,7 @@ import static com.msb.common.utils.result.CommonResultMsg.assignFieldNotNull;
 
 @RestController
 @RequestMapping("/")
-public class CommonController {
+public class CommonController extends BaseMsbController {
     @Autowired
     private SmsConfig smsConfig;
     @Autowired
@@ -69,7 +70,7 @@ public class CommonController {
         }
     }
 
-    @GetMapping("/send/sms/{mobile}")
+    @PostMapping("/send/sms/{mobile}")
     public Result sendSms(@PathVariable String mobile){
         if(StringUtils.isBlank(mobile)){
             return Result.FAIL(assignFieldNotNull("手机号"));
@@ -98,7 +99,7 @@ public class CommonController {
      * @param request
      * @return
      */
-    @GetMapping("checkToken")
+    @PostMapping("checkToken")
     public String checkToken(HttpServletRequest request){
         if(TokenUtils.checkToekn(UserTypeEnum.customer,request.getHeader("token"),redisService)){
             return "false";
@@ -113,12 +114,12 @@ public class CommonController {
      * @return
      */
     @PostMapping("/voice")
-    public String sendSms(Voice voice){
+    public Result voice(@RequestBody Voice voice){
         Map<String, String> map = new HashMap<>();
         map.put("text",voice.getText());
         map.put("userId",voice.getUserId());
         map.put("operationId",voice.getOperationId());
-        return HttpUtil.doPost("http://112.125.89.15/bill/parse",map);
+        return render(HttpUtil.doPost("http://39.100.68.112/bill/parse",map));
     }
 
     @GetMapping("test")

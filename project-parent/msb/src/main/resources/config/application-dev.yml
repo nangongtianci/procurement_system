@@ -36,7 +36,7 @@ quickers:
     excelSavePath: D:\data\template\excel
     imgPath: D:\data\template\img
     verifyPath: D:\data\template\wx-verify
-    staticBrowsePath: /static/img/
+    staticBrowsePath: /static/
   mail:
     report:
       subject: 报表信息

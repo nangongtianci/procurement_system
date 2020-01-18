@@ -194,7 +194,7 @@ public class ValidateUtils {
      * @return
      */
     public static boolean isMobile(String mobile) {
-        Pattern pattern = Pattern.compile("^1[1|3|4|5|7|8][0-9]{9}$");
+        Pattern pattern = Pattern.compile("^1[3|4|5|7|8|9][0-9]{9}$");
         return pattern.matcher(mobile).matches();
 
     }

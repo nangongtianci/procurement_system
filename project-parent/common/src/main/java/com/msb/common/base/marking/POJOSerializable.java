@@ -7,4 +7,5 @@ package com.msb.common.base.marking;
  * @return
  */
 public interface POJOSerializable extends BaseSerializable{
+
 }

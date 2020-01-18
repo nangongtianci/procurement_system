@@ -17,8 +17,6 @@
         <result column="other_cost" property="otherCost" />
         <result column="total_price" property="totalPrice" />
         <result column="actual_total_price" property="actualTotalPrice" />
-        <result column="bill_sn_type" property="billSnType" />
-        <result column="is_top" property="isTop" />
         <result column="bill_date" property="billDate" />
         <result column="is_receive" property="isReceive" />
         <result column="create_customer_id" property="createCustomerId" />
@@ -26,6 +24,24 @@
 
     <!--级联商品查询映射结果-->
     <resultMap id="LinkGoodsResultMap" type="bill" extends="BaseResultMap">
+        <!--<collection property="billGoods" autoMapping="true" ofType="billGoods">-->
+            <!--<id column="goods_id" property="id" />-->
+            <!--<result column="bill_id" property="billId" />-->
+            <!--<result column="weight_unit" property="weightUnit" />-->
+            <!--<result column="product_img_path" property="productImgPath"/>-->
+            <!--<result column="is_goods" property="isGoods" />-->
+            <!--<result column="goods_fix_price" property="goodsFixPrice" />-->
+            <!--<result column="goods_start_count" property="goodsStartCount" />-->
+            <!--<result column="goods_desc" property="goodsDesc" />-->
+            <!--<result column="goods_brand" property="goodsBrand" />-->
+            <!--<result column="goods_spec" property="goodsSpec" />-->
+            <!--<result column="goods_product_place" property="goodsProductPlace" />-->
+            <!--<result column="goods_address" property="goodsAddress" />-->
+            <!--<result column="goods_freight" property="goodsFreight" />-->
+            <!--<result column="goods_cost_ratio" property="goodsCostRatio" />-->
+            <!--<result column="goodsImgPath" property="goods_img_path" />-->
+            <!--<result column="goodsVideoPath" property="goods_video_path" />-->
+        <!--</collection>-->
         <association property="billGoods" javaType="billGoods" autoMapping="true">
             <id column="goods_id" property="id" />
             <result column="bill_id" property="billId" />
@@ -44,44 +60,58 @@
             <result column="goodsImgPath" property="goods_img_path" />
             <result column="goodsVideoPath" property="goods_video_path" />
         </association>
+        <association property="customerVO" javaType="customerVO" autoMapping="true">
+            <id column="customer_id" property="id" />
+            <result column="name" property="name" />
+        </association>
     </resultMap>
 
     <!--查询子账单列表，级联商品-->
     <select id="getBillsByPidLinkGoods" parameterType="string" resultMap="LinkGoodsResultMap">
         SELECT
-        b.*,
+        b.*,cr.id AS customer_id,cr.name,
         g.id AS goods_id,g.bill_id,g.name,g.number,
         g.price,g.weight,g.weight_unit,g.quality,g.product_img_path,g.is_goods,
         g.goods_is_show,g.goods_fix_price,g.goods_start_count,g.goods_desc,g.goods_brand,g.goods_spec,
         g.goods_product_place,g.goods_address,g.goods_freight,g.goods_cost_ratio,g.goods_img_path,g.goods_video_path
         FROM t_bill b
         LEFT JOIN t_bill_goods g ON b.id = g.bill_id
+        LEFT JOIN t_customer cr ON cr.id = b.create_customer_id
         WHERE b.pid=#{pid} ORDER BY b.id,b.update_time
+    </select>
+
+    <!--查询子账单统计信息-->
+    <select id="selectStat" parameterType="string" resultType="map">
+        SELECT
+          sum(g.weight) AS soldOutWeight,sum(g.number) AS soldOutNumber,
+          sum(b.actual_total_price) AS soldOutPrice,sum(b.other_cost) AS soldOutOtherCost,
+          (sum(b.actual_total_price)-(select actual_total_price from t_bill where id=#{pid})-sum(b.other_cost)) AS profit
+        FROM t_bill b
+        LEFT JOIN t_bill_goods g on b.id = g.bill_id
+        WHERE pid=#{pid}
     </select>
 
     <!--分页个数查询-->
     <select id="getCounts" resultType="int">
         SELECT
-        count(b.id)
-        FROM
-        (SELECT tcbr.bid
+        count(tcbr.bill_id)
         FROM t_customer_bill_relation tcbr
-        WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
-        LEFT JOIN t_bill_goods g on b.id = g.bill_id
-        LEFT JOIN t_customer c on c.id = b.create_customer_id
+        LEFT JOIN t_bill b on b.id = tcbr.bill_id
+        LEFT JOIN t_customer cr on cr.id = b.cid
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
         <where>
+            tcbr.create_id = #{createCustomerId}
             <if test="customerName != null and customerName != ''">
-                AND c.name=#{customerName}
+                AND cr.name=#{customerName}
             </if>
             <if test="customerPhone != null and customerPhone != ''">
-                AND c.phone=#{customerPhone}
+                AND cr.phone=#{customerPhone}
             </if>
             <if test="businessStatus != null and businessStatus != ''">
-                AND b.business_status=#{businessStatus}
+                AND tcbr.business_status=#{businessStatus}
             </if>
             <if test="billStatus != null and billStatus != ''">
-                AND b.bill_status=#{billStatus}
+                AND tcbr.bill_status=#{billStatus}
             </if>
             <if test="goodsName != null and goodsName != ''">
                 AND g.name=#{goodsName}
@@ -90,7 +120,7 @@
                 AND g.is_goods=#{isGoods}
             </if>
             <if test="startDate != null">
-                AND b.create_time BETWEEN #{startDate} AND #{endDate}
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
     </select>
@@ -98,35 +128,29 @@
     <!--账单首页分页查询（级联商品名称，创建时间降序排序）-->
     <select id="getPageForBillIndexPage" resultType="billProductsForIndexPageVO">
         SELECT
-        b.id,
+        tcbr.id,tcbr.bill_id AS billId,tcbr.is_top as isTop,tcbr.is_peer as isPeer,
+        tcbr.bill_status AS billStatus,tcbr.business_status AS businessStatus,
+        tcbr.total_price AS totalPrice,tcbr.actual_total_price AS actualTotalPrice,
+        tcbr.create_time AS createTime,tcbr.update_time AS updateTime,
         g.name AS goodsName,
-        g.product_img_path AS productImgPath,
-        b.bill_date AS billDate,
-        b.business_status AS businessStatus,
-        bill_status AS billStatus,
-        total_price AS totalPrice,
-        b.actual_total_price AS actualTotalPrice,
-        b.is_top as isTop,
-        b.create_time AS createTime,b.update_time AS updateTime
-        FROM
-        (SELECT tcbr.bid
-         FROM t_customer_bill_relation tcbr
-         WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
-        LEFT JOIN t_bill_goods g on b.id = g.bill_id
-        LEFT JOIN t_customer c on c.id = b.create_customer_id
+        g.product_img_path AS productImgPath
+        FROM t_customer_bill_relation tcbr
+        LEFT JOIN t_bill b on b.id = tcbr.bill_id
+        LEFT JOIN t_customer cr on cr.id = b.cid
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
         <where>
+            tcbr.create_id = #{createCustomerId}
             <if test="customerName != null and customerName != ''">
-                AND c.name=#{customerName}
+                AND cr.name=#{customerName}
             </if>
             <if test="customerPhone != null and customerPhone != ''">
-                AND c.phone=#{customerPhone}
+                AND cr.phone=#{customerPhone}
             </if>
             <if test="businessStatus != null and businessStatus != ''">
-                AND b.business_status=#{businessStatus}
+                AND tcbr.business_status=#{businessStatus}
             </if>
             <if test="billStatus != null and billStatus != ''">
-                AND b.bill_status=#{billStatus}
+                AND tcbr.bill_status=#{billStatus}
             </if>
             <if test="goodsName != null and goodsName != ''">
                 AND g.name=#{goodsName}
@@ -135,45 +159,40 @@
                 AND g.is_goods=#{isGoods}
             </if>
             <if test="startDate != null">
-                AND b.create_time BETWEEN #{startDate} AND #{endDate}
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
-        ORDER BY b.is_top DESC,b.create_time DESC
+        ORDER BY tcbr.is_top DESC,tcbr.create_time DESC
         LIMIT #{pageSize} offset #{offSet}
     </select>
 
     <!--账单多条件查询无分页（级联商品名称，创建时间降序排序,更新时间降序）-->
     <select id="getBillsByParams" resultType="billProductsForQueryPageVO">
         SELECT
-        b.id,c.name AS customerName,c.phone AS customerPhone,
+        tcbr.id,tcbr.bill_id AS billId,tcbr.is_top as isTop,tcbr.is_peer as isPeer,
+        tcbr.bill_status AS billStatus,tcbr.business_status AS businessStatus,
+        tcbr.total_price AS totalPrice,tcbr.actual_total_price AS actualTotalPrice,
+        tcbr.create_time AS createTime,tcbr.update_time AS updateTime,
+        cr.name AS customerName,cr.phone AS customerPhone,
         g.name AS goodsName,
-        g.product_img_path AS productImgPath,
-        b.bill_date AS billDate,
-        b.business_status AS businessStatus,
-        bill_status AS billStatus,
-        total_price AS totalPrice,
-        b.actual_total_price AS actualTotalPrice,
-        b.is_top as isTop,
-        b.create_time AS createTime,b.update_time AS updateTime
-        FROM
-        (SELECT tcbr.bid
+        g.product_img_path AS productImgPath
         FROM t_customer_bill_relation tcbr
-        WHERE tcbr.cid = #{createCustomerId}) tmp
-        LEFT JOIN t_bill b on tmp.bid = b.id
-        LEFT JOIN t_bill_goods g on b.id = g.bill_id
-        LEFT JOIN t_customer c on c.id = b.create_customer_id
+        LEFT JOIN t_bill b on b.id = tcbr.bill_id
+        LEFT JOIN t_customer cr on cr.id = b.cid
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
         <where>
+            tcbr.create_id = #{createCustomerId}
             <if test="customerName != null and customerName != ''">
-                AND c.name=#{customerName}
+                AND cr.name=#{customerName}
             </if>
             <if test="customerPhone != null and customerPhone != ''">
-                AND c.phone=#{customerPhone}
+                AND cr.phone=#{customerPhone}
             </if>
             <if test="businessStatus != null and businessStatus != ''">
-                AND b.business_status=#{businessStatus}
+                AND tcbr.business_status=#{businessStatus}
             </if>
             <if test="billStatus != null and billStatus != ''">
-                AND b.bill_status=#{billStatus}
+                AND tcbr.bill_status=#{billStatus}
             </if>
             <if test="goodsName != null and goodsName != ''">
                 AND g.name=#{goodsName}
@@ -182,9 +201,162 @@
                 AND g.is_goods=#{isGoods}
             </if>
             <if test="startDate != null">
-                AND b.create_time BETWEEN #{startDate} AND #{endDate}
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
-        ORDER BY b.create_time desc,b.update_time desc
+        ORDER BY tcbr.create_time desc,tcbr.update_time desc
+    </select>
+
+    <!--账单多条件查询含分页(查询界面使用)（级联商品名称，创建时间降序排序,更新时间降序）-->
+    <select id="getPageForQueryPage" resultType="billProductsForQueryPageVO">
+        SELECT
+        cr.name AS customerName,cr.phone AS customerPhone,
+        g.name AS goodsName,g.product_img_path AS productImgPath,
+        tcbr.id,tcbr.bill_id AS billId,tcbr.is_top as isTop,tcbr.is_peer as isPeer,
+        tcbr.business_status AS businessStatus,tcbr.bill_status AS billStatus,
+        tcbr.total_price AS totalPrice,tcbr.actual_total_price AS actualTotalPrice
+        FROM t_customer_bill_relation tcbr
+        LEFT JOIN t_bill b on b.id = tcbr.bill_id
+        LEFT JOIN t_customer cr on cr.id = b.cid
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
+        <where>
+            tcbr.create_id = #{createCustomerId}
+            <if test="customerName != null and customerName != ''">
+                AND cr.name=#{customerName}
+            </if>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND cr.phone=#{customerPhone}
+            </if>
+            <if test="businessStatus != null and businessStatus != ''">
+                AND tcbr.business_status=#{businessStatus}
+            </if>
+            <if test="billStatus != null and billStatus != ''">
+                AND tcbr.bill_status=#{billStatus}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND g.name=#{goodsName}
+            </if>
+            <if test="isGoods != null and isGoods != ''">
+                AND g.is_goods=#{isGoods}
+            </if>
+            <if test="startDate != null">
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY tcbr.create_time desc
+        LIMIT #{pageSize} offset #{offSet}
+    </select>
+
+    <!--账单多条件查询合计(查询界面使用)-->
+    <select id="getTotalForQueryPage" resultType="string">
+        SELECT
+        IFNULL(sum(tcbr.actual_total_price),0.00) AS actualTotalPrice
+        FROM t_customer_bill_relation tcbr
+        LEFT JOIN t_bill b on b.id = tcbr.bill_id
+        LEFT JOIN t_customer cr on cr.id = b.cid
+        LEFT JOIN t_bill_goods g on tcbr.bill_id = g.bill_id
+        <where>
+            tcbr.create_id = #{createCustomerId}
+            <if test="customerName != null and customerName != ''">
+                AND cr.name=#{customerName}
+            </if>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND cr.phone=#{customerPhone}
+            </if>
+            <if test="businessStatus != null and businessStatus != ''">
+                AND tcbr.business_status=#{businessStatus}
+            </if>
+            <if test="billStatus != null and billStatus != ''">
+                AND tcbr.bill_status=#{billStatus}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND g.name=#{goodsName}
+            </if>
+            <if test="isGoods != null and isGoods != ''">
+                AND g.is_goods=#{isGoods}
+            </if>
+            <if test="startDate != null">
+                AND tcbr.create_time BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <!--统计-->
+    <sql id="statisticsForBill">
+      count(bill_id) ct,ifnull(sum(actual_total_price),0.00) atp
+    </sql>
+    <sql id="statisticsForBillNotBuyAndSale">
+      count(bill_id) ct,ifnull(sum(total_price),0.00) atp
+    </sql>
+    <select id="getStatisticsForBill" resultType="billStatisticsVO">
+        SELECT <include refid="statisticsForBill"/>,'买入' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0' and relation_type != '4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'卖出' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1'
+        <if test="startDate != null and endDate != null">
+          AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBillNotBuyAndSale"/>,'盘盈' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='2'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBillNotBuyAndSale"/>,'盘损' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='3'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBillNotBuyAndSale"/>,'费用' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'应付' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0' and bill_status='2' and relation_type != '4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'应收' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1' and bill_status='3'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'已收' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='1' and bill_status='1'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT <include refid="statisticsForBill"/>,'已付' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status='0' and bill_status='0' and relation_type != '4'
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        UNION
+        SELECT count(bill_id) ct,ifnull(sum(other_cost),0.00) atp,'内部费用' as name
+        FROM `t_customer_bill_relation`
+        WHERE create_id=#{createCustomerId} and business_status in ('0','1')
+        <if test="startDate != null and endDate != null">
+            AND create_time BETWEEN #{startDate} AND #{endDate}
+        </if>
     </select>
 </mapper>

@@ -46,8 +46,7 @@ public class ApplyLoanRecordController extends BaseMsbController {
     @InsertMethodFlag
     @PostMapping
     public Result insert(HttpServletRequest request,@RequestBody ApplyLoanRecord applyLoanRecord){
-        // String cid = getCid(request.getHeader("token"));
-        String cid = "acdf18c5a364c138f09760221e7d4b7";
+        String cid = getCid(request.getHeader("token"));
         applyLoanRecord.setCreateCustomerId(cid);
 
         if(applyLoanRecord.getNeedMoney() == null ||

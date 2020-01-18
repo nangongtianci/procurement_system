@@ -4,6 +4,9 @@ server:
     key-store: classpath:certificate/keystore.jks
     key-store-password: 50167515853
 
+logging:
+  config: classpath:logback/logback-spring.xml
+
 spring:
   http:
     converters:

@@ -7,6 +7,7 @@ import java.util.List;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.msb.common.base.entity.BaseWeChatEntity;
+import com.msb.entity.vo.CustomerVO;
 
 /**
  * <p>
@@ -25,6 +26,11 @@ public class Bill extends BaseWeChatEntity {
      */
     @TableField(exist = false)
     private Customer customer;
+    /**
+     * 用户主键
+     */
+    @TableField(exist = false)
+    private CustomerVO customerVO;
 
     /**
      * 客户主键
@@ -74,16 +80,6 @@ public class Bill extends BaseWeChatEntity {
     @TableField("actual_total_price")
     private BigDecimal actualTotalPrice;
     /**
-     * 扫描，手动
-     */
-    @TableField("bill_sn_type")
-    private String billSnType;
-    /**
-     * 置顶，不置顶
-     */
-    @TableField("is_top")
-    private String isTop;
-    /**
      * 记账日期
      */
     @TableField("bill_date")
@@ -119,6 +115,32 @@ public class Bill extends BaseWeChatEntity {
      */
     @TableField(exist = false)
     private String sourceBillId;
+    /**
+     * 对等，不对等
+     */
+    @TableField(exist = false)
+    private String isPeer;
+    /**
+     * 新建，扫描，卖货，代卖，分享
+     */
+    @TableField(exist = false)
+    private String relationType;
+
+    public String getRelationType() {
+        return relationType;
+    }
+
+    public void setRelationType(String relationType) {
+        this.relationType = relationType;
+    }
+
+    public String getIsPeer() {
+        return isPeer;
+    }
+
+    public void setIsPeer(String isPeer) {
+        this.isPeer = isPeer;
+    }
 
     public String getSourceBillId() {
         return sourceBillId;
@@ -224,22 +246,6 @@ public class Bill extends BaseWeChatEntity {
         this.actualTotalPrice = actualTotalPrice;
     }
 
-    public String getBillSnType() {
-        return billSnType;
-    }
-
-    public void setBillSnType(String billSnType) {
-        this.billSnType = billSnType;
-    }
-
-    public String getIsTop() {
-        return isTop;
-    }
-
-    public void setIsTop(String isTop) {
-        this.isTop = isTop;
-    }
-
     public Date getBillDate() {
         return billDate;
     }
@@ -280,10 +286,19 @@ public class Bill extends BaseWeChatEntity {
         this.feedBacks = feedBacks;
     }
 
+    public CustomerVO getCustomerVO() {
+        return customerVO;
+    }
+
+    public void setCustomerVO(CustomerVO customerVO) {
+        this.customerVO = customerVO;
+    }
+
     @Override
     public String toString() {
         return "Bill{" +
                 "customer=" + customer +
+                ", customerVO=" + customerVO +
                 ", cid='" + cid + '\'' +
                 ", pid='" + pid + '\'' +
                 ", businessStatus='" + businessStatus + '\'' +
@@ -294,8 +309,6 @@ public class Bill extends BaseWeChatEntity {
                 ", otherCost=" + otherCost +
                 ", totalPrice=" + totalPrice +
                 ", actualTotalPrice=" + actualTotalPrice +
-                ", billSnType='" + billSnType + '\'' +
-                ", isTop='" + isTop + '\'' +
                 ", billDate=" + billDate +
                 ", isReceive='" + isReceive + '\'' +
                 ", createCustomerId='" + createCustomerId + '\'' +
@@ -303,6 +316,8 @@ public class Bill extends BaseWeChatEntity {
                 ", subBills=" + subBills +
                 ", feedBacks='" + feedBacks + '\'' +
                 ", sourceBillId='" + sourceBillId + '\'' +
+                ", isPeer='" + isPeer + '\'' +
+                ", relationType='" + relationType + '\'' +
                 '}';
     }
 }

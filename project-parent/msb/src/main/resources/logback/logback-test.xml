@@ -2,6 +2,8 @@
 <included>
     <!-- 定义日志文件 输入位置 -->
     <property name="log_dir" value="/data/project/logs" />
+    <property name="log_name" value="msb" />
+
     <!-- ConsoleAppender 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 对日志进行格式化 -->
@@ -190,8 +192,8 @@
     </appender>
 
     <!-- 项目日志单独输出 -->
-    <appender name="RJYX-CKDIS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log_dir}/rjyx-ckdis.log</file>
+    <appender name="MSB" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}/${log_name}.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
@@ -200,10 +202,10 @@
                 [ %-5level] [%date{yyyy-MM-dd HH:mm:ss}] %logger{96} [%line]
                 - %msg%n
             </pattern>
-            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
+            <charset>GBK</charset> <!-- 此处设置字符集 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy" >
-            <FileNamePattern>${log_dir}/%d{yyyy-MM-dd}/rjyx-ckdis.%i.log</FileNamePattern>
+            <FileNamePattern>${log_dir}/%d{yyyy-MM-dd}/${log_name}.%i.log</FileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>10</maxIndex>
         </rollingPolicy>
@@ -241,19 +243,11 @@
         </encoder>
     </appender>
 
-    <logger name="com.msb" level="DEBUG" additivity="false">
-        <appender-ref ref="RJYX-CKDIS" />
-    </logger>
-    <logger name="mapper" level="DEBUG" additivity="false">
-        <appender-ref ref="MYBATIS-SQL" />
+    <!-- root级别   DEBUG -->
+    <root level="DEBUG">
+        <!-- 控制台输出 STDOUT-->
         <appender-ref ref="STDOUT" />
-    </logger>
-    <include resource="logback/logback-level-config.xml" />
-
-    <!-- root级别DEBUG -->
-    <root level="debug">
-        <!-- 控制台输出 -->
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="DEBUG" />
         <!-- 文件输出 -->
         <appender-ref ref="ERROR" />
         <appender-ref ref="INFO" />
@@ -261,4 +255,15 @@
         <appender-ref ref="DEBUG" />
         <appender-ref ref="TRACE" />
     </root>
+
+    <include resource="logback/logback-level-config.xml" />
+
+    <logger name="com.msb" level="DEBUG" additivity="false">
+        <appender-ref ref="MSB" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="com.baomidou" level="DEBUG" additivity="false">
+        <appender-ref ref="MYBATIS-SQL" />
+        <appender-ref ref="STDOUT" />
+    </logger>
 </included>

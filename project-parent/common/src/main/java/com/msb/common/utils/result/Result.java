@@ -2,15 +2,21 @@ package com.msb.common.utils.result;
 
 
 import com.msb.common.utils.exceptions.enums.BizExceptionEnum;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value="通用结果",description="通用结果")
 public class Result {
     public final static int OK_CODE = 0;
     public final static int EMPTY_CODE = 1;
     public final static int FAIL_CODE = -1;
     public final static int TIMEOUT_CODE = -2;
 
+    @ApiModelProperty(value="响应状态码",name="status",required = true,example = "0(成功)|1（成功无响应数据）|-1(失败)|-11(token过期)")
     private int status;
+    @ApiModelProperty(value="具体错误消息",name="message",example = "xxx具体错误信息！")
     private String message;
+    @ApiModelProperty(value="响应数据",name="data",required = true)
     private Object data;
 
     public static Result OK(){

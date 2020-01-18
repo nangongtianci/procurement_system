@@ -1,6 +1,8 @@
 package com.msb.controller;
 
 
+import com.msb.service.CustomerBillRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/customerBillRelation")
 public class CustomerBillRelationController {
+    @Autowired
+    private CustomerBillRelationService customerBillRelationService;
+
 
 }
 
